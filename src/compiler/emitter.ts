@@ -387,12 +387,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };`;
 
         const reflectHelper = `
-var __reflect = (this && this.__reflect) || function (d, t) {
-    var p = d.prototype;
-    p.__class__ = t[0];
-    p.__types__ = p.__types__ ? t.concat(p.__types__) : t;
-};`;
-        
+var __reflect = (this && this.__reflect) || function (c, v) {
+    var p = c.prototype;
+    p.__class__ = v[0], p.__types__ = p.__types__ ? v.concat(p.__types__) : v;
+}`;
+
         const accessorHelper = `
 var __accessor = (this && this.__accessor) || function (o, p, g, s) {
     Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
@@ -568,6 +567,8 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
             let decorateEmitted: boolean;
             let paramEmitted: boolean;
             let awaiterEmitted: boolean;
+            let reflectEmitted:boolean;
+            let accessorEmitted:boolean;
             let tempFlags: TempFlags = 0;
             let tempVariables: Identifier[];
             let tempParameters: Identifier[];
@@ -649,6 +650,8 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
                 paramEmitted = false;
                 awaiterEmitted = false;
                 assignEmitted = false;
+                reflectEmitted = false;
+                accessorEmitted = false;
                 tempFlags = 0;
                 tempVariables = undefined;
                 tempParameters = undefined;
@@ -5186,43 +5189,39 @@ const _super = (function (geti, seti) {
                         if (member === accessors.firstAccessor) {
                             writeLine();
                             emitStart(member);
-                            write("Object.defineProperty(");
+                            write("__accessor(");
                             emitStart((<AccessorDeclaration>member).name);
                             emitClassMemberPrefix(node, member);
                             write(", ");
                             emitExpressionForPropertyName((<AccessorDeclaration>member).name);
                             emitEnd((<AccessorDeclaration>member).name);
-                            write(", {");
+                            write(", ");
                             increaseIndent();
                             if (accessors.getAccessor) {
                                 writeLine();
                                 emitLeadingComments(accessors.getAccessor);
-                                write("get: ");
                                 emitStart(accessors.getAccessor);
                                 write("function ");
                                 emitSignatureAndBody(accessors.getAccessor);
                                 emitEnd(accessors.getAccessor);
                                 emitTrailingComments(accessors.getAccessor);
-                                write(",");
+                            }
+                            else if (accessors.setAccessor) {
+                                write("null");
                             }
                             if (accessors.setAccessor) {
+                                write(", ");
                                 writeLine();
                                 emitLeadingComments(accessors.setAccessor);
-                                write("set: ");
                                 emitStart(accessors.setAccessor);
                                 write("function ");
                                 emitSignatureAndBody(accessors.setAccessor);
                                 emitEnd(accessors.setAccessor);
                                 emitTrailingComments(accessors.setAccessor);
-                                write(",");
                             }
-                            writeLine();
-                            write("enumerable: true,");
-                            writeLine();
-                            write("configurable: true");
                             decreaseIndent();
                             writeLine();
-                            write("});");
+                            write(");");
                             emitEnd(member);
                         }
                     }
@@ -7883,6 +7882,16 @@ const _super = (function (geti, seti) {
                     if (!awaiterEmitted && node.flags & NodeFlags.HasAsyncFunctions) {
                         writeLines(awaiterHelper);
                         awaiterEmitted = true;
+                    }
+
+                    if (languageVersion < ScriptTarget.ES6 && !reflectEmitted) {
+                        writeLines(reflectHelper);
+                        reflectEmitted = true;
+                    }
+
+                    if (languageVersion < ScriptTarget.ES6 && !accessorEmitted) {
+                        writeLines(accessorHelper);
+                        accessorEmitted = true;
                     }
                 }
             }
