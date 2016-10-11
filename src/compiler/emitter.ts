@@ -5221,6 +5221,9 @@ const _super = (function (geti, seti) {
                 });
             }
 
+            /**
+             * If the accessor method contains only one call to another method, use that method as the accessor directly.
+             */
             function emitAccessorOrTargetMethod(accessor:ts.AccessorDeclaration,
                                                 member:ts.ClassElement,
                                                 node:ts.ClassLikeDeclaration):void {
@@ -5291,22 +5294,6 @@ const _super = (function (geti, seti) {
                     return <ts.MethodDeclaration>declaration;
                 }
                 return null;
-            }
-
-            function shouldEmitSetAccessor(accessor:ts.SetAccessorDeclaration):boolean {
-                if (accessor.body.statements.length != 1) {
-                    return true;
-                }
-                let statement = accessor.body.statements[0];
-                if (statement.kind !== ts.SyntaxKind.ExpressionStatement &&
-                    statement.kind !== ts.SyntaxKind.ReturnStatement) {
-                    return true;
-                }
-                let expression = (<ts.ExpressionStatement>statement).expression;
-                if (expression.kind !== ts.SyntaxKind.CallExpression) {
-                    return true;
-                }
-                return false;
             }
 
             function emitMemberFunctionsForES6AndHigher(node:ClassLikeDeclaration) {
