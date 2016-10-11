@@ -386,6 +386,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };`;
 
+        const reflectHelper = `
+var __reflect = (this && this.__reflect) || function (d, t) {
+    var p = d.prototype;
+    p.__class__ = t[0];
+    p.__types__ = p.__types__ ? t.concat(p.__types__) : t;
+};`;
+        
+        const accessorHelper = `
+var __accessor = (this && this.__accessor) || function (o, p, g, s) {
+    Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
+};`;
+
         const compilerOptions = host.getCompilerOptions();
         const languageVersion = getEmitScriptTarget(compilerOptions);
         const modulekind = getEmitModuleKind(compilerOptions);
