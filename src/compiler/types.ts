@@ -697,6 +697,7 @@ namespace ts {
     export interface MethodDeclaration extends FunctionLikeDeclaration, ClassElement, ObjectLiteralElement {
         name: PropertyName;
         body?: FunctionBody;
+        jumpTarget?:boolean;
     }
 
     // @kind(SyntaxKind.Constructor)

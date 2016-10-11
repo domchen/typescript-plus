@@ -854,7 +854,8 @@ namespace ts {
                 emitResolver,
                 getEmitHost(writeFileCallback),
                 sourceFile,
-                emitOnlyDtsFiles);
+                emitOnlyDtsFiles,
+                getTypeChecker());
 
             performance.mark("afterEmit");
             performance.measure("Emit", "beforeEmit", "afterEmit");

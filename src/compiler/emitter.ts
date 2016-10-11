@@ -336,7 +336,7 @@ namespace ts {
     }
 
     // targetSourceFile is when users only want one file in entire project to be emitted. This is used in compileOnSave feature
-    export function emitFiles(resolver:EmitResolver, host:EmitHost, targetSourceFile:SourceFile, emitOnlyDtsFiles?:boolean):EmitResult {
+    export function emitFiles(resolver:EmitResolver, host:EmitHost, targetSourceFile:SourceFile, emitOnlyDtsFiles?:boolean, typeChecker?:ts.TypeChecker):EmitResult {
         // emit output for the __extends helper function
         const extendsHelper = `
 var __extends = (this && this.__extends) || function (d, b) {
@@ -4662,6 +4662,7 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
                     // Emit name if one is present, or emit generated name in down-level case (for export default case)
                     return !!node.name || modulekind !== ModuleKind.ES6;
                 }
+                return (node.kind === SyntaxKind.MethodDeclaration && (<MethodDeclaration>node).jumpTarget);
             }
 
             function emitFunctionDeclaration(node:FunctionLikeDeclaration) {
@@ -5178,6 +5179,11 @@ const _super = (function (geti, seti) {
                         emitMemberAccessForPropertyName((<MethodDeclaration>member).name);
                         emitEnd((<MethodDeclaration>member).name);
                         write(" = ");
+                        if((<MethodDeclaration>member).jumpTarget){
+                            emit((<MethodDeclaration>member).name);
+                            write(";");
+                            writeLine();
+                        }
                         emitFunctionDeclaration(<MethodDeclaration>member);
                         emitEnd(member);
                         write(";");
@@ -5197,26 +5203,14 @@ const _super = (function (geti, seti) {
                             write(", ");
                             increaseIndent();
                             if (accessors.getAccessor) {
-                                writeLine();
-                                emitLeadingComments(accessors.getAccessor);
-                                emitStart(accessors.getAccessor);
-                                write("function ");
-                                emitSignatureAndBody(accessors.getAccessor);
-                                emitEnd(accessors.getAccessor);
-                                emitTrailingComments(accessors.getAccessor);
+                                emitAccessorOrTargetMethod(accessors.getAccessor, member, node);
                             }
                             else if (accessors.setAccessor) {
                                 write("null");
                             }
                             if (accessors.setAccessor) {
                                 write(", ");
-                                writeLine();
-                                emitLeadingComments(accessors.setAccessor);
-                                emitStart(accessors.setAccessor);
-                                write("function ");
-                                emitSignatureAndBody(accessors.setAccessor);
-                                emitEnd(accessors.setAccessor);
-                                emitTrailingComments(accessors.setAccessor);
+                                emitAccessorOrTargetMethod(accessors.setAccessor, member, node);
                             }
                             decreaseIndent();
                             writeLine();
@@ -5225,6 +5219,94 @@ const _super = (function (geti, seti) {
                         }
                     }
                 });
+            }
+
+            function emitAccessorOrTargetMethod(accessor:ts.AccessorDeclaration,
+                                                member:ts.ClassElement,
+                                                node:ts.ClassLikeDeclaration):void {
+                writeLine();
+                emitLeadingComments(accessor);
+                emitStart(accessor);
+                let method = getJumpTargetOfAccessor(accessor);
+                if (method) {
+                    if (member.pos > method.pos) { // the target method has been already emitted.
+                        emitClassMemberPrefix(node, member);
+                        emitMemberAccessForPropertyName(method.name);
+                    }
+                    else {
+                        emit(method.name);
+                        method.jumpTarget = true;
+                    }
+                }
+                else {
+                    write("function ");
+                    emitSignatureAndBody(accessor);
+                }
+                emitEnd(accessor);
+                emitTrailingComments(accessor);
+            }
+
+            function getJumpTargetOfAccessor(accessor:ts.AccessorDeclaration):MethodDeclaration {
+                if (accessor.body.statements.length != 1) {
+                    return null;
+                }
+                let statement = accessor.body.statements[0];
+                if (statement.kind !== ts.SyntaxKind.ExpressionStatement &&
+                    statement.kind !== ts.SyntaxKind.ReturnStatement) {
+                    return null;
+                }
+                let expression = (<ts.ReturnStatement>statement).expression;
+                if (expression.kind !== ts.SyntaxKind.CallExpression) {
+                    return null;
+                }
+                let callExpression = <ts.CallExpression>expression;
+                if (accessor.kind === ts.SyntaxKind.SetAccessor) {
+                    if (callExpression.arguments.length != 1) {
+                        return null;
+                    }
+                    let argument = callExpression.arguments[0];
+                    if (argument.kind !== ts.SyntaxKind.Identifier) {
+                        return null;
+                    }
+                }
+                else {
+                    if (callExpression.arguments.length != 0) {
+                        return null;
+                    }
+                }
+
+                if (callExpression.expression.kind !== ts.SyntaxKind.PropertyAccessExpression) {
+                    return null;
+                }
+                let propertyExpression = <ts.PropertyAccessExpression>callExpression.expression;
+                if (propertyExpression.expression.kind !== ts.SyntaxKind.ThisKeyword) {
+                    return null;
+                }
+                let type = typeChecker.getTypeAtLocation(propertyExpression.name);
+                if (!type) {
+                    return null;
+                }
+                let declaration = type.symbol.valueDeclaration;
+                if (declaration.kind === ts.SyntaxKind.MethodDeclaration) {
+                    return <ts.MethodDeclaration>declaration;
+                }
+                return null;
+            }
+
+            function shouldEmitSetAccessor(accessor:ts.SetAccessorDeclaration):boolean {
+                if (accessor.body.statements.length != 1) {
+                    return true;
+                }
+                let statement = accessor.body.statements[0];
+                if (statement.kind !== ts.SyntaxKind.ExpressionStatement &&
+                    statement.kind !== ts.SyntaxKind.ReturnStatement) {
+                    return true;
+                }
+                let expression = (<ts.ExpressionStatement>statement).expression;
+                if (expression.kind !== ts.SyntaxKind.CallExpression) {
+                    return true;
+                }
+                return false;
             }
 
             function emitMemberFunctionsForES6AndHigher(node:ClassLikeDeclaration) {
