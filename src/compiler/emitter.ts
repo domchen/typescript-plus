@@ -7952,29 +7952,55 @@ const _super = (function (geti, seti) {
                         awaiterEmitted = true;
                     }
 
-                    if (!reflectEmitted && languageVersion < ScriptTarget.ES6) {
+                    if (!reflectEmitted && languageVersion < ScriptTarget.ES6 && hasClassInNode(node)) {
                         writeLines(reflectHelper);
                         reflectEmitted = true;
                     }
 
-                    if (!accessorEmitted && languageVersion < ScriptTarget.ES6 && hasAccessorsInFile(node)) {
+                    if (!accessorEmitted && languageVersion < ScriptTarget.ES6 && hasAccessorsInNode(node)) {
                         writeLines(accessorHelper);
                         accessorEmitted = true;
                     }
                 }
             }
 
-            function hasAccessorsInFile(node:SourceFile):boolean {
-                for (let statement of node.statements) {
-                    if (hasAccessorsInNode(statement)) {
-                        return true;
+            function hasClassInNode(node:Node):boolean {
+                if (node.kind == SyntaxKind.SourceFile) {
+                    for (let statement of (<SourceFile>node).statements) {
+                        if (hasClassInNode(statement)) {
+                            return true;
+                        }
+                    }
+                }
+                else if (node.kind === SyntaxKind.ClassDeclaration) {
+                    return true;
+                }
+                else if (node.kind === SyntaxKind.ModuleDeclaration) {
+                    let moduleDeclaration = <ModuleDeclaration>node;
+                    if (moduleDeclaration.body.kind == ts.SyntaxKind.ModuleDeclaration) {
+                        return hasClassInNode(<ts.ModuleDeclaration>moduleDeclaration.body);
+                    }
+                    let statements = (<ts.ModuleBlock>moduleDeclaration.body).statements;
+                    let length = statements.length;
+                    for (let i = 0; i < length; i++) {
+                        let statement = statements[i];
+                        if (hasClassInNode(statement)) {
+                            return true;
+                        }
                     }
                 }
                 return false;
             }
 
             function hasAccessorsInNode(node:Node):boolean {
-                if (node.kind === SyntaxKind.ClassDeclaration) {
+                if (node.kind == SyntaxKind.SourceFile) {
+                    for (let statement of (<SourceFile>node).statements) {
+                        if (hasAccessorsInNode(statement)) {
+                            return true;
+                        }
+                    }
+                }
+                else if (node.kind === SyntaxKind.ClassDeclaration) {
                     let classDeclaration = <ClassDeclaration>node;
                     if (!classDeclaration.members) {
                         return false;
