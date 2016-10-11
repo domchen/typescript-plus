@@ -5821,6 +5821,64 @@ const _super = (function (geti, seti) {
                     emitDeclarationName(node);
                     write(";");
                 }
+                let interfaces:any = {};
+                getImplementedInterfaces(node, interfaces);
+                let interfaceArray:string[] = Object.keys(interfaces);
+                let fullClassName = typeChecker.getFullyQualifiedName(node.symbol);
+                let types:string[] = [fullClassName];
+                let superTypes = getSuperClassTypes(node);
+                if (superTypes) {
+                    for (let type of interfaceArray) {
+                        if (superTypes.indexOf(type) === -1) {
+                            types.push(type);
+                        }
+                    }
+                }
+                else {
+                    types = types.concat(interfaceArray);
+                }
+                node.typeNames = types;
+                writeLine();
+                write("__reflect(");
+                emit(node.name);
+                write(".prototype, [\"" + types.join("\", \"") + "\"]);");
+                writeLine();
+            }
+
+            function getImplementedInterfaces(node:Node, result:any) {
+                let superInterfaces:any[] = null;
+                if (node.kind === SyntaxKind.ClassDeclaration) {
+                    superInterfaces = getClassImplementsHeritageClauseElements(<ClassLikeDeclaration>node);
+                }
+                else {
+                    superInterfaces = ts.getInterfaceBaseTypeNodes(<InterfaceDeclaration>node);
+                }
+                if (superInterfaces) {
+                    superInterfaces.forEach(superInterface=> {
+                        var type = typeChecker.getTypeAtLocation(superInterface)
+                        if (type && type.symbol && type.flags & TypeFlags.Interface) {
+                            var fullName = typeChecker.getFullyQualifiedName(type.symbol);
+                            result[fullName] = true;
+                            let declaration = type.symbol.valueDeclaration;
+                            if (declaration) {
+                                getImplementedInterfaces(type.symbol.valueDeclaration, result);
+                            }
+                        }
+                    });
+                }
+            }
+
+            function getSuperClassTypes(node:ClassLikeDeclaration):string[] {
+                let superClass = getClassExtendsHeritageClauseElement(node);
+                if (!superClass) {
+                    return null;
+                }
+                let type = typeChecker.getTypeAtLocation(superClass);
+                if (!type || !type.symbol) {
+                    return;
+                }
+                let declaration = <ClassLikeDeclaration>type.symbol.valueDeclaration;
+                return declaration ? declaration.typeNames : null;
             }
 
             function emitClassMemberPrefix(node:ClassLikeDeclaration, member:Node) {

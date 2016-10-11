@@ -1261,6 +1261,7 @@ namespace ts {
         name?: Identifier;
         typeParameters?: NodeArray<TypeParameterDeclaration>;
         heritageClauses?: NodeArray<HeritageClause>;
+        typeNames?: string[];
         members: NodeArray<ClassElement>;
     }
 
