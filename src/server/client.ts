@@ -216,7 +216,18 @@ namespace ts.server {
             return {
                 isMemberCompletion: false,
                 isNewIdentifierLocation: false,
-                entries: response.body
+                entries: response.body.map(entry => {
+
+                    if (entry.replacementSpan !== undefined) {
+                        const { name, kind, kindModifiers, sortText, replacementSpan} = entry;
+
+                        const convertedSpan = createTextSpanFromBounds(this.lineOffsetToPosition(fileName, replacementSpan.start),
+                            this.lineOffsetToPosition(fileName, replacementSpan.end));
+                        return { name, kind, kindModifiers, sortText, replacementSpan: convertedSpan };
+                    }
+
+                    return entry as { name: string, kind: string, kindModifiers: string, sortText: string };
+                })
             };
         }
 
@@ -638,10 +649,6 @@ namespace ts.server {
         }
 
         getNonBoundSourceFile(fileName: string): SourceFile {
-            throw new Error("SourceFile objects are not serializable through the server protocol.");
-        }
-
-        getSourceFile(fileName: string): SourceFile {
             throw new Error("SourceFile objects are not serializable through the server protocol.");
         }
 

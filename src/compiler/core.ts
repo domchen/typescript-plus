@@ -1,6 +1,5 @@
-/// <reference path="types.ts"/>
+﻿/// <reference path="types.ts"/>
 /// <reference path="performance.ts" />
-
 
 /* @internal */
 namespace ts {
@@ -47,6 +46,7 @@ namespace ts {
             contains,
             remove,
             forEachValue: forEachValueInMap,
+            getKeys,
             clear,
         };
 
@@ -54,6 +54,14 @@ namespace ts {
             for (const key in files) {
                 f(<Path>key, files[key]);
             }
+        }
+
+        function getKeys() {
+            const keys: Path[] = [];
+            for (const key in files) {
+                keys.push(<Path>key);
+            }
+            return keys;
         }
 
         // path should already be well-formed so it does not need to be normalized
@@ -250,6 +258,7 @@ namespace ts {
         return array1.concat(array2);
     }
 
+    // TODO: fixme (N^2) - add optional comparer so collection can be sorted before deduplication.
     export function deduplicate<T>(array: T[], areEqual?: (a: T, b: T) => boolean): T[] {
         let result: T[];
         if (array) {
@@ -310,18 +319,25 @@ namespace ts {
      * @param array A sorted array whose first element must be no larger than number
      * @param number The value to be searched for in the array.
      */
-    export function binarySearch(array: number[], value: number): number {
+    export function binarySearch<T>(array: T[], value: T, comparer?: (v1: T, v2: T) => number): number {
+        if (!array || array.length === 0) {
+            return -1;
+        }
+
         let low = 0;
         let high = array.length - 1;
+        comparer = comparer !== undefined
+            ? comparer
+            : (v1, v2) => (v1 < v2 ? -1 : (v1 > v2 ? 1 : 0));
 
         while (low <= high) {
             const middle = low + ((high - low) >> 1);
             const midValue = array[middle];
 
-            if (midValue === value) {
+            if (comparer(midValue, value) === 0) {
                 return middle;
             }
-            else if (midValue > value) {
+            else if (comparer(midValue, value) > 0) {
                 high = middle - 1;
             }
             else {
@@ -1338,6 +1354,14 @@ namespace ts {
         return options && options.allowJs ? allSupportedExtensions : supportedTypeScriptExtensions;
     }
 
+    export function hasJavaScriptFileExtension(fileName: string) {
+        return forEach(supportedJavascriptExtensions, extension => fileExtensionIs(fileName, extension));
+    }
+
+    export function hasTypeScriptFileExtension(fileName: string) {
+        return forEach(supportedTypeScriptExtensions, extension => fileExtensionIs(fileName, extension));
+    }
+
     export function isSupportedSourceFileName(fileName: string, compilerOptions?: CompilerOptions) {
         if (!fileName) { return false; }
 
@@ -1516,4 +1540,79 @@ namespace ts {
             : ((fileName) => fileName.toLowerCase());
     }
 
+
+    /* @internal */
+    export function trace(host: ModuleResolutionHost, message: DiagnosticMessage, ...args: any[]): void;
+    export function trace(host: ModuleResolutionHost, message: DiagnosticMessage): void {
+        host.trace(formatMessage.apply(undefined, arguments));
+    }
+
+    /* @internal */
+    export function isTraceEnabled(compilerOptions: CompilerOptions, host: ModuleResolutionHost): boolean {
+        return compilerOptions.traceResolution && host.trace !== undefined;
+    }
+
+    /* @internal */
+    export function hasZeroOrOneAsteriskCharacter(str: string): boolean {
+        let seenAsterisk = false;
+        for (let i = 0; i < str.length; i++) {
+            if (str.charCodeAt(i) === CharacterCodes.asterisk) {
+                if (!seenAsterisk) {
+                    seenAsterisk = true;
+                }
+                else {
+                    // have already seen asterisk
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /* @internal */
+    export function createResolvedModule(resolvedFileName: string, isExternalLibraryImport: boolean, failedLookupLocations: string[]): ResolvedModuleWithFailedLookupLocations {
+        return { resolvedModule: resolvedFileName ? { resolvedFileName, isExternalLibraryImport } : undefined, failedLookupLocations };
+    }
+
+    /* @internal */
+    export function isExternalModuleNameRelative(moduleName: string): boolean {
+        // TypeScript 1.0 spec (April 2014): 11.2.1
+        // An external module name is "relative" if the first term is "." or "..".
+        return /^\.\.?($|[\\/])/.test(moduleName);
+    }
+
+    /* @internal */
+    export interface ModuleResolutionState {
+        host: ModuleResolutionHost;
+        compilerOptions: CompilerOptions;
+        traceEnabled: boolean;
+        // skip .tsx files if jsx is not enabled
+        skipTsx: boolean;
+    }
+
+
+
+    /* @internal */
+    export function readJson(path: string, host: ModuleResolutionHost): { typings?: string, types?: string, main?: string } {
+        try {
+            const jsonText = host.readFile(path);
+            return jsonText ? JSON.parse(jsonText) : {};
+        }
+        catch (e) {
+            // gracefully handle if readFile fails or returns not JSON
+            return {};
+        }
+    }
+
+    /* @internal */
+    export function getEmitModuleKind(compilerOptions: CompilerOptions) {
+        return typeof compilerOptions.module === "number" ?
+            compilerOptions.module :
+            getEmitScriptTarget(compilerOptions) === ScriptTarget.ES6 ? ModuleKind.ES6 : ModuleKind.CommonJS;
+    }
+
+    /* @internal */
+    export function getEmitScriptTarget(compilerOptions: CompilerOptions) {
+        return compilerOptions.target || ScriptTarget.ES3;
+    }
 }

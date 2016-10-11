@@ -67,6 +67,11 @@ namespace ts {
         getProjectVersion?(): string;
         useCaseSensitiveFileNames?(): boolean;
 
+        getTypeRootsVersion?(): number;
+        readDirectory(rootDir: string, extension: string, basePaths?: string, excludeEx?: string, includeFileEx?: string, includeDirEx?: string, depth?: number): string;
+        readFile(path: string, encoding?: string): string;
+        fileExists(path: string): boolean;
+
         getModuleResolutionsForFile?(fileName: string): string;
         getTypeReferenceDirectiveResolutionsForFile?(fileName: string): string;
         directoryExists(directoryName: string): boolean;
@@ -354,6 +359,13 @@ namespace ts {
             return this.shimHost.getProjectVersion();
         }
 
+        public getTypeRootsVersion(): number {
+            if (!this.shimHost.getTypeRootsVersion) {
+                return 0;
+            }
+            return this.shimHost.getTypeRootsVersion();
+        }
+
         public useCaseSensitiveFileNames(): boolean {
             return this.shimHost.useCaseSensitiveFileNames ? this.shimHost.useCaseSensitiveFileNames() : false;
         }
@@ -420,6 +432,28 @@ namespace ts {
 
         public getDefaultLibFileName(options: CompilerOptions): string {
             return this.shimHost.getDefaultLibFileName(JSON.stringify(options));
+        }
+
+        public readDirectory(path: string, extensions?: string[], exclude?: string[], include?: string[], depth?: number): string[] {
+            const pattern = getFileMatcherPatterns(path, extensions, exclude, include,
+                this.shimHost.useCaseSensitiveFileNames(), this.shimHost.getCurrentDirectory());
+            return JSON.parse(this.shimHost.readDirectory(
+                path,
+                JSON.stringify(extensions),
+                JSON.stringify(pattern.basePaths),
+                pattern.excludePattern,
+                pattern.includeFilePattern,
+                pattern.includeDirectoryPattern,
+                depth
+            ));
+        }
+
+        public readFile(path: string, encoding?: string): string {
+            return this.shimHost.readFile(path, encoding);
+        }
+
+        public fileExists(path: string): boolean {
+            return this.shimHost.fileExists(path);
         }
     }
 
@@ -560,21 +594,6 @@ namespace ts {
         public dispose(dummy: any): void {
             this.factory.unregisterShim(this);
         }
-    }
-
-    export function realizeDiagnostics(diagnostics: Diagnostic[], newLine: string): { message: string; start: number; length: number; category: string; code: number; }[] {
-        return diagnostics.map(d => realizeDiagnostic(d, newLine));
-    }
-
-    function realizeDiagnostic(diagnostic: Diagnostic, newLine: string): { message: string; start: number; length: number; category: string; code: number; } {
-        return {
-            message: flattenDiagnosticMessageText(diagnostic.messageText, newLine),
-            start: diagnostic.start,
-            length: diagnostic.length,
-            /// TODO: no need for the tolowerCase call
-            category: DiagnosticCategory[diagnostic.category].toLowerCase(),
-            code: diagnostic.code
-        };
     }
 
     class LanguageServiceShimObject extends ShimBase implements LanguageServiceShim {
