@@ -5,7 +5,8 @@
 
 
 
-TypeScript is a language for application-scale JavaScript (For more information, please visit : [typescriptlang.org](http://www.typescriptlang.org/)). The typescript-plus project provides extra features to the original typescript compiler, such as emitting reflection data of class, get/set accessor optimization and conditional compilation.
+TypeScript is a language for application-scale JavaScript (For more information, please visit : [typescriptlang.org](http://www.typescriptlang.org/)).
+The typescript-plus provides extra features to the original typescript compiler, such as emitting reflection data of class, get / set accessors optimization and conditional compilation.
 
 ## Installing
 
@@ -47,6 +48,7 @@ To learn how to use the original typescript compiler, please visit the following
 | emitReflection        | boolean | false  | Emit the reflection data of class .                |
 | accessorOptimization  | boolean | false  | If an accessor contains only one call to another method, use that method as the accessor method directly.|
 | defines                 | Object  |        | Replace the global variables with the constants defined in the "defines"" object. |
+
 
 **Note: The "defines" option is only allowed in tsconfig.json, and not through command-line switches.**
 
