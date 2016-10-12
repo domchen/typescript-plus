@@ -387,8 +387,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };`;
 
         const reflectHelper = `
-var __reflect = (this && this.__reflect) || function (p, v) {
-    p.__class__ = v[0], p.__types__ = p.__types__ ? v.concat(p.__types__) : v;
+var __reflect = (this && this.__reflect) || function (p, c, t) {
+    p.__class__ = c, t ? t.push(c) : t = [c], p.__types__ = p.__types__ ? t.concat(p.__types__) : t;
 }`;
 
         const accessorHelper = `
@@ -5873,32 +5873,38 @@ const _super = (function (geti, seti) {
                     write(";");
                 }
 
-                if (!compilerOptions.emitReflection) {
-                    return;
+                if (compilerOptions.emitReflection) {
+                    emitReflection(node);
                 }
+            }
 
-                // Emit the reflection helper
-                let interfaces:any = {};
-                getImplementedInterfaces(node, interfaces);
-                let interfaceArray:string[] = Object.keys(interfaces);
-                let fullClassName = typeChecker.getFullyQualifiedName(node.symbol);
-                let types:string[] = [fullClassName];
+            function emitReflection(node:ClassLikeDeclaration):void {
+                let interfaceMap:any = {};
+                getImplementedInterfaces(node, interfaceMap);
+                let allInterfaces:string[] = Object.keys(interfaceMap);
+                let interfaces:string[];
                 let superTypes = getSuperClassTypes(node);
                 if (superTypes) {
-                    for (let type of interfaceArray) {
+                    interfaces = [];
+                    for (let type of allInterfaces) {
                         if (superTypes.indexOf(type) === -1) {
-                            types.push(type);
+                            interfaces.push(type);
                         }
                     }
                 }
                 else {
-                    types = types.concat(interfaceArray);
+                    interfaces = allInterfaces;
                 }
-                node.typeNames = types;
+                node.typeNames = interfaces;
                 writeLine();
                 write("__reflect(");
                 emit(node.name);
-                write(".prototype, [\"" + types.join("\", \"") + "\"]);");
+                let fullClassName = typeChecker.getFullyQualifiedName(node.symbol);
+                write(".prototype, \""+fullClassName+"\"");
+                if(interfaces.length>0){
+                    write(", [\"" + interfaces.join("\", \"") + "\"]");
+                }
+                write(");");
                 writeLine();
             }
 
