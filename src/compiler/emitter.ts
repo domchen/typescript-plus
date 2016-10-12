@@ -5821,6 +5821,12 @@ const _super = (function (geti, seti) {
                     emitDeclarationName(node);
                     write(";");
                 }
+
+                if (!compilerOptions.emitReflection) {
+                    return;
+                }
+                
+                // Emit the reflection helper
                 let interfaces:any = {};
                 getImplementedInterfaces(node, interfaces);
                 let interfaceArray:string[] = Object.keys(interfaces);
@@ -8010,7 +8016,7 @@ const _super = (function (geti, seti) {
                         awaiterEmitted = true;
                     }
 
-                    if (!reflectEmitted && languageVersion < ScriptTarget.ES6 && hasClassInNode(node)) {
+                    if (!reflectEmitted && compilerOptions.emitReflection && languageVersion < ScriptTarget.ES6 && hasClassInNode(node)) {
                         writeLines(reflectHelper);
                         reflectEmitted = true;
                     }

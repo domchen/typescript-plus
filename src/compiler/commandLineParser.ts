@@ -290,6 +290,10 @@ namespace ts {
             description: Diagnostics.Enables_experimental_support_for_emitting_type_metadata_for_decorators
         },
         {
+            name: "emitReflection",
+            type: "boolean"
+        },
+        {
             name: "moduleResolution",
             type: createMap({
                 "node": ModuleResolutionKind.NodeJs,

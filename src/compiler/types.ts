@@ -2600,6 +2600,7 @@ namespace ts {
         emitBOM?: boolean;
         emitDecoratorMetadata?: boolean;
         experimentalDecorators?: boolean;
+        emitReflection?:boolean;
         forceConsistentCasingInFileNames?: boolean;
         /*@internal*/help?: boolean;
         /*@internal*/init?: boolean;
