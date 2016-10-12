@@ -2601,6 +2601,7 @@ namespace ts {
         emitDecoratorMetadata?: boolean;
         experimentalDecorators?: boolean;
         emitReflection?:boolean;
+        accessorOptimization?:boolean;
         forceConsistentCasingInFileNames?: boolean;
         /*@internal*/help?: boolean;
         /*@internal*/init?: boolean;

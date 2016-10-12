@@ -294,6 +294,10 @@ namespace ts {
             type: "boolean"
         },
         {
+            name: "accessorOptimization",
+            type: "boolean"
+        },
+        {
             name: "moduleResolution",
             type: createMap({
                 "node": ModuleResolutionKind.NodeJs,

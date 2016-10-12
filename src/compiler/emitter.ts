@@ -5189,35 +5189,86 @@ const _super = (function (geti, seti) {
                         emitTrailingComments(member);
                     }
                     else if (member.kind === SyntaxKind.GetAccessor || member.kind === SyntaxKind.SetAccessor) {
+                        if (compilerOptions.accessorOptimization) {
+                            emitOptimizedAccessor(member, node);
+                            return;
+                        }
                         const accessors = getAllAccessorDeclarations(node.members, <AccessorDeclaration>member);
                         if (member === accessors.firstAccessor) {
                             writeLine();
                             emitStart(member);
-                            write("__accessor(");
+                            write("Object.defineProperty(");
                             emitStart((<AccessorDeclaration>member).name);
                             emitClassMemberPrefix(node, member);
                             write(", ");
                             emitExpressionForPropertyName((<AccessorDeclaration>member).name);
                             emitEnd((<AccessorDeclaration>member).name);
-                            write(", ");
+                            write(", {");
                             increaseIndent();
                             if (accessors.getAccessor) {
-                                emitAccessorOrTargetMethod(accessors.getAccessor, member, node);
-                            }
-                            else if (accessors.setAccessor) {
-                                write("null");
+                                writeLine();
+                                emitLeadingComments(accessors.getAccessor);
+                                write("get: ");
+                                emitStart(accessors.getAccessor);
+                                write("function ");
+                                emitSignatureAndBody(accessors.getAccessor);
+                                emitEnd(accessors.getAccessor);
+                                emitTrailingComments(accessors.getAccessor);
+                                write(",");
                             }
                             if (accessors.setAccessor) {
-                                write(", ");
-                                emitAccessorOrTargetMethod(accessors.setAccessor, member, node);
+                                writeLine();
+                                emitLeadingComments(accessors.setAccessor);
+                                write("set: ");
+                                emitStart(accessors.setAccessor);
+                                write("function ");
+                                emitSignatureAndBody(accessors.setAccessor);
+                                emitEnd(accessors.setAccessor);
+                                emitTrailingComments(accessors.setAccessor);
+                                write(",");
                             }
+                            writeLine();
+                            write("enumerable: true,");
+                            writeLine();
+                            write("configurable: true");
                             decreaseIndent();
                             writeLine();
-                            write(");");
+                            write("});");
                             emitEnd(member);
                         }
+
                     }
                 });
+            }
+
+            function emitOptimizedAccessor(member:ClassElement, node:ClassLikeDeclaration):void {
+                const accessors = getAllAccessorDeclarations(node.members, <AccessorDeclaration>member);
+                if (member === accessors.firstAccessor) {
+                    writeLine();
+                    emitStart(member);
+                    write("__accessor(");
+                    emitStart((<AccessorDeclaration>member).name);
+                    emitClassMemberPrefix(node, member);
+                    write(", ");
+                    emitExpressionForPropertyName((<AccessorDeclaration>member).name);
+                    emitEnd((<AccessorDeclaration>member).name);
+                    write(", ");
+                    increaseIndent();
+                    if (accessors.getAccessor) {
+                        emitAccessorOrTargetMethod(accessors.getAccessor, member, node);
+                    }
+                    else if (accessors.setAccessor) {
+                        write("null");
+                    }
+                    if (accessors.setAccessor) {
+                        write(", ");
+                        emitAccessorOrTargetMethod(accessors.setAccessor, member, node);
+                    }
+                    decreaseIndent();
+                    writeLine();
+                    write(");");
+                    emitEnd(member);
+                }
             }
 
             /**
@@ -5825,7 +5876,7 @@ const _super = (function (geti, seti) {
                 if (!compilerOptions.emitReflection) {
                     return;
                 }
-                
+
                 // Emit the reflection helper
                 let interfaces:any = {};
                 getImplementedInterfaces(node, interfaces);
@@ -8016,12 +8067,14 @@ const _super = (function (geti, seti) {
                         awaiterEmitted = true;
                     }
 
-                    if (!reflectEmitted && compilerOptions.emitReflection && languageVersion < ScriptTarget.ES6 && hasClassInNode(node)) {
+                    if (!reflectEmitted && compilerOptions.emitReflection &&
+                        languageVersion < ScriptTarget.ES6 && hasClassInNode(node)) {
                         writeLines(reflectHelper);
                         reflectEmitted = true;
                     }
 
-                    if (!accessorEmitted && languageVersion < ScriptTarget.ES6 && hasAccessorsInNode(node)) {
+                    if (!accessorEmitted && compilerOptions.accessorOptimization
+                        && languageVersion < ScriptTarget.ES6 && hasAccessorsInNode(node)) {
                         writeLines(accessorHelper);
                         accessorEmitted = true;
                     }
