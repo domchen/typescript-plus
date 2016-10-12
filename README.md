@@ -33,7 +33,7 @@ tsc-plus [input files] [options]
 
 ## Documentation
 
-To learn how to use the original compiler, please visit the following links:
+To learn how to use the original typescript compiler, please visit the following links:
 
 *  [Quick tutorial](http://www.typescriptlang.org/Tutorial)
 *  [Programming handbook](http://www.typescriptlang.org/Handbook)
@@ -42,11 +42,11 @@ To learn how to use the original compiler, please visit the following links:
 
 ##Extra Options
 
-| Option                 | Type    | Default | Description                                        |
-| ---------------------- |:-------:| -------:| --------------------------------------------------:|
-| --emitReflection       | boolean | false   | Emit the reflection data of class .                |
-| --accessorOptimization | boolean | false   | If an accessor contains only one call to another method, use that method as the accessor method directly.|
-| defines                | Object  |         | Replace the global variables with the constants defined in the "defines"" object. |
+| Option                  | Type    | Default | Description                                        |
+| -----------------------:| -------:| -------:| -------------------------------------------------- |
+| --emitReflection        | boolean | false   | Emit the reflection data of class .                |
+| --accessorOptimization  | boolean | false   | If an accessor contains only one call to another method, use that method as the accessor method directly.|
+| defines                 | Object  |         | Replace the global variables with the constants defined in the "defines"" object. |
 
 Note: The "defines" option is only allowed in tsconfig.json, and not through command-line switches.
 
