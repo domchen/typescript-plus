@@ -397,6 +397,7 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
 };`;
 
         const compilerOptions = host.getCompilerOptions();
+        const compilerDefines = getCompilerDefines(compilerOptions.defines);
         const languageVersion = getEmitScriptTarget(compilerOptions);
         const modulekind = getEmitModuleKind(compilerOptions);
         const sourceMapDataList:SourceMapData[] = compilerOptions.sourceMap || compilerOptions.inlineSourceMap ? [] : undefined;
@@ -425,6 +426,31 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
                 }
             }
             return true;
+        }
+
+        function getCompilerDefines(defines:MapLike<any>):MapLike<string> {
+            if (!defines) {
+                return null;
+            }
+            let compilerDefines:MapLike<string> = {};
+            let keys = Object.keys(defines);
+            for (let key of keys) {
+                let value = defines[key];
+                let type = typeof value;
+                switch (type) {
+                    case "boolean":
+                    case "number":
+                        compilerDefines[key] = value.toString();
+                        break;
+                    case "string":
+                        compilerDefines[key] = "\"" + value + "\"";
+                        break;
+                }
+            }
+            if (Object.keys(compilerDefines).length == 0) {
+                return null;
+            }
+            return compilerDefines;
         }
 
         interface ConvertedLoopState {
@@ -1727,7 +1753,12 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
                             return;
                         }
                     }
-                    emitExpressionIdentifier(node);
+                    if (compilerDefines && isDefinedConstant(node)) {
+                        write(compilerDefines[node.text]);
+                    }
+                    else {
+                        emitExpressionIdentifier(node);
+                    }
                 }
                 else if (isNameOfNestedBlockScopedRedeclarationOrCapturedBinding(node)) {
                     write(getGeneratedNameForNode(node));
@@ -1738,6 +1769,27 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
                 else {
                     writeTextOfNode(currentText, node);
                 }
+            }
+
+            function isDefinedConstant(node:Identifier):boolean {
+                if (compilerDefines[node.text] === undefined) {
+                    return false;
+                }
+                if(node.parent.kind===SyntaxKind.BinaryExpression){
+                    let parent = <BinaryExpression>node.parent;
+                    if(parent.left===node&&parent.operatorToken.kind===SyntaxKind.EqualsToken){
+                        return false;
+                    }
+                }
+                let declaration = resolver.getReferencedValueDeclaration(node);
+                if (!declaration) {
+                    return false;
+                }
+                if (declaration.kind !== SyntaxKind.VariableDeclaration) {
+                    return false;
+                }
+                let statement = declaration.parent.parent;
+                return (statement.parent.kind === SyntaxKind.SourceFile);
             }
 
             function emitThis(node:Node) {
@@ -5900,8 +5952,8 @@ const _super = (function (geti, seti) {
                 write("__reflect(");
                 emit(node.name);
                 let fullClassName = typeChecker.getFullyQualifiedName(node.symbol);
-                write(".prototype, \""+fullClassName+"\"");
-                if(interfaces.length>0){
+                write(".prototype, \"" + fullClassName + "\"");
+                if (interfaces.length > 0) {
                     write(", [\"" + interfaces.join("\", \"") + "\"]");
                 }
                 write(");");
@@ -5914,7 +5966,7 @@ const _super = (function (geti, seti) {
                     superInterfaces = getClassImplementsHeritageClauseElements(<ClassLikeDeclaration>node);
                 }
                 else {
-                    superInterfaces = ts.getInterfaceBaseTypeNodes(<InterfaceDeclaration>node);
+                    superInterfaces = getInterfaceBaseTypeNodes(<InterfaceDeclaration>node);
                 }
                 if (superInterfaces) {
                     superInterfaces.forEach(superInterface=> {

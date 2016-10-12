@@ -298,6 +298,13 @@ namespace ts {
             type: "boolean"
         },
         {
+            // this option can only be specified in tsconfig.json
+            // use type = object to copy the value as-is
+            name: "defines",
+            type: "object",
+            isTSConfigOnly: true
+        },
+        {
             name: "moduleResolution",
             type: createMap({
                 "node": ModuleResolutionKind.NodeJs,
