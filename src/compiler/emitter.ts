@@ -391,11 +391,6 @@ var __reflect = (this && this.__reflect) || function (p, c, t) {
     p.__class__ = c, t ? t.push(c) : t = [c], p.__types__ = p.__types__ ? t.concat(p.__types__) : t;
 }`;
 
-        const accessorHelper = `
-var __accessor = (this && this.__accessor) || function (o, p, g, s) {
-    Object.defineProperty(o, p, {configurable: true, enumerable: true, get: g, set: s});
-};`;
-
         const compilerOptions = host.getCompilerOptions();
         const compilerDefines = getCompilerDefines(compilerOptions.defines);
         const languageVersion = getEmitScriptTarget(compilerOptions);
@@ -593,7 +588,6 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
             let paramEmitted:boolean;
             let awaiterEmitted:boolean;
             let reflectEmitted:boolean;
-            let accessorEmitted:boolean;
             let tempFlags:TempFlags = 0;
             let tempVariables:Identifier[];
             let tempParameters:Identifier[];
@@ -681,7 +675,6 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
                 awaiterEmitted = false;
                 assignEmitted = false;
                 reflectEmitted = false;
-                accessorEmitted = false;
                 tempFlags = 0;
                 tempVariables = undefined;
                 tempParameters = undefined;
@@ -1775,9 +1768,9 @@ var __accessor = (this && this.__accessor) || function (o, p, g, s) {
                 if (compilerDefines[node.text] === undefined) {
                     return false;
                 }
-                if(node.parent.kind===SyntaxKind.BinaryExpression){
+                if (node.parent.kind === SyntaxKind.BinaryExpression) {
                     let parent = <BinaryExpression>node.parent;
-                    if(parent.left===node&&parent.operatorToken.kind===SyntaxKind.EqualsToken){
+                    if (parent.left === node && parent.operatorToken.kind === SyntaxKind.EqualsToken) {
                         return false;
                     }
                 }
@@ -5241,10 +5234,6 @@ const _super = (function (geti, seti) {
                         emitTrailingComments(member);
                     }
                     else if (member.kind === SyntaxKind.GetAccessor || member.kind === SyntaxKind.SetAccessor) {
-                        if (compilerOptions.accessorOptimization) {
-                            emitOptimizedAccessor(member, node);
-                            return;
-                        }
                         const accessors = getAllAccessorDeclarations(node.members, <AccessorDeclaration>member);
                         if (member === accessors.firstAccessor) {
                             writeLine();
@@ -5261,22 +5250,14 @@ const _super = (function (geti, seti) {
                                 writeLine();
                                 emitLeadingComments(accessors.getAccessor);
                                 write("get: ");
-                                emitStart(accessors.getAccessor);
-                                write("function ");
-                                emitSignatureAndBody(accessors.getAccessor);
-                                emitEnd(accessors.getAccessor);
-                                emitTrailingComments(accessors.getAccessor);
+                                emitAccessorOrTargetMethod(accessors.getAccessor, member, node);
                                 write(",");
                             }
                             if (accessors.setAccessor) {
                                 writeLine();
                                 emitLeadingComments(accessors.setAccessor);
                                 write("set: ");
-                                emitStart(accessors.setAccessor);
-                                write("function ");
-                                emitSignatureAndBody(accessors.setAccessor);
-                                emitEnd(accessors.setAccessor);
-                                emitTrailingComments(accessors.setAccessor);
+                                emitAccessorOrTargetMethod(accessors.setAccessor, member, node);
                                 write(",");
                             }
                             writeLine();
@@ -5293,46 +5274,15 @@ const _super = (function (geti, seti) {
                 });
             }
 
-            function emitOptimizedAccessor(member:ClassElement, node:ClassLikeDeclaration):void {
-                const accessors = getAllAccessorDeclarations(node.members, <AccessorDeclaration>member);
-                if (member === accessors.firstAccessor) {
-                    writeLine();
-                    emitStart(member);
-                    write("__accessor(");
-                    emitStart((<AccessorDeclaration>member).name);
-                    emitClassMemberPrefix(node, member);
-                    write(", ");
-                    emitExpressionForPropertyName((<AccessorDeclaration>member).name);
-                    emitEnd((<AccessorDeclaration>member).name);
-                    write(", ");
-                    increaseIndent();
-                    if (accessors.getAccessor) {
-                        emitAccessorOrTargetMethod(accessors.getAccessor, member, node);
-                    }
-                    else if (accessors.setAccessor) {
-                        write("null");
-                    }
-                    if (accessors.setAccessor) {
-                        write(", ");
-                        emitAccessorOrTargetMethod(accessors.setAccessor, member, node);
-                    }
-                    decreaseIndent();
-                    writeLine();
-                    write(");");
-                    emitEnd(member);
-                }
-            }
-
             /**
              * If the accessor method contains only one call to another method, use that method as the accessor directly.
              */
             function emitAccessorOrTargetMethod(accessor:AccessorDeclaration,
                                                 member:ClassElement,
                                                 node:ClassLikeDeclaration):void {
-                writeLine();
-                emitLeadingComments(accessor);
+
                 emitStart(accessor);
-                let method = getJumpTargetOfAccessor(accessor);
+                let method = compilerOptions.accessorOptimization ? getJumpTargetOfAccessor(accessor) : null;
                 if (method) {
                     if (member.pos > method.pos) { // the target method has been already emitted.
                         emitClassMemberPrefix(node, member);
@@ -8131,11 +8081,6 @@ const _super = (function (geti, seti) {
                         reflectEmitted = true;
                     }
 
-                    if (!accessorEmitted && compilerOptions.accessorOptimization
-                        && languageVersion < ScriptTarget.ES6 && hasAccessorsInNode(node)) {
-                        writeLines(accessorHelper);
-                        accessorEmitted = true;
-                    }
                 }
             }
 
@@ -8160,42 +8105,6 @@ const _super = (function (geti, seti) {
                     for (let i = 0; i < length; i++) {
                         let statement = statements[i];
                         if (hasClassInNode(statement)) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-
-            function hasAccessorsInNode(node:Node):boolean {
-                if (node.kind == SyntaxKind.SourceFile) {
-                    for (let statement of (<SourceFile>node).statements) {
-                        if (hasAccessorsInNode(statement)) {
-                            return true;
-                        }
-                    }
-                }
-                else if (node.kind === SyntaxKind.ClassDeclaration) {
-                    let classDeclaration = <ClassDeclaration>node;
-                    if (!classDeclaration.members) {
-                        return false;
-                    }
-                    for (let member of classDeclaration.members) {
-                        if (member.kind === SyntaxKind.GetAccessor || member.kind == SyntaxKind.SetAccessor) {
-                            return true;
-                        }
-                    }
-                }
-                else if (node.kind === SyntaxKind.ModuleDeclaration) {
-                    let moduleDeclaration = <ModuleDeclaration>node;
-                    if (moduleDeclaration.body.kind == ts.SyntaxKind.ModuleDeclaration) {
-                        return hasAccessorsInNode(<ts.ModuleDeclaration>moduleDeclaration.body);
-                    }
-                    let statements = (<ts.ModuleBlock>moduleDeclaration.body).statements;
-                    let length = statements.length;
-                    for (let i = 0; i < length; i++) {
-                        let statement = statements[i];
-                        if (hasAccessorsInNode(statement)) {
                             return true;
                         }
                     }
