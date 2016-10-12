@@ -13,7 +13,11 @@ See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
 
+
+
 /// <reference no-default-lib="true"/>
+
+
 /////////////////////////////
 /// ECMAScript APIs
 /////////////////////////////
@@ -4130,6 +4134,8 @@ interface Date {
       */
     toLocaleTimeString(locale?: string, options?: Intl.DateTimeFormatOptions): string;
 }
+
+
 
 /////////////////////////////
 /// IE DOM APIs
@@ -18755,11 +18761,15 @@ type ScrollLogicalPosition = "start" | "center" | "end" | "nearest";
 type IDBValidKey = number | string | Date | IDBArrayKey;
 type BufferSource = ArrayBuffer | ArrayBufferView;
 type MouseWheelEvent = WheelEvent;
+
+
 /////////////////////////////
 /// WorkerGlobalScope APIs 
 /////////////////////////////
 // These are only available in a Web Worker 
 declare function importScripts(...urls: string[]): void;
+
+
 
 
 /////////////////////////////

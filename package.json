@@ -1,10 +1,10 @@
 {
-    "name": "typescript",
-    "author": "Microsoft Corp.",
-    "homepage": "http://typescriptlang.org/",
-    "version": "2.0.5",
+    "name": "typescript-plus",
+    "author": "Dom Chen",
+    "homepage": "http://www.idom.me/",
+    "version": "2.0.3",
     "license": "Apache-2.0",
-    "description": "TypeScript is a language for application scale JavaScript development",
+    "description": "An enhanced version of the original typescript compiler.",
     "keywords": [
         "TypeScript",
         "Microsoft",
@@ -13,17 +13,16 @@
         "javascript"
     ],
     "bugs": {
-        "url": "https://github.com/Microsoft/TypeScript/issues"
+        "url": "https://github.com/domchen/typescript-plus/issues"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Microsoft/TypeScript.git"
+        "url": "https://github.com/domchen/typescript-plus.git"
     },
     "main": "./lib/typescript.js",
     "typings": "./lib/typescript.d.ts",
     "bin": {
-        "tsc": "./bin/tsc",
-        "tsserver": "./bin/tsserver"
+        "tsc-plus": "./bin/tsc"
     },
     "engines": {
         "node": ">=0.8.0"

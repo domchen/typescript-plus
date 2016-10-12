@@ -1,94 +1,77 @@
-[![Build Status](https://travis-ci.org/Microsoft/TypeScript.svg?branch=master)](https://travis-ci.org/Microsoft/TypeScript)
-[![npm version](https://badge.fury.io/js/typescript.svg)](https://www.npmjs.com/package/typescript)
-[![Downloads](https://img.shields.io/npm/dm/TypeScript.svg)](https://www.npmjs.com/package/typescript)
+[![npm version](https://badge.fury.io/js/typescript.svg)](https://www.npmjs.com/package/typescript-plus)
+[![Downloads](https://img.shields.io/npm/dm/TypeScript.svg)](https://www.npmjs.com/package/typescript-plus)
 
-# TypeScript
+# typescript-plus
 
-[![Join the chat at https://gitter.im/Microsoft/TypeScript](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Microsoft/TypeScript?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[TypeScript](http://www.typescriptlang.org/) is a language for application-scale JavaScript. TypeScript adds optional types, classes, and modules to JavaScript. TypeScript supports tools for large-scale JavaScript applications for any browser, for any host, on any OS. TypeScript compiles to readable, standards-based JavaScript. Try it out at the [playground](http://www.typescriptlang.org/Playground), and stay up to date via [our blog](https://blogs.msdn.microsoft.com/typescript) and [Twitter account](https://twitter.com/typescriptlang).
+
+TypeScript is a language for application-scale JavaScript (For more information, please visit : [typescriptlang.org](http://www.typescriptlang.org/)). The typescript-plus project provides extra features to the original typescript compiler, such as emitting reflection data of class, get/set accessor optimization and conditional compilation.
 
 ## Installing
 
-For the latest stable version:
+First make sure you have installed the latest version of [node.js](http://nodejs.org/)
+(You may need to restart your computer after this step).
+
+For use as a command line app:
 
 ```
-npm install -g typescript
+npm install -g typescript-plus
 ```
 
-For our nightly builds:
+For programmatic use:
 
 ```
-npm install -g typescript@next
+npm install typescript-plus
 ```
 
-## Contribute
+## Usage
 
-There are many ways to [contribute](https://github.com/Microsoft/TypeScript/blob/master/CONTRIBUTING.md) to TypeScript.
-* [Submit bugs](https://github.com/Microsoft/TypeScript/issues) and help us verify fixes as they are checked in.
-* Review the [source code changes](https://github.com/Microsoft/TypeScript/pulls).
-* Engage with other TypeScript users and developers on [StackOverflow](http://stackoverflow.com/questions/tagged/typescript). 
-* Join the [#typescript](http://twitter.com/#!/search/realtime/%23typescript) discussion on Twitter.
-* [Contribute bug fixes](https://github.com/Microsoft/TypeScript/blob/master/CONTRIBUTING.md).
-* Read the language specification ([docx](https://github.com/Microsoft/TypeScript/blob/master/doc/TypeScript%20Language%20Specification.docx?raw=true), [pdf](https://github.com/Microsoft/TypeScript/blob/master/doc/TypeScript%20Language%20Specification.pdf?raw=true), [md](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md)).
+```
+tsc-plus [input files] [options]
+```
 
 
 ## Documentation
+
+To learn how to use the original compiler, please visit the following links:
 
 *  [Quick tutorial](http://www.typescriptlang.org/Tutorial)
 *  [Programming handbook](http://www.typescriptlang.org/Handbook)
 *  [Language specification](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md)
 *  [Homepage](http://www.typescriptlang.org/)
 
-## Building
+##Extra Options
 
-In order to build the TypeScript compiler, ensure that you have [Git](http://git-scm.com/downloads) and [Node.js](http://nodejs.org/) installed.
+| Option                 | Type    | Default | Description                                        |
+| ---------------------- |:-------:| -------:| --------------------------------------------------:|
+| --emitReflection       | boolean | false   | Emit the reflection data of class .                |
+| --accessorOptimization | boolean | false   | If an accessor contains only one call to another method, use that method as the accessor method directly.|
+| defines                | Object  |         | Replace the global variables with the constants defined in the "defines"" object. |
 
-Clone a copy of the repo:
+Note: The "defines" option is only allowed in tsconfig.json, and not through command-line switches.
 
-```
-git clone https://github.com/Microsoft/TypeScript.git
-```
-
-Change to the TypeScript directory:
-
-```
-cd TypeScript
-```
-
-Install Gulp tools and dev dependencies:
+Example tsconfig.json file:
 
 ```
-npm install -g gulp
-npm install
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "emitReflection": true,
+        "accessorOptimization": true,
+        "defines": {
+            "DEBUG": false,  // the value can be boolean, number or string.
+            "RELEASE": true
+        }
+
+    },  
+    "files": [
+        "core.ts",
+        "sys.ts"
+    ]  
+}
+
 ```
-
-Use one of the following to build and test:
-
-```
-gulp local            # Build the compiler into built/local 
-gulp clean            # Delete the built compiler 
-gulp LKG              # Replace the last known good with the built one.
-                      # Bootstrapping step to be executed when the built compiler reaches a stable state.
-gulp tests            # Build the test infrastructure using the built compiler. 
-gulp runtests         # Run tests using the built compiler and test infrastructure. 
-                      # You can override the host or specify a test for this command. 
-                      # Use host=<hostName> or tests=<testPath>. 
-gulp runtests-browser # Runs the tests using the built run.js file. Syntax is gulp runtests. Optional
-                        parameters 'host=', 'tests=[regex], reporter=[list|spec|json|<more>]'.
-gulp baseline-accept  # This replaces the baseline test results with the results obtained from gulp runtests.
-gulp lint             # Runs tslint on the TypeScript source.
-gulp help             # List the above commands. 
-```
-
-
-## Usage
-
-```shell
-node built/local/tsc.js hello.ts
-```
-
-
-## Roadmap
-
-For details on our planned features and future direction please refer to our [roadmap](https://github.com/Microsoft/TypeScript/wiki/Roadmap).
