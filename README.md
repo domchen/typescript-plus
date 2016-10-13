@@ -43,7 +43,7 @@ To learn how to use the original typescript compiler, please visit the following
 | Option                  | Type    | Default| Description                                        |
 |:----------------------- |:-------:|:------:| :------------------------------------------------- |
 | emitReflection        | boolean | false  | Emit the reflection data of class .                |
-| accessorOptimization  | boolean | false  | If an accessor contains only one call to another method, use that method as the accessor method directly.|
+| accessorOptimization  | boolean | false  | If an accessor contains only one call to another method, use that method to define the accessor directly.|
 | defines                 | Object  |        | Replace the global variables with the constants defined in the "defines"" object. |
 
 
