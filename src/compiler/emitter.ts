@@ -5275,7 +5275,7 @@ const _super = (function (geti, seti) {
             }
 
             /**
-             * If the accessor method contains only one call to another method, use that method as the accessor directly.
+             * If the accessor method contains only one call to another method, use that method to define the accessor directly.
              */
             function emitAccessorOrTargetMethod(accessor:AccessorDeclaration,
                                                 member:ClassElement,

@@ -15,3 +15,4 @@ Jakefile.js
 .travis.yml
 .vscode/
 .idea/
+/tools
