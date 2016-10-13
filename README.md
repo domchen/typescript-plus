@@ -4,7 +4,7 @@
 
 
 
-TypeScript is a language for application-scale JavaScript (For more information, please visit : [typescriptlang.org](http://www.typescriptlang.org/)).
+TypeScript is a language for application-scale JavaScript, For more information, please visit : [www.typescriptlang.org](http://www.typescriptlang.org/).
 
 The typescript-plus provides extra features to the original typescript compiler, such as emitting reflection data of class, get / set accessors optimization and conditional compilation.
 
