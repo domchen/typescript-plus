@@ -6,7 +6,7 @@
 
 TypeScript is a language for application-scale JavaScript, For more information, please visit : [TypeScript](https://github.com/Microsoft/TypeScript).
 
-The typescript-plus provides extra features to the original typescript compiler, such as emitting reflection data of class, get / set accessors optimization and conditional compilation.
+The typescript-plus provides extra features to the original typescript compiler, such as emitting reflection data of class, get / set accessors optimization and conditional compilation. This project will be updated after the original TypeScript project publishing a new release.
 
 ## Installing
 
