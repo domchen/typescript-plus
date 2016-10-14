@@ -25,6 +25,7 @@
         "emitter.ts",
         "program.ts",
         "commandLineParser.ts",
+        "sorting.ts",
         "tsc.ts",
         "diagnosticInformationMap.generated.ts"
     ]

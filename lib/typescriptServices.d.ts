@@ -1589,9 +1589,6 @@ declare namespace ts {
         emitBOM?: boolean;
         emitDecoratorMetadata?: boolean;
         experimentalDecorators?: boolean;
-        emitReflection?: boolean;
-        accessorOptimization?: boolean;
-        defines?: MapLike<any>;
         forceConsistentCasingInFileNames?: boolean;
         inlineSourceMap?: boolean;
         inlineSources?: boolean;
@@ -1639,6 +1636,10 @@ declare namespace ts {
         types?: string[];
         /** Paths used to used to compute primary types search locations */
         typeRoots?: string[];
+        accessorOptimization?: boolean;
+        defines?: MapLike<any>;
+        emitReflection?: boolean;
+        reorderFiles?: boolean;
         [option: string]: CompilerOptionsValue | undefined;
     }
     interface TypingOptions {
@@ -1900,6 +1901,13 @@ declare namespace ts {
     function classicNameResolver(moduleName: string, containingFile: string, compilerOptions: CompilerOptions, host: ModuleResolutionHost): ResolvedModuleWithFailedLookupLocations;
     function nodeModuleNameResolver(moduleName: string, containingFile: string, compilerOptions: CompilerOptions, host: ModuleResolutionHost): ResolvedModuleWithFailedLookupLocations;
     function resolveModuleName(moduleName: string, containingFile: string, compilerOptions: CompilerOptions, host: ModuleResolutionHost): ResolvedModuleWithFailedLookupLocations;
+}
+declare namespace ts {
+    interface SortingResult {
+        sortedFileNames: string[];
+        circularReferences: string[];
+    }
+    function reorderSourceFiles(program: Program): SortingResult;
 }
 declare namespace ts {
     /** The version of the TypeScript compiler release */

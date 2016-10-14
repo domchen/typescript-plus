@@ -2600,9 +2600,6 @@ namespace ts {
         emitBOM?: boolean;
         emitDecoratorMetadata?: boolean;
         experimentalDecorators?: boolean;
-        emitReflection?: boolean;
-        accessorOptimization?: boolean;
-        defines?: MapLike<any>;
         forceConsistentCasingInFileNames?: boolean;
         /*@internal*/help?: boolean;
         /*@internal*/init?: boolean;
@@ -2659,6 +2656,12 @@ namespace ts {
         typeRoots?: string[];
         /*@internal*/ version?: boolean;
         /*@internal*/ watch?: boolean;
+
+        /* extra options */
+        accessorOptimization?: boolean;
+        defines?: MapLike<any>;
+        emitReflection?: boolean;
+        reorderFiles?: boolean;
 
         [option: string]: CompilerOptionsValue | undefined;
     }

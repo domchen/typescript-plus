@@ -25,6 +25,7 @@
         "../compiler/sourcemap.ts",
         "../compiler/declarationEmitter.ts",
         "../compiler/emitter.ts",
+        "../compiler/sorting.ts",
         "../compiler/program.ts",
         "../compiler/commandLineParser.ts",
         "../compiler/diagnosticInformationMap.generated.ts",
