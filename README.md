@@ -6,7 +6,9 @@
 
 TypeScript is a language for application-scale JavaScript, For more information, please visit : [TypeScript](https://github.com/Microsoft/TypeScript).
 
-The typescript-plus provides extra features to the original typescript compiler, such as emitting reflection data of class, get / set accessors optimization and conditional compilation. This project will be updated after the original TypeScript project publishing a new release.
+The typescript-plus provides extra features to the original typescript compiler, such as accessors optimization, class reflection, conditional compilation and the most useful one : automatically reordering the source files by denpendencies. 
+
+This project will try to stay up to date with the new release of the original TypeScript project.
 
 ## Installing
 
@@ -40,11 +42,13 @@ To learn how to use the original typescript compiler, please visit the following
 
 ## Extra Options
 
-| Option                  | Type    | Default| Description                                        |
-|:----------------------- |:-------:|:------:| :------------------------------------------------- |
-| emitReflection        | boolean | false  | Emit the reflection data of class .                |
-| accessorOptimization  | boolean | false  | If an accessor contains only one call to another method, use that method to define the accessor directly.|
-| defines                 | Object  |        | Replace the global variables with the constants defined in the "defines"" object. |
+| Option               | Type    | Default| Description                                        |
+|:-------------------- |:-------:|:------:| :------------------------------------------------- |
+| accessorOptimization | boolean | false  | If an accessor contains only one call to another method, use that method to define the accessor directly.|
+| emitReflection       | boolean | false  | Emit the reflection data of class .                |
+| reorderFiles         | boolean | false  | Automatically reordering the source files by denpendencies.|
+| defines              | Object  |        | Replace the global variables with the constants defined in the "defines"" object. |
+
 
 
 Example tsconfig.json file:
@@ -57,8 +61,9 @@ Example tsconfig.json file:
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true,
-        "emitReflection": true,
         "accessorOptimization": true,
+        "emitReflection": true,
+        "reorderFiles": true
         "defines": {
             "DEBUG": false,
             "RELEASE": true
@@ -71,54 +76,6 @@ Example tsconfig.json file:
     ]  
 }
 
-```
-
-## Reflection
-
-Pass `--emitReflection` to the command-line tool or add `"emitReflection": true` to the `compilerOptions` in tsconfig.json file to enable this feature.
-
-TypeScript:
-
-```
-namespace ts {
-    export interface IPerson {
-        name:string;
-    }
-    
-    export class Student implements IPerson {
-        public name:string = "";
-    }
-}
-```
-JavaScript:
-
-```
-var ts;
-(function (ts) {
-    var Student = (function () {
-        function Student() {
-            this.name = "";
-        }
-        return Student;
-    }());
-    ts.Student = Student;
-    __reflect(Student.prototype, "ts.Student", ["ts.IPerson"]);
-})(ts || (ts = {}));
-
-```
-The `__reflect` helper function is just like the `__extends` function, it is emitted only once in one file.
-
-Then you can use the helper funtions in [reflection.ts](tools/reflection.ts) to get the qualified class name of an instance:
-
-```
-let student = new ts.Student();
-ts.getQualifiedClassName(student);  // "ts.Student"
-```
-or do some type checking:
-
-```
-ts.is(student, "ts.Student"); // true
-ts.is(student, "ts.IPersion"); // true
 ```
 
 ## Accessor Optimization
@@ -193,6 +150,62 @@ var Student = (function () {
 ```
 Either way, it works.
 
+## Class Reflection
+
+Pass `--emitReflection` to the command-line tool or add `"emitReflection": true` to the `compilerOptions` in tsconfig.json file to enable this feature.
+
+TypeScript:
+
+```
+namespace ts {
+    export interface IPerson {
+        name:string;
+    }
+    
+    export class Student implements IPerson {
+        public name:string = "";
+    }
+}
+```
+JavaScript:
+
+```
+var ts;
+(function (ts) {
+    var Student = (function () {
+        function Student() {
+            this.name = "";
+        }
+        return Student;
+    }());
+    ts.Student = Student;
+    __reflect(Student.prototype, "ts.Student", ["ts.IPerson"]);
+})(ts || (ts = {}));
+
+```
+The `__reflect` helper function is just like the `__extends` function, it is emitted only once in one file.
+
+Then you can use the helper funtions in [reflection.ts](tools/reflection.ts) to get the qualified class name of an instance:
+
+```
+let student = new ts.Student();
+ts.getQualifiedClassName(student);  // "ts.Student"
+```
+or do some type checking:
+
+```
+ts.is(student, "ts.Student"); // true
+ts.is(student, "ts.IPersion"); // true
+```
+
+## SourceFiles Reordering
+
+Pass `--reorderFiles` to the command-line tool or add `"reorderFiles": true` to the `compilerOptions` in tsconfig.json file to enable this feature.
+
+Normally when you pass the `--outFile` option, the compiler will concatenate and emit output to a single file. But the order of concatenation is determined by the list of files passed to the compiler on the command line (or in the tsconfig.json file) along with triple-slash references and imports. That forces you to sort the input files in the correct order manually. It is ok with only a few source files, but it becomes a disaster when you have coutless source files.
+
+With the `reorderFiles` swith on, the compiler will automatically reorder the source files by analyzing their denpendencies in code. Then you can get the correct concatination order in the generated file without doing any extra effort. I have tested this feature in many real-world projects, it works very well. If it does not work in you project, please feel free to open an issue and send me the test case.
+
 ## Conditional Compilation
 
 The `defines` option is only allowed in tsconfig.json, and not through command-line switches.
@@ -251,4 +264,9 @@ function someFunction() {
 As you can see, the second `if(DEBUG)` in `someFunction` is not replaced because it is defined in scope.
 
 Note that the compiler does not dropping the unreachable code, because it is can be easily done by other tools like [UglifyJS](http://lisperator.net/uglifyjs/) or [Google Closure Compiler](https://developers.google.com/closure/compiler/).
+
+
+
+
+
 
