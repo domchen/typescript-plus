@@ -651,7 +651,8 @@ namespace ts {
     }
 
     function printVersion() {
-        sys.write(getDiagnosticText(Diagnostics.Version_0, ts.version) + sys.newLine);
+        sys.write("typescript version :     " + ts.version + sys.newLine);
+        sys.write("typescript-plus version :" + ts.version_plus + sys.newLine);
     }
 
     function printHelp() {

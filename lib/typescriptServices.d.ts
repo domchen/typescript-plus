@@ -1912,6 +1912,7 @@ declare namespace ts {
 declare namespace ts {
     /** The version of the TypeScript compiler release */
     const version: string;
+    const version_plus: string;
     function findConfigFile(searchPath: string, fileExists: (fileName: string) => boolean, configName?: string): string;
     function resolveTripleslashReference(moduleName: string, containingFile: string): string;
     /**
