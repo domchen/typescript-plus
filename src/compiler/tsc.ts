@@ -630,8 +630,7 @@ namespace ts {
             }
 
             // Otherwise, emit and report any errors we ran into.
-            let emitOnlyDtsFiles = !compilerOptions.noEmit && compilerOptions.declaration && compilerOptions.noEmitJs;
-            const emitOutput = program.emit(undefined, undefined, undefined, emitOnlyDtsFiles);
+            const emitOutput = program.emit();
             diagnostics = diagnostics.concat(emitOutput.diagnostics);
 
             reportDiagnostics(sortAndDeduplicateDiagnostics(diagnostics), compilerHost);

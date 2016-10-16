@@ -815,6 +815,9 @@ namespace ts {
             if (options.noEmit) {
                 return { diagnostics: declarationDiagnostics, sourceMaps: undefined, emittedFiles: undefined, emitSkipped: true };
             }
+            if(!emitOnlyDtsFiles){
+                emitOnlyDtsFiles = options.declaration && options.noEmitJs;
+            }
 
             // If the noEmitOnError flag is set, then check if we have any errors so far.  If so,
             // immediately bail out.  Note that we pass 'undefined' for 'sourceFile' so that we
