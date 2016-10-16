@@ -2661,6 +2661,7 @@ namespace ts {
         accessorOptimization?: boolean;
         defines?: MapLike<any>;
         emitReflection?: boolean;
+        noEmitJs?: boolean;
         reorderFiles?: boolean;
 
         [option: string]: CompilerOptionsValue | undefined;

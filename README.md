@@ -45,7 +45,8 @@ To learn how to use the original typescript compiler, please visit the following
 | Option               | Type    | Default| Description                                        |
 |:-------------------- |:-------:|:------:| :------------------------------------------------- |
 | accessorOptimization | boolean | false  | If an accessor contains only one call to another method, use that method to define the accessor directly.|
-| emitReflection       | boolean | false  | Emit the reflection data of class .                |
+| emitReflection       | boolean | false  | Emit the reflection data of class.                 |
+| noEmitJs             | boolean | false  | Do not generate javascript files.                  |
 | reorderFiles         | boolean | false  | Automatically reordering the source files by denpendencies.|
 | defines              | Object  |        | Replace the global variables with the constants defined in the "defines"" object. |
 
