@@ -6,7 +6,7 @@ namespace ts {
     /** The version of the TypeScript compiler release */
 
     export const version = "2.0.5";
-    export const version_plus = "2.0.10";
+    export const version_plus = "2.0.11";
 
     const emptyArray: any[] = [];
 

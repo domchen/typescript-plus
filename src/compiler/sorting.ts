@@ -76,6 +76,8 @@ namespace ts {
     }
 
     function visitFile(sourceFile:SourceFile):void {
+        let hasDecorators = !!((sourceFile.flags & NodeFlags.HasDecorators) ||
+        (sourceFile.flags & NodeFlags.HasParamDecorators));
         let statements = sourceFile.statements;
         let length = statements.length;
         for (let i = 0; i < length; i++) {
@@ -95,16 +97,19 @@ namespace ts {
                 }
             }
             else {
-                visitStatement(statements[i]);
+                visitStatement(statements[i], hasDecorators);
             }
         }
     }
 
-    function visitStatement(statement:Statement):void {
+    function visitStatement(statement:Statement, hasDecorators?:boolean):void {
         switch (statement.kind) {
             case SyntaxKind.ClassDeclaration:
                 checkInheriting(<ClassDeclaration>statement);
                 checkStaticMember(<ClassDeclaration>statement);
+                if (hasDecorators) {
+                    checkClassDecorators(<ClassDeclaration>statement);
+                }
                 break;
             case SyntaxKind.VariableStatement:
                 let variable = <VariableStatement>statement;
@@ -113,12 +118,12 @@ namespace ts {
                 });
                 break;
             case SyntaxKind.ModuleDeclaration:
-                visitModule(<ModuleDeclaration>statement);
+                visitModule(<ModuleDeclaration>statement, hasDecorators);
                 break;
         }
     }
 
-    function visitModule(node:ModuleDeclaration):void {
+    function visitModule(node:ModuleDeclaration, hasDecorators?:boolean):void {
         if (node.body.kind == SyntaxKind.ModuleDeclaration) {
             visitModule(<ModuleDeclaration>node.body);
             return;
@@ -130,7 +135,7 @@ namespace ts {
             if (statement.flags & NodeFlags.Ambient) { // has the 'declare' keyword
                 continue;
             }
-            visitStatement(statement);
+            visitStatement(statement, hasDecorators);
         }
     }
 
@@ -140,7 +145,7 @@ namespace ts {
             return;
         }
         let sourceFile = getSourceFileOfNode(type.symbol.valueDeclaration);
-        if (sourceFile.isDeclarationFile) {
+        if (!sourceFile ||sourceFile.isDeclarationFile) {
             return;
         }
         addDependency(getSourceFileOfNode(node).fileName, sourceFile.fileName);
@@ -183,6 +188,55 @@ namespace ts {
                 let property = <PropertyDeclaration>member;
                 checkExpression(property.initializer);
             }
+        }
+    }
+
+    function checkClassDecorators(node:ClassDeclaration):void {
+        if (node.decorators) {
+            checkDecorators(node.decorators);
+        }
+        let members = node.members;
+        if (!members) {
+            return;
+        }
+        for (let member of members) {
+            let decorators:NodeArray<Decorator>;
+            let functionLikeMember:FunctionLikeDeclaration;
+            if (member.kind === SyntaxKind.GetAccessor || member.kind === SyntaxKind.SetAccessor) {
+                const accessors = getAllAccessorDeclarations(node.members, <AccessorDeclaration>member);
+                if (member !== accessors.firstAccessor) {
+                    continue;
+                }
+                decorators = accessors.firstAccessor.decorators;
+                if (!decorators && accessors.secondAccessor) {
+                    decorators = accessors.secondAccessor.decorators;
+                }
+                functionLikeMember = accessors.setAccessor;
+            }
+            else {
+                decorators = member.decorators;
+                if (member.kind === SyntaxKind.MethodDeclaration) {
+                    functionLikeMember = <MethodDeclaration>member;
+                }
+            }
+            if (decorators) {
+                checkDecorators(decorators);
+            }
+
+            if (functionLikeMember) {
+                let parameterIndex = 0;
+                for (const parameter of functionLikeMember.parameters) {
+                    if (parameter.decorators) {
+                        checkDecorators(parameter.decorators);
+                    }
+                }
+            }
+        }
+    }
+
+    function checkDecorators(decorators:NodeArray<Decorator>):void {
+        for (let decorator of decorators) {
+            checkExpression(decorator.expression);
         }
     }
 
@@ -264,7 +318,7 @@ namespace ts {
                 }
                 let declaration = type.symbol.valueDeclaration;
                 let sourceFile = getSourceFileOfNode(declaration);
-                if (sourceFile.isDeclarationFile) {
+                if (!sourceFile ||sourceFile.isDeclarationFile) {
                     return;
                 }
                 addDependency(getSourceFileOfNode(expression).fileName, sourceFile.fileName);
@@ -383,7 +437,7 @@ namespace ts {
         return null;
     }
 
-    function getSourceFileOfNode(node: Node): SourceFile {
+    function getSourceFileOfNode(node:Node):SourceFile {
         while (node && node.kind !== SyntaxKind.SourceFile) {
             node = node.parent;
         }
