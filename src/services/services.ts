@@ -7622,7 +7622,10 @@ namespace ts {
         function getEmitOutput(fileName: string, emitDeclarationsOnly?: boolean): EmitOutput {
             synchronizeHostData();
 
-            const sourceFile = getValidSourceFile(fileName);
+            let sourceFile:SourceFile;
+            if(fileName){
+                sourceFile = getValidSourceFile(fileName);
+            }
             const outputFiles: OutputFile[] = [];
 
             function writeFile(fileName: string, data: string, writeByteOrderMark: boolean) {
