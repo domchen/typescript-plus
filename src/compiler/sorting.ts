@@ -85,11 +85,7 @@ namespace ts {
             if (statement.flags & NodeFlags.Ambient) { // has the 'declare' keyword
                 continue;
             }
-            if (statement.kind === SyntaxKind.ExpressionStatement) {
-                let expression = <ExpressionStatement>statement;
-                checkExpression(expression.expression);
-            }
-            else if (statement.kind === SyntaxKind.ImportEqualsDeclaration) {
+            if (statement.kind === SyntaxKind.ImportEqualsDeclaration) {
                 let importDeclaration = <ImportEqualsDeclaration>statement;
                 if (importDeclaration.moduleReference.kind == SyntaxKind.QualifiedName) {
                     let qualifiedName = <QualifiedName>importDeclaration.moduleReference;
@@ -104,6 +100,10 @@ namespace ts {
 
     function visitStatement(statement:Statement, hasDecorators?:boolean):void {
         switch (statement.kind) {
+            case SyntaxKind.ExpressionStatement:
+                let expression = <ExpressionStatement>statement;
+                checkExpression(expression.expression);
+                break;
             case SyntaxKind.ClassDeclaration:
                 checkInheriting(<ClassDeclaration>statement);
                 checkStaticMember(<ClassDeclaration>statement);
@@ -145,7 +145,7 @@ namespace ts {
             return;
         }
         let sourceFile = getSourceFileOfNode(type.symbol.valueDeclaration);
-        if (!sourceFile ||sourceFile.isDeclarationFile) {
+        if (!sourceFile || sourceFile.isDeclarationFile) {
             return;
         }
         addDependency(getSourceFileOfNode(node).fileName, sourceFile.fileName);
@@ -318,7 +318,7 @@ namespace ts {
                 }
                 let declaration = type.symbol.valueDeclaration;
                 let sourceFile = getSourceFileOfNode(declaration);
-                if (!sourceFile ||sourceFile.isDeclarationFile) {
+                if (!sourceFile || sourceFile.isDeclarationFile) {
                     return;
                 }
                 addDependency(getSourceFileOfNode(expression).fileName, sourceFile.fileName);
