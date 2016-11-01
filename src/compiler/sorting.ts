@@ -380,10 +380,11 @@ namespace ts {
         pathWeightMap = createMap<number>();
         for (let i = 0; i < sourceFiles.length; i++) {
             let sourceFile = sourceFiles[i];
+            let path = sourceFile.fileName;
             if (sourceFile.isDeclarationFile) {
+                pathWeightMap[path] = 10000;
                 continue;
             }
-            let path = sourceFile.fileName;
             let references = updatePathWeight(path, 0, [path]);
             if (references) {
                 result.circularReferences = references;
