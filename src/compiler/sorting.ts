@@ -85,16 +85,7 @@ namespace ts {
             if (statement.flags & NodeFlags.Ambient) { // has the 'declare' keyword
                 continue;
             }
-            if (statement.kind === SyntaxKind.ImportEqualsDeclaration) {
-                let importDeclaration = <ImportEqualsDeclaration>statement;
-                if (importDeclaration.moduleReference.kind == SyntaxKind.QualifiedName) {
-                    let qualifiedName = <QualifiedName>importDeclaration.moduleReference;
-                    checkDependencyAtLocation(qualifiedName);
-                }
-            }
-            else {
-                visitStatement(statements[i], hasDecorators);
-            }
+            visitStatement(statements[i], hasDecorators);
         }
     }
 
@@ -116,6 +107,13 @@ namespace ts {
                 variable.declarationList.declarations.forEach(declaration=> {
                     checkExpression(declaration.initializer);
                 });
+                break;
+            case SyntaxKind.ImportEqualsDeclaration:
+                    let importDeclaration = <ImportEqualsDeclaration>statement;
+                    if (importDeclaration.moduleReference.kind == SyntaxKind.QualifiedName) {
+                        let qualifiedName = <QualifiedName>importDeclaration.moduleReference;
+                        checkDependencyAtLocation(qualifiedName);
+                    }
                 break;
             case SyntaxKind.ModuleDeclaration:
                 visitModule(<ModuleDeclaration>statement, hasDecorators);
