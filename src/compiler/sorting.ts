@@ -109,11 +109,8 @@ namespace ts {
                 });
                 break;
             case SyntaxKind.ImportEqualsDeclaration:
-                    let importDeclaration = <ImportEqualsDeclaration>statement;
-                    if (importDeclaration.moduleReference.kind == SyntaxKind.QualifiedName) {
-                        let qualifiedName = <QualifiedName>importDeclaration.moduleReference;
-                        checkDependencyAtLocation(qualifiedName);
-                    }
+                let importDeclaration = <ImportEqualsDeclaration>statement;
+                checkDependencyAtLocation(importDeclaration.moduleReference);
                 break;
             case SyntaxKind.ModuleDeclaration:
                 visitModule(<ModuleDeclaration>statement, hasDecorators);
@@ -138,11 +135,11 @@ namespace ts {
     }
 
     function checkDependencyAtLocation(node:Node):void {
-        let type = checker.getTypeAtLocation(node);
-        if (!type || !type.symbol || type.flags & TypeFlags.Interface) {
+        let symbol = checker.getSymbolAtLocation(node);
+        if (!symbol||!symbol.valueDeclaration) {
             return;
         }
-        let sourceFile = getSourceFileOfNode(type.symbol.valueDeclaration);
+        let sourceFile = getSourceFileOfNode(symbol.valueDeclaration);
         if (!sourceFile || sourceFile.isDeclarationFile) {
             return;
         }
@@ -169,7 +166,7 @@ namespace ts {
         }
         let currentFileName = getSourceFileOfNode(node).fileName;
         superClasses.forEach(superClass=> {
-            checkDependencyAtLocation(superClass);
+            checkDependencyAtLocation(superClass.expression);
         });
     }
 
@@ -310,11 +307,14 @@ namespace ts {
                 break;
             case SyntaxKind.PropertyAccessExpression:
             case SyntaxKind.Identifier:
-                let type = checker.getTypeAtLocation(expression);
-                if (!type || !type.symbol || type.flags & TypeFlags.Interface) {
+                let symbol = checker.getSymbolAtLocation(expression);
+                if (!symbol) {
                     return;
                 }
-                let declaration = type.symbol.valueDeclaration;
+                let declaration = symbol.valueDeclaration;
+                if (!declaration) {
+                    return;
+                }
                 let sourceFile = getSourceFileOfNode(declaration);
                 if (!sourceFile || sourceFile.isDeclarationFile) {
                     return;

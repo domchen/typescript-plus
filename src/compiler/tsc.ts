@@ -651,8 +651,8 @@ namespace ts {
     }
 
     function printVersion() {
-        sys.write("typescript version :     " + ts.version + sys.newLine);
-        sys.write("typescript-plus version :" + ts.version_plus + sys.newLine);
+        sys.write("Version : " + ts.version_plus + sys.newLine);
+        sys.write("typescript-version : " + ts.version + sys.newLine);
     }
 
     function printHelp() {
