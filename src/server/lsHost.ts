@@ -9,6 +9,8 @@ namespace ts.server {
         private readonly resolvedTypeReferenceDirectives: ts.FileMap<Map<ResolvedTypeReferenceDirectiveWithFailedLookupLocations>>;
         private readonly getCanonicalFileName: (fileName: string) => string;
 
+        private filesWithChangedSetOfUnresolvedImports: Path[];
+
         private readonly resolveModuleName: typeof resolveModuleName;
         readonly trace: (s: string) => void;
 
@@ -52,12 +54,23 @@ namespace ts.server {
             };
         }
 
-        private resolveNamesWithLocalCache<T extends { failedLookupLocations: string[] }, R>(
+        public startRecordingFilesWithChangedResolutions() {
+            this.filesWithChangedSetOfUnresolvedImports = [];
+        }
+
+        public finishRecordingFilesWithChangedResolutions() {
+            const collected = this.filesWithChangedSetOfUnresolvedImports;
+            this.filesWithChangedSetOfUnresolvedImports = undefined;
+            return collected;
+        }
+
+        private resolveNamesWithLocalCache<T extends { failedLookupLocations: string[] }, R extends { resolvedFileName?: string }>(
             names: string[],
             containingFile: string,
             cache: ts.FileMap<Map<T>>,
             loader: (name: string, containingFile: string, options: CompilerOptions, host: ModuleResolutionHost) => T,
-            getResult: (s: T) => R): R[] {
+            getResult: (s: T) => R,
+            logChanges: boolean): R[] {
 
             const path = toPath(containingFile, this.host.getCurrentDirectory(), this.getCanonicalFileName);
             const currentResolutionsInFile = cache.get(path);
@@ -65,6 +78,7 @@ namespace ts.server {
             const newResolutions: Map<T> = createMap<T>();
             const resolvedModules: R[] = [];
             const compilerOptions = this.getCompilationSettings();
+            const lastDeletedFileName = this.project.projectService.lastDeletedFile && this.project.projectService.lastDeletedFile.fileName;
 
             for (const name of names) {
                 // check if this is a duplicate entry in the list
@@ -78,6 +92,11 @@ namespace ts.server {
                     else {
                         newResolutions[name] = resolution = loader(name, containingFile, compilerOptions, this);
                     }
+                    if (logChanges && this.filesWithChangedSetOfUnresolvedImports && !resolutionIsEqualTo(existingResolution, resolution)) {
+                        this.filesWithChangedSetOfUnresolvedImports.push(path);
+                        // reset log changes to avoid recording the same file multiple times
+                        logChanges = false;
+                    }
                 }
 
                 ts.Debug.assert(resolution !== undefined);
@@ -89,13 +108,34 @@ namespace ts.server {
             cache.set(path, newResolutions);
             return resolvedModules;
 
+            function resolutionIsEqualTo(oldResolution: T, newResolution: T): boolean {
+                if (oldResolution === newResolution) {
+                    return true;
+                }
+                if (!oldResolution || !newResolution) {
+                    return false;
+                }
+                const oldResult = getResult(oldResolution);
+                const newResult = getResult(newResolution);
+                if (oldResult === newResult) {
+                    return true;
+                }
+                if (!oldResult || !newResult) {
+                    return false;
+                }
+                return oldResult.resolvedFileName === newResult.resolvedFileName;
+            }
+
             function moduleResolutionIsValid(resolution: T): boolean {
                 if (!resolution) {
                     return false;
                 }
 
-                if (getResult(resolution)) {
-                    // TODO: consider checking failedLookupLocations
+                const result = getResult(resolution);
+                if (result) {
+                    if (result.resolvedFileName && result.resolvedFileName === lastDeletedFileName) {
+                        return false;
+                    }
                     return true;
                 }
 
@@ -122,11 +162,11 @@ namespace ts.server {
         }
 
         resolveTypeReferenceDirectives(typeDirectiveNames: string[], containingFile: string): ResolvedTypeReferenceDirective[] {
-            return this.resolveNamesWithLocalCache(typeDirectiveNames, containingFile, this.resolvedTypeReferenceDirectives, resolveTypeReferenceDirective, m => m.resolvedTypeReferenceDirective);
+            return this.resolveNamesWithLocalCache(typeDirectiveNames, containingFile, this.resolvedTypeReferenceDirectives, resolveTypeReferenceDirective, m => m.resolvedTypeReferenceDirective, /*logChanges*/ false);
         }
 
         resolveModuleNames(moduleNames: string[], containingFile: string): ResolvedModule[] {
-            return this.resolveNamesWithLocalCache(moduleNames, containingFile, this.resolvedModuleNames, this.resolveModuleName, m => m.resolvedModule);
+            return this.resolveNamesWithLocalCache(moduleNames, containingFile, this.resolvedModuleNames, this.resolveModuleName, m => m.resolvedModule, /*logChanges*/ true);
         }
 
         getDefaultLibFileName() {
@@ -171,12 +211,16 @@ namespace ts.server {
             return this.host.fileExists(path);
         }
 
+        readFile(fileName: string): string {
+            return this.host.readFile(fileName);
+        }
+
         directoryExists(path: string): boolean {
             return this.host.directoryExists(path);
         }
 
-        readFile(fileName: string): string {
-            return this.host.readFile(fileName);
+        readDirectory(path: string, extensions?: string[], exclude?: string[], include?: string[]): string[] {
+            return this.host.readDirectory(path, extensions, exclude, include);
         }
 
         getDirectories(path: string): string[] {
@@ -189,10 +233,11 @@ namespace ts.server {
         }
 
         setCompilationSettings(opt: ts.CompilerOptions) {
+            if (changesAffectModuleResolution(this.compilationSettings, opt)) {
+                this.resolvedModuleNames.clear();
+                this.resolvedTypeReferenceDirectives.clear();
+            }
             this.compilationSettings = opt;
-            // conservatively assume that changing compiler options might affect module resolution strategy
-            this.resolvedModuleNames.clear();
-            this.resolvedTypeReferenceDirectives.clear();
         }
     }
 }

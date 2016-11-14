@@ -20,17 +20,12 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Parent = (function () {
     function Parent() {
     }
-    Object.defineProperty(Parent.prototype, "message", {
-        get: function () { },
-        enumerable: true,
-        configurable: true
-    });
     return Parent;
 }());
 var Child = (function (_super) {
     __extends(Child, _super);
     function Child() {
-        _super.apply(this, arguments);
+        return _super.apply(this, arguments) || this;
     }
     Object.defineProperty(Child.prototype, "message", {
         get: function () {

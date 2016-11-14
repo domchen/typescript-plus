@@ -20,20 +20,74 @@ namespace ts.server {
         }
     }
 
-    function isJsOrDtsFile(info: ScriptInfo) {
-        return info.scriptKind === ScriptKind.JS || info.scriptKind == ScriptKind.JSX || fileExtensionIs(info.fileName, ".d.ts");
+    function countEachFileTypes(infos: ScriptInfo[]): { js: number, jsx: number, ts: number, tsx: number, dts: number } {
+        const result = { js: 0, jsx: 0, ts: 0, tsx: 0, dts: 0 };
+        for (const info of infos) {
+            switch (info.scriptKind) {
+                case ScriptKind.JS:
+                    result.js += 1;
+                    break;
+                case ScriptKind.JSX:
+                    result.jsx += 1;
+                    break;
+                case ScriptKind.TS:
+                    fileExtensionIs(info.fileName, ".d.ts")
+                        ? result.dts += 1
+                        : result.ts += 1;
+                    break;
+                case ScriptKind.TSX:
+                    result.tsx += 1;
+                    break;
+            }
+        }
+        return result;
+    }
+
+    function hasOneOrMoreJsAndNoTsFiles(project: Project) {
+        const counts = countEachFileTypes(project.getScriptInfos());
+        return counts.js > 0 && counts.ts === 0 && counts.tsx === 0;
     }
 
     export function allRootFilesAreJsOrDts(project: Project): boolean {
-        return project.getRootScriptInfos().every(isJsOrDtsFile);
+        const counts = countEachFileTypes(project.getRootScriptInfos());
+        return counts.ts === 0 && counts.tsx === 0;
     }
 
     export function allFilesAreJsOrDts(project: Project): boolean {
-        return project.getScriptInfos().every(isJsOrDtsFile);
+        const counts = countEachFileTypes(project.getScriptInfos());
+        return counts.ts === 0 && counts.tsx === 0;
     }
 
     export interface ProjectFilesWithTSDiagnostics extends protocol.ProjectFiles {
         projectErrors: Diagnostic[];
+    }
+
+    export class UnresolvedImportsMap {
+        readonly perFileMap = createFileMap<ReadonlyArray<string>>();
+        private version = 0;
+
+        public clear() {
+            this.perFileMap.clear();
+            this.version = 0;
+        }
+
+        public getVersion() {
+            return this.version;
+        }
+
+        public remove(path: Path) {
+            this.perFileMap.remove(path);
+            this.version++;
+        }
+
+        public get(path: Path) {
+            return this.perFileMap.get(path);
+        }
+
+        public set(path: Path, value: ReadonlyArray<string>) {
+            this.perFileMap.set(path, value);
+            this.version++;
+        }
     }
 
     export abstract class Project {
@@ -41,6 +95,9 @@ namespace ts.server {
         private rootFilesMap: FileMap<ScriptInfo> = createFileMap<ScriptInfo>();
         private lsHost: ServerLanguageServiceHost;
         private program: ts.Program;
+
+        private cachedUnresolvedImportsPerFile = new UnresolvedImportsMap();
+        private lastCachedUnresolvedImportsList: SortedReadonlyArray<string>;
 
         private languageService: LanguageService;
         builder: Builder;
@@ -65,15 +122,24 @@ namespace ts.server {
          */
         private projectStateVersion = 0;
 
-        private typingFiles: TypingsArray;
+        private typingFiles: SortedReadonlyArray<string>;
 
         protected projectErrors: Diagnostic[];
 
         public typesVersion = 0;
 
-        public isJsOnlyProject() {
+        public isNonTsProject() {
             this.updateGraph();
             return allFilesAreJsOrDts(this);
+        }
+
+        public isJsOnlyProject() {
+            this.updateGraph();
+            return hasOneOrMoreJsAndNoTsFiles(this);
+        }
+
+        public getCachedUnresolvedImportsPerFile_TestOnly() {
+            return this.cachedUnresolvedImportsPerFile;
         }
 
         constructor(
@@ -93,6 +159,10 @@ namespace ts.server {
             else if (hasExplicitListOfFiles) {
                 // If files are listed explicitly, allow all extensions
                 this.compilerOptions.allowNonTsExtensions = true;
+            }
+
+            if (this.projectKind === ProjectKind.Inferred) {
+                this.compilerOptions.noEmitOverwritenFiles = true;
             }
 
             if (languageServiceEnabled) {
@@ -215,7 +285,13 @@ namespace ts.server {
         }
 
         getScriptInfos() {
-            return map(this.program.getSourceFiles(), sourceFile => this.getScriptInfoLSHost(sourceFile.path));
+            return map(this.program.getSourceFiles(), sourceFile => {
+                const scriptInfo = this.projectService.getScriptInfoForPath(sourceFile.path);
+                if (!scriptInfo) {
+                    Debug.assert(false, `scriptInfo for a file '${sourceFile.fileName}' is missing.`);
+                }
+                return scriptInfo;
+            });
         }
 
         getFileEmitOutput(info: ScriptInfo, emitOnlyDtsFiles: boolean) {
@@ -289,6 +365,7 @@ namespace ts.server {
         removeFile(info: ScriptInfo, detachFromProject = true) {
             this.removeRootFileIfNecessary(info);
             this.lsHost.notifyFileRemoved(info);
+            this.cachedUnresolvedImportsPerFile.remove(info.path);
 
             if (detachFromProject) {
                 info.detachFromProject(this);
@@ -301,6 +378,38 @@ namespace ts.server {
             this.projectStateVersion++;
         }
 
+        private extractUnresolvedImportsFromSourceFile(file: SourceFile, result: string[]) {
+            const cached = this.cachedUnresolvedImportsPerFile.get(file.path);
+            if (cached) {
+                // found cached result - use it and return
+                for (const f of cached) {
+                    result.push(f);
+                }
+                return;
+            }
+            let unresolvedImports: string[];
+            if (file.resolvedModules) {
+                for (const name in file.resolvedModules) {
+                    // pick unresolved non-relative names
+                    if (!file.resolvedModules[name] && !isExternalModuleNameRelative(name)) {
+                        // for non-scoped names extract part up-to the first slash
+                        // for scoped names - extract up to the second slash
+                        let trimmed = name.trim();
+                        let i = trimmed.indexOf("/");
+                        if (i !== -1 && trimmed.charCodeAt(0) === CharacterCodes.at) {
+                            i = trimmed.indexOf("/", i + 1);
+                        }
+                        if (i !== -1) {
+                            trimmed = trimmed.substr(0, i);
+                        }
+                        (unresolvedImports || (unresolvedImports = [])).push(trimmed);
+                        result.push(trimmed);
+                    }
+                }
+            }
+            this.cachedUnresolvedImportsPerFile.set(file.path, unresolvedImports || emptyArray);
+        }
+
         /**
          * Updates set of files that contribute to this project
          * @returns: true if set of files in the project stays the same and false - otherwise.
@@ -309,8 +418,35 @@ namespace ts.server {
             if (!this.languageServiceEnabled) {
                 return true;
             }
+
+            this.lsHost.startRecordingFilesWithChangedResolutions();
+
             let hasChanges = this.updateGraphWorker();
-            const cachedTypings = this.projectService.typingsCache.getTypingsForProject(this, hasChanges);
+
+            const changedFiles: ReadonlyArray<Path> = this.lsHost.finishRecordingFilesWithChangedResolutions() || emptyArray;
+
+            for (const file of changedFiles) {
+                // delete cached information for changed files
+                this.cachedUnresolvedImportsPerFile.remove(file);
+            }
+
+            // 1. no changes in structure, no changes in unresolved imports - do nothing
+            // 2. no changes in structure, unresolved imports were changed - collect unresolved imports for all files 
+            // (can reuse cached imports for files that were not changed)
+            // 3. new files were added/removed, but compilation settings stays the same - collect unresolved imports for all new/modified files
+            // (can reuse cached imports for files that were not changed)
+            // 4. compilation settings were changed in the way that might affect module resolution - drop all caches and collect all data from the scratch
+            let unresolvedImports: SortedReadonlyArray<string>;
+            if (hasChanges || changedFiles.length) {
+                const result: string[] = [];
+                for (const sourceFile of this.program.getSourceFiles()) {
+                    this.extractUnresolvedImportsFromSourceFile(sourceFile, result);
+                }
+                this.lastCachedUnresolvedImportsList = toSortedReadonlyArray(result);
+            }
+            unresolvedImports = this.lastCachedUnresolvedImportsList;
+
+            const cachedTypings = this.projectService.typingsCache.getTypingsForProject(this, unresolvedImports, hasChanges);
             if (this.setTypings(cachedTypings)) {
                 hasChanges = this.updateGraphWorker() || hasChanges;
             }
@@ -320,7 +456,7 @@ namespace ts.server {
             return !hasChanges;
         }
 
-        private setTypings(typings: TypingsArray): boolean {
+        private setTypings(typings: SortedReadonlyArray<string>): boolean {
             if (arrayIsEqualTo(this.typingFiles, typings)) {
                 return false;
             }
@@ -393,6 +529,11 @@ namespace ts.server {
                     compilerOptions.allowJs = true;
                 }
                 compilerOptions.allowNonTsExtensions = true;
+                if (changesAffectModuleResolution(this.compilerOptions, compilerOptions)) {
+                    // reset cached unresolved imports if changes in compiler options affected module resolution
+                    this.cachedUnresolvedImportsPerFile.clear();
+                    this.lastCachedUnresolvedImportsList = undefined;
+                }
                 this.compilerOptions = compilerOptions;
                 this.lsHost.setCompilationSettings(compilerOptions);
 
@@ -400,11 +541,11 @@ namespace ts.server {
             }
         }
 
-        reloadScript(filename: NormalizedPath): boolean {
+        reloadScript(filename: NormalizedPath, tempFileName?: NormalizedPath): boolean {
             const script = this.projectService.getScriptInfoForNormalizedPath(filename);
             if (script) {
                 Debug.assert(script.isAttached(this));
-                script.reloadFromFile();
+                script.reloadFromFile(tempFileName);
                 return true;
             }
             return false;
