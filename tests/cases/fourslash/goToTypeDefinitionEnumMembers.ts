@@ -1,8 +1,8 @@
 /// <reference path='fourslash.ts' />
 
-////enum E {
+/////*definition*/enum E {
 ////    value1,
-////    /*definition*/value2
+////    value2
 ////}
 ////var x = E.value2;
 ////

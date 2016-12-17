@@ -10,7 +10,8 @@
 ////    }
 ////}
 
-verify.quickInfos({
-    1: "(local var) r: typeof C",
-    2: "(local var) r: typeof C"
-});
+goTo.marker('1');
+verify.quickInfoIs('(local var) r: typeof C');
+
+goTo.marker('2');
+verify.quickInfoIs('(local var) r: typeof C');

@@ -32,10 +32,9 @@ var B = (function () {
 var C = (function (_super) {
     __extends(C, _super);
     function C(y, z, w) {
-        var _this = _super.call(this, y) || this;
+        _super.call(this, y);
         var x = 10 + w;
         var ll = x * w;
-        return _this;
     }
     C.prototype.liftxyz = function () { return x + z + this.y; };
     C.prototype.liftxylocllz = function () { return x + z + this.y + this.ll; };

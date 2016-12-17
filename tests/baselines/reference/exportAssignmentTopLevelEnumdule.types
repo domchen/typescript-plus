@@ -26,16 +26,16 @@ enum foo {
 >foo : foo
 
 	red, green, blue
->red : foo.red
->green : foo.green
->blue : foo.blue
+>red : foo
+>green : foo
+>blue : foo
 }
 module foo {
 >foo : typeof foo
 
 	export var answer = 42;
 >answer : number
->42 : 42
+>42 : number
 }
 export = foo;
 >foo : foo

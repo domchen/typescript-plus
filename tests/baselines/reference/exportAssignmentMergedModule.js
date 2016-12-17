@@ -34,6 +34,7 @@ var Foo;
     Foo.a = a;
     Foo.b = true;
 })(Foo || (Foo = {}));
+var Foo;
 (function (Foo) {
     function c(a) {
         return a;

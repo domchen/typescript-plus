@@ -11,6 +11,9 @@
 ////tempTag1 `${ x => /*3*/x }${ (x: number) => /*4*/x }${ undefined }`;
 ////tempTag1 `${ (x: number) => /*5*/x }${ x => /*6*/x }${ undefined }`;
 
-for (const marker of test.markerNames()) {
-    verify.quickInfoAt(marker, "(parameter) x: number");
-}
+var markers = test.markers();
+
+markers.forEach(marker => {
+    goTo.position(marker.position);
+    verify.quickInfoIs("(parameter) x: number");
+});

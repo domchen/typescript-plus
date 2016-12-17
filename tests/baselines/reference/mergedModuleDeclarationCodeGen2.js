@@ -20,6 +20,7 @@ var my;
         })(foo = data.foo || (data.foo = {}));
     })(data = my.data || (my.data = {}));
 })(my || (my = {}));
+var my;
 (function (my_1) {
     var data;
     (function (data_1) {

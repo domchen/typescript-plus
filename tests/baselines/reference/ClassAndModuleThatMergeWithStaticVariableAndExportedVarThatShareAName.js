@@ -28,9 +28,10 @@ var Point = (function () {
         this.x = x;
         this.y = y;
     }
+    Point.Origin = { x: 0, y: 0 };
     return Point;
 }());
-Point.Origin = { x: 0, y: 0 };
+var Point;
 (function (Point) {
     Point.Origin = ""; //expected duplicate identifier error
 })(Point || (Point = {}));
@@ -41,10 +42,11 @@ var A;
             this.x = x;
             this.y = y;
         }
+        Point.Origin = { x: 0, y: 0 };
         return Point;
     }());
-    Point.Origin = { x: 0, y: 0 };
     A.Point = Point;
+    var Point;
     (function (Point) {
         Point.Origin = ""; //expected duplicate identifier error
     })(Point = A.Point || (A.Point = {}));

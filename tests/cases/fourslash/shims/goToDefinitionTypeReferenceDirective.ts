@@ -8,4 +8,6 @@
 //// /// <reference types="lib/*1*/"/>
 //// $.x;
 
-verify.goToDefinition("1", "0");
+goTo.marker("1");
+goTo.definition();
+verify.caretAtMarker("0");

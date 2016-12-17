@@ -49,14 +49,14 @@ class D<T>{
 function F(x: string): number { return 42; }
 >F : (x: string) => number
 >x : string
->42 : 42
+>42 : number
 
 function F2(x: number): boolean { return x < 42; }
 >F2 : (x: number) => boolean
 >x : number
 >x < 42 : boolean
 >x : number
->42 : 42
+>42 : number
 
 module M {
 >M : typeof M
@@ -98,13 +98,13 @@ module N {
 
 // literals
 if (true) { }
->true : true
+>true : boolean
 
 while (true) { }
->true : true
+>true : boolean
 
 do { }while(true)
->true : true
+>true : boolean
 
 if (null) { }
 >null : null
@@ -125,31 +125,31 @@ do { }while(undefined)
 >undefined : undefined
 
 if (0.0) { }
->0.0 : 0
+>0.0 : number
 
 while (0.0) { }
->0.0 : 0
+>0.0 : number
 
 do { }while(0.0)
->0.0 : 0
+>0.0 : number
 
 if ('a string') { }
->'a string' : "a string"
+>'a string' : string
 
 while ('a string') { }
->'a string' : "a string"
+>'a string' : string
 
 do { }while('a string')
->'a string' : "a string"
+>'a string' : string
 
 if ('') { }
->'' : ""
+>'' : string
 
 while ('') { }
->'' : ""
+>'' : string
 
 do { }while('')
->'' : ""
+>'' : string
 
 if (/[a-z]/) { }
 >/[a-z]/ : RegExp
@@ -171,18 +171,18 @@ do { }while([])
 
 if ([1, 2]) { }
 >[1, 2] : number[]
->1 : 1
->2 : 2
+>1 : number
+>2 : number
 
 while ([1, 2]) { }
 >[1, 2] : number[]
->1 : 1
->2 : 2
+>1 : number
+>2 : number
 
 do { }while([1, 2])
 >[1, 2] : number[]
->1 : 1
->2 : 2
+>1 : number
+>2 : number
 
 if ({}) { }
 >{} : {}
@@ -196,35 +196,35 @@ do { }while({})
 if ({ x: 1, y: 'a' }) { }
 >{ x: 1, y: 'a' } : { x: number; y: string; }
 >x : number
->1 : 1
+>1 : number
 >y : string
->'a' : "a"
+>'a' : string
 
 while ({ x: 1, y: 'a' }) { }
 >{ x: 1, y: 'a' } : { x: number; y: string; }
 >x : number
->1 : 1
+>1 : number
 >y : string
->'a' : "a"
+>'a' : string
 
 do { }while({ x: 1, y: 'a' })
 >{ x: 1, y: 'a' } : { x: number; y: string; }
 >x : number
->1 : 1
+>1 : number
 >y : string
->'a' : "a"
+>'a' : string
 
 if (() => 43) { }
 >() => 43 : () => number
->43 : 43
+>43 : number
 
 while (() => 43) { }
 >() => 43 : () => number
->43 : 43
+>43 : number
 
 do { }while(() => 43)
 >() => 43 : () => number
->43 : 43
+>43 : number
 
 if (new C()) { }
 >new C() : C
@@ -256,7 +256,7 @@ do { }while(new D<C>())
 // references
 var a = true;
 >a : boolean
->true : true
+>true : boolean
 
 if (a) { }
 >a : boolean
@@ -295,7 +295,7 @@ do { }while(c)
 
 var d = 0.0;
 >d : number
->0.0 : 0
+>0.0 : number
 
 if (d) { }
 >d : number
@@ -308,7 +308,7 @@ do { }while(d)
 
 var e = 'a string';
 >e : string
->'a string' : "a string"
+>'a string' : string
 
 if (e) { }
 >e : string
@@ -321,7 +321,7 @@ do { }while(e)
 
 var f = '';
 >f : string
->'' : ""
+>'' : string
 
 if (f) { }
 >f : string
@@ -361,8 +361,8 @@ do { }while(h)
 var i = [1, 2];
 >i : number[]
 >[1, 2] : number[]
->1 : 1
->2 : 2
+>1 : number
+>2 : number
 
 if (i) { }
 >i : number[]
@@ -390,9 +390,9 @@ var k = { x: 1, y: 'a' };
 >k : { x: number; y: string; }
 >{ x: 1, y: 'a' } : { x: number; y: string; }
 >x : number
->1 : 1
+>1 : number
 >y : string
->'a' : "a"
+>'a' : string
 
 if (k) { }
 >k : { x: number; y: string; }

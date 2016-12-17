@@ -11,4 +11,6 @@
 ////export var /*1*/x: a<a<string>>;
 ////x.a;
 
-verify.quickInfoAt("1", "var x: a<a<string>>");
+goTo.file("quickInfoExportAssignmentOfGenericInterface_1.ts");
+goTo.marker('1');
+verify.quickInfoIs("var x: a<a<string>>", undefined);

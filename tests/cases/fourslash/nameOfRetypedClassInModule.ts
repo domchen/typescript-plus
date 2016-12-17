@@ -13,10 +13,11 @@
 
 edit.disableFormatting();
 
-verify.quickInfos({
-    check: "constructor Check(val: any): Check",
-    check2: "constructor M.Check2(val: any): Check2"
-});
+goTo.marker('check');
+verify.quickInfoIs('constructor Check(val: any): Check');
+
+goTo.marker('check2');
+verify.quickInfoIs('constructor M.Check2(val: any): Check2');
 
 goTo.marker('A');
 edit.deleteAtCaret('class A {}'.length);

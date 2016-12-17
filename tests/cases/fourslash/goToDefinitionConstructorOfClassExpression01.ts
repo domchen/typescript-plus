@@ -6,4 +6,6 @@
 ////    }
 ////}
 
-verify.goToDefinition("usage", "definition");
+goTo.marker("usage");
+goTo.definition();
+verify.caretAtMarker("definition");

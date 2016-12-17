@@ -14,8 +14,11 @@
 //// p2.then(function (x/*3*/x) {
 //// } );
 
-verify.quickInfos({
-    1: "var p2: IPromise<string>",
-    2: "(parameter) xx: string",
-    3: "(parameter) xx: string"
-});
+goTo.marker("1");
+verify.quickInfoIs('var p2: IPromise<string>');
+
+goTo.marker("2");
+verify.quickInfoIs('(parameter) xx: string');
+
+goTo.marker("3");
+verify.quickInfoIs('(parameter) xx: string');

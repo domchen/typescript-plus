@@ -8,4 +8,5 @@
 ////	}
 ////}
 
-verify.quickInfoAt("", "this: this");
+goTo.marker();
+verify.quickInfoIs('this: this');

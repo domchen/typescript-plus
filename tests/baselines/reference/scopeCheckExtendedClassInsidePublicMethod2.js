@@ -22,7 +22,7 @@ var C = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     D.prototype.c = function () {
         v = 1;

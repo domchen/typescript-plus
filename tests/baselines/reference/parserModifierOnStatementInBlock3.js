@@ -8,7 +8,8 @@ export function foo() {
 //// [parserModifierOnStatementInBlock3.js]
 "use strict";
 function foo() {
-    export function bar() {
+    function bar() {
     }
+    exports.bar = bar;
 }
 exports.foo = foo;

@@ -177,7 +177,7 @@ var C = (function () {
 var C2 = (function (_super) {
     __extends(C2, _super);
     function C2() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return C2;
 }(C));

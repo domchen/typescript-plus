@@ -7,10 +7,10 @@ let [hello, brave, newish, world] = ["Hello", "Brave", "New", "World"];
 >newish : string
 >world : string
 >["Hello", "Brave", "New", "World"] : [string, string, string, string]
->"Hello" : "Hello"
->"Brave" : "Brave"
->"New" : "New"
->"World" : "World"
+>"Hello" : string
+>"Brave" : string
+>"New" : string
+>"World" : string
 
 type RexOrRaptor = "t-rex" | "raptor"
 >RexOrRaptor : RexOrRaptor
@@ -26,12 +26,12 @@ let [im, a, dinosaur]: ["I'm", "a", RexOrRaptor] = ['I\'m', 'a', 't-rex'];
 >'t-rex' : "t-rex"
 
 rawr(dinosaur);
->rawr(dinosaur) : "ROAAAAR!" | "yip yip!"
->rawr : (dino: RexOrRaptor) => "ROAAAAR!" | "yip yip!"
+>rawr(dinosaur) : string
+>rawr : (dino: RexOrRaptor) => string
 >dinosaur : "t-rex"
 
 function rawr(dino: RexOrRaptor) {
->rawr : (dino: RexOrRaptor) => "ROAAAAR!" | "yip yip!"
+>rawr : (dino: RexOrRaptor) => string
 >dino : RexOrRaptor
 >RexOrRaptor : RexOrRaptor
 
@@ -41,7 +41,7 @@ function rawr(dino: RexOrRaptor) {
 >"t-rex" : "t-rex"
 
         return "ROAAAAR!";
->"ROAAAAR!" : "ROAAAAR!"
+>"ROAAAAR!" : string
     }
     if (dino === "raptor") {
 >dino === "raptor" : boolean
@@ -49,11 +49,11 @@ function rawr(dino: RexOrRaptor) {
 >"raptor" : "raptor"
 
         return "yip yip!";
->"yip yip!" : "yip yip!"
+>"yip yip!" : string
     }
 
     throw "Unexpected " + dino;
 >"Unexpected " + dino : string
->"Unexpected " : "Unexpected "
+>"Unexpected " : string
 >dino : never
 }

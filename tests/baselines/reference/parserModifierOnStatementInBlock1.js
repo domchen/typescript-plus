@@ -7,6 +7,6 @@ export function foo() {
 //// [parserModifierOnStatementInBlock1.js]
 "use strict";
 function foo() {
-    export var x = this;
+    exports.x = this;
 }
 exports.foo = foo;

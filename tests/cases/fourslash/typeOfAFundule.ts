@@ -7,4 +7,5 @@
 ////}
 ////var /**/r13 = foo13();
 
-verify.quickInfoAt("", "var r13: typeof m1");
+goTo.marker();
+verify.quickInfoIs('var r13: typeof m1');

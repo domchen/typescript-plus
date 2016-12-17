@@ -151,6 +151,7 @@ var E2;
     E2[E2["A"] = 0] = "A";
 })(E2 || (E2 = {}));
 function f() { }
+var f;
 (function (f) {
     f.bar = 1;
 })(f || (f = {}));
@@ -159,6 +160,7 @@ var c = (function () {
     }
     return c;
 }());
+var c;
 (function (c) {
     c.bar = 1;
 })(c || (c = {}));

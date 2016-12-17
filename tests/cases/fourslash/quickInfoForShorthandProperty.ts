@@ -6,12 +6,16 @@
 //// var id2 = 10000;
 //// var /*obj2*/obj2 = {/*name2*/name2, /*id2*/id2};
 
-verify.quickInfos({
-    obj1: "var obj1: {\n    name1: any;\n    id1: any;\n}",
-    name1: "(property) name1: any",
-    id1: "(property) id1: any",
+goTo.marker("obj1");
+verify.quickInfoIs("var obj1: {\n    name1: any;\n    id1: any;\n}");
+goTo.marker("name1");
+verify.quickInfoIs("(property) name1: any");
+goTo.marker("id1");
+verify.quickInfoIs("(property) id1: any");
 
-    obj2: "var obj2: {\n    name2: string;\n    id2: number;\n}",
-    name2: "(property) name2: string",
-    id2: "(property) id2: number"
-});
+goTo.marker("obj2");
+verify.quickInfoIs("var obj2: {\n    name2: string;\n    id2: number;\n}");
+goTo.marker("name2");
+verify.quickInfoIs("(property) name2: string");
+goTo.marker("id2");
+verify.quickInfoIs("(property) id2: number");

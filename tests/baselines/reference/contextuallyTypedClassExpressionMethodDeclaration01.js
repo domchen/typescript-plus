@@ -61,32 +61,28 @@ function getFoo1() {
     }());
 }
 function getFoo2() {
-    return _a = (function () {
-            function class_2() {
-            }
-            return class_2;
-        }()),
-        _a.method1 = function (arg) {
+    return (function () {
+        function class_2() {
+        }
+        class_2.method1 = function (arg) {
             arg.numProp = 10;
-        },
-        _a.method2 = function (arg) {
+        };
+        class_2.method2 = function (arg) {
             arg.strProp = "hello";
-        },
-        _a;
-    var _a;
+        };
+        return class_2;
+    }());
 }
 function getFoo3() {
-    return _a = (function () {
-            function class_3() {
-            }
-            return class_3;
-        }()),
-        _a.method1 = function (arg) {
+    return (function () {
+        function class_3() {
+        }
+        class_3.method1 = function (arg) {
             arg.numProp = 10;
-        },
-        _a.method2 = function (arg) {
+        };
+        class_3.method2 = function (arg) {
             arg.strProp = "hello";
-        },
-        _a;
-    var _a;
+        };
+        return class_3;
+    }());
 }

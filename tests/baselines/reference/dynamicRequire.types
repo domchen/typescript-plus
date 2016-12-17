@@ -9,6 +9,6 @@ function foo(name) {
 >require("t/" + name) : any
 >require : any
 >"t/" + name : string
->"t/" : "t/"
+>"t/" : string
 >name : any
 }

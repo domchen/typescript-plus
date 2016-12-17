@@ -4,4 +4,5 @@
 ////    f/*1*/oo
 ////}
 
-verify.goToDefinition("1", []);
+goTo.marker("1");
+verify.not.definitionLocationExists();

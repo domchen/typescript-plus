@@ -21,6 +21,7 @@ class foo3 { } // Should error
 
 //// [funClodule.js]
 function foo3() { }
+var foo3;
 (function (foo3) {
     function x() { }
     foo3.x = x;

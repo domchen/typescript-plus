@@ -1,4 +1,3 @@
-// @allowUnreachableCode: true
 // @noImplicitAny: true
 
 let x: (a: string) => string;

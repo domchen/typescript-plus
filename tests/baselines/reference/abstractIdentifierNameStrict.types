@@ -1,15 +1,15 @@
 === tests/cases/compiler/abstractIdentifierNameStrict.ts ===
 var abstract = true;
 >abstract : boolean
->true : true
+>true : boolean
 
 function foo() {
 >foo : () => void
 
     "use strict";
->"use strict" : "use strict"
+>"use strict" : string
 
     var abstract = true;
 >abstract : boolean
->true : true
+>true : boolean
 }

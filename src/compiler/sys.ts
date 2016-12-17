@@ -32,10 +32,6 @@ namespace ts {
         getMemoryUsage?(): number;
         exit(exitCode?: number): void;
         realpath?(path: string): string;
-        /*@internal*/ getEnvironmentVariable(name: string): string;
-        /*@internal*/ tryEnableSourceMapsForHost?(): void;
-        setTimeout?(callback: (...args: any[]) => void, ms: number, ...args: any[]): any;
-        clearTimeout?(timeoutId: any): void;
     }
 
     export interface FileWatcher {
@@ -48,9 +44,13 @@ namespace ts {
     }
 
     declare var require: any;
+    declare var module: any;
     declare var process: any;
     declare var global: any;
     declare var __filename: string;
+    declare var Buffer: {
+        new (str: string, encoding?: string): any;
+    };
 
     declare class Enumerator {
         public atEnd(): boolean;
@@ -78,10 +78,9 @@ namespace ts {
         watchFile?(path: string, callback: FileWatcherCallback): FileWatcher;
         watchDirectory?(path: string, callback: DirectoryWatcherCallback, recursive?: boolean): FileWatcher;
         realpath(path: string): string;
-        getEnvironmentVariable?(name: string): string;
     };
 
-    export let sys: System = (function() {
+    export var sys: System = (function() {
 
         function getWScriptSystem(): System {
 
@@ -213,9 +212,6 @@ namespace ts {
                     return shell.CurrentDirectory;
                 },
                 getDirectories,
-                getEnvironmentVariable(name: string) {
-                    return new ActiveXObject("WScript.Shell").ExpandEnvironmentStrings(`%${name}%`);
-                },
                 readDirectory,
                 exit(exitCode?: number): void {
                     try {
@@ -271,7 +267,7 @@ namespace ts {
                 }
 
                 function addFileWatcherCallback(filePath: string, callback: FileWatcherCallback): void {
-                    multiMapAdd(fileWatcherCallbacks, filePath, callback);
+                    (fileWatcherCallbacks[filePath] || (fileWatcherCallbacks[filePath] = [])).push(callback);
                 }
 
                 function addFile(fileName: string, callback: FileWatcherCallback): WatchedFile {
@@ -287,7 +283,16 @@ namespace ts {
                 }
 
                 function removeFileWatcherCallback(filePath: string, callback: FileWatcherCallback) {
-                    multiMapRemove(fileWatcherCallbacks, filePath, callback);
+                    const callbacks = fileWatcherCallbacks[filePath];
+                    if (callbacks) {
+                        const newCallbacks = copyListRemovingItem(callback, callbacks);
+                        if (newCallbacks.length === 0) {
+                            delete fileWatcherCallbacks[filePath];
+                        }
+                        else {
+                            fileWatcherCallbacks[filePath] = newCallbacks;
+                        }
+                    }
                 }
 
                 function fileEventHandler(eventName: string, relativeFileName: string, baseDirPath: string) {
@@ -309,20 +314,11 @@ namespace ts {
                 return parseInt(process.version.charAt(1)) >= 4;
             }
 
-            function isFileSystemCaseSensitive(): boolean {
-                // win32\win64 are case insensitive platforms
-                if (platform === "win32" || platform === "win64") {
-                    return false;
-                }
-                // convert current file name to upper case / lower case and check if file exists
-                // (guards against cases when name is already all uppercase or lowercase)
-                return !fileExists(__filename.toUpperCase()) || !fileExists(__filename.toLowerCase());
-            }
-
             const platform: string = _os.platform();
-            const useCaseSensitiveFileNames = isFileSystemCaseSensitive();
+            // win32\win64 are case insensitive platforms, MacOS (darwin) by default is also case insensitive
+            const useCaseSensitiveFileNames = platform !== "win32" && platform !== "win64" && platform !== "darwin";
 
-            function readFile(fileName: string, _encoding?: string): string {
+            function readFile(fileName: string, encoding?: string): string {
                 if (!fileExists(fileName)) {
                     return undefined;
                 }
@@ -436,7 +432,7 @@ namespace ts {
             }
 
             function getDirectories(path: string): string[] {
-                return filter<string>(_fs.readdirSync(path), dir => fileSystemEntryExists(combinePaths(path, dir), FileSystemEntryKind.Directory));
+                return filter<string>(_fs.readdirSync(path), p => fileSystemEntryExists(combinePaths(path, p), FileSystemEntryKind.Directory));
             }
 
             const nodeSystem: System = {
@@ -474,10 +470,6 @@ namespace ts {
                     // Node 4.0 `fs.watch` function supports the "recursive" option on both OSX and Windows
                     // (ref: https://github.com/nodejs/node/pull/2649 and https://github.com/Microsoft/TypeScript/issues/4643)
                     let options: any;
-                    if (!directoryExists(directoryName)) {
-                        return;
-                    }
-
                     if (isNode4OrLater() && (process.platform === "win32" || process.platform === "darwin")) {
                         options = { persistent: true, recursive: !!recursive };
                     }
@@ -516,9 +508,6 @@ namespace ts {
                     return process.cwd();
                 },
                 getDirectories,
-                getEnvironmentVariable(name: string) {
-                    return process.env[name] || "";
-                },
                 readDirectory,
                 getModifiedTime(path) {
                     try {
@@ -554,17 +543,7 @@ namespace ts {
                 },
                 realpath(path: string): string {
                     return _fs.realpathSync(path);
-                },
-                tryEnableSourceMapsForHost() {
-                    try {
-                        require("source-map-support").install();
-                    }
-                    catch (e) {
-                        // Could not enable source maps.
-                    }
-                },
-                setTimeout,
-                clearTimeout
+                }
             };
             return nodeSystem;
         }
@@ -576,7 +555,7 @@ namespace ts {
                 args: ChakraHost.args,
                 useCaseSensitiveFileNames: !!ChakraHost.useCaseSensitiveFileNames,
                 write: ChakraHost.echo,
-                readFile(path: string, _encoding?: string) {
+                readFile(path: string, encoding?: string) {
                     // encoding is automatically handled by the implementation in ChakraHost
                     return ChakraHost.readFile(path);
                 },
@@ -595,9 +574,8 @@ namespace ts {
                 getExecutingFilePath: () => ChakraHost.executingFile,
                 getCurrentDirectory: () => ChakraHost.currentDirectory,
                 getDirectories: ChakraHost.getDirectories,
-                getEnvironmentVariable: ChakraHost.getEnvironmentVariable || (() => ""),
                 readDirectory: (path: string, extensions?: string[], excludes?: string[], includes?: string[]) => {
-                    const pattern = getFileMatcherPatterns(path, excludes, includes, !!ChakraHost.useCaseSensitiveFileNames, ChakraHost.currentDirectory);
+                    const pattern = getFileMatcherPatterns(path, extensions, excludes, includes, !!ChakraHost.useCaseSensitiveFileNames, ChakraHost.currentDirectory);
                     return ChakraHost.readDirectory(path, extensions, pattern.basePaths, pattern.excludePattern, pattern.includeFilePattern, pattern.includeDirectoryPattern);
                 },
                 exit: ChakraHost.quit,
@@ -641,10 +619,4 @@ namespace ts {
         }
         return sys;
     })();
-
-    if (sys && sys.getEnvironmentVariable) {
-        Debug.currentAssertionLevel = /^development$/i.test(sys.getEnvironmentVariable("NODE_ENV"))
-            ? AssertionLevel.Normal
-            : AssertionLevel.None;
-    }
 }

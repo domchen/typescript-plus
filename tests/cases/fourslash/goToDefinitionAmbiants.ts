@@ -14,4 +14,16 @@
 ////ambientClass./*staticMethodReference*/method();
 ////ambientClassVariable./*instanceMethodReference*/method();
 
-verify.goToDefinitionForMarkers("ambientVariable", "ambientFunction", "constructor", "staticMethod", "instanceMethod");
+var markerList = [
+    "ambientVariable",
+    "ambientFunction",
+    "constructor",
+    "staticMethod",
+    "instanceMethod",
+];
+
+markerList.forEach((marker) => {
+    goTo.marker(marker + 'Reference');
+    goTo.definition();
+    verify.caretAtMarker(marker + 'Definition');
+});

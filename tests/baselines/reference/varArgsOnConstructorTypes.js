@@ -41,10 +41,9 @@ define(["require", "exports"], function (require, exports) {
     var B = (function (_super) {
         __extends(B, _super);
         function B(element, url) {
-            var _this = _super.call(this, element) || this;
-            _this.p1 = element;
-            _this.p2 = url;
-            return _this;
+            _super.call(this, element);
+            this.p1 = element;
+            this.p2 = url;
         }
         return B;
     }(A));

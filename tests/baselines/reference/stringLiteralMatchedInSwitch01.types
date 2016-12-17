@@ -31,7 +31,7 @@ switch (foo) {
 >foo as S[] : S[]
 >foo : S[]
 >S : S
->0 : 0
+>0 : number
 
         break;
 }

@@ -1,5 +1,3 @@
-// @allowUnreachableCode: true
-
 declare function map<T, U>(array: T, func: (x: T) => U): U;
 declare function identity<V>(y: V): V;
 var s: string;

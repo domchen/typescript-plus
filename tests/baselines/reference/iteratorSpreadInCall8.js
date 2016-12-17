@@ -34,7 +34,8 @@ class StringIterator {
 //// [iteratorSpreadInCall8.js]
 new Foo(...new SymbolIterator, ...new StringIterator);
 class Foo {
-    constructor(...s) { }
+    constructor(...s) {
+    }
 }
 class SymbolIterator {
     next() {

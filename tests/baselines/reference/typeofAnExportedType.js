@@ -80,6 +80,7 @@ exports.Z = M;
 var E = exports.E;
 function foo() { }
 exports.foo = foo;
+var foo;
 (function (foo) {
     foo.y = 1;
     var C = (function () {

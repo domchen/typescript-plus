@@ -1,6 +1,6 @@
 === tests/cases/compiler/doWhileLoop.ts ===
 do { } while (false);
->false : false
+>false : boolean
 
 var n;
 >n : any

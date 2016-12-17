@@ -31,17 +31,6 @@ namespace ts.JsTyping {
 
     const EmptySafeList: Map<string> = createMap<string>();
 
-    /* @internal */
-    export const nodeCoreModuleList: ReadonlyArray<string> = [
-        "buffer", "querystring", "events", "http", "cluster",
-        "zlib", "os", "https", "punycode", "repl", "readline",
-        "vm", "child_process", "url", "dns", "net",
-        "dgram", "fs", "path", "string_decoder", "tls",
-        "crypto", "stream", "util", "assert", "tty", "domain",
-        "constants", "process", "v8", "timers", "console"];
-
-    const nodeCoreModules = arrayToMap(<string[]>nodeCoreModuleList, x => x);
-
     /**
      * @param host is the object providing I/O related operations.
      * @param fileNames are the file names that belong to the same project
@@ -58,7 +47,7 @@ namespace ts.JsTyping {
         safeListPath: Path,
         packageNameToTypingLocation: Map<string>,
         typingOptions: TypingOptions,
-        unresolvedImports: ReadonlyArray<string>):
+        compilerOptions: CompilerOptions):
         { cachedTypingPaths: string[], newTypingNames: string[], filesToWatch: string[] } {
 
         // A typing name to typing file path mapping
@@ -104,15 +93,6 @@ namespace ts.JsTyping {
         }
         getTypingNamesFromSourceFileNames(fileNames);
 
-        // add typings for unresolved imports
-        if (unresolvedImports) {
-            for (const moduleId of unresolvedImports) {
-                const typingName = moduleId in nodeCoreModules ? "node" : moduleId;
-                if (!(typingName in inferredTypings)) {
-                    inferredTypings[typingName] = undefined;
-                }
-            }
-        }
         // Add the cached typing locations for inferred typings that are already installed
         for (const name in packageNameToTypingLocation) {
             if (name in inferredTypings && !inferredTypings[name]) {
@@ -156,12 +136,10 @@ namespace ts.JsTyping {
          * Get the typing info from common package manager json files like package.json or bower.json
          */
         function getTypingNamesFromJson(jsonPath: string, filesToWatch: string[]) {
-            if (host.fileExists(jsonPath)) {
-                filesToWatch.push(jsonPath);
-            }
             const result = readConfigFile(jsonPath, (path: string) => host.readFile(path));
             if (result.config) {
                 const jsonConfig: PackageJson = result.config;
+                filesToWatch.push(jsonPath);
                 if (jsonConfig.dependencies) {
                     mergeTypings(getOwnKeys(jsonConfig.dependencies));
                 }

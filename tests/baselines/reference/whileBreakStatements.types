@@ -1,7 +1,7 @@
 === tests/cases/conformance/statements/breakStatements/whileBreakStatements.ts ===
 
 while(true) {
->true : true
+>true : boolean
 
     break;
 } 
@@ -10,7 +10,7 @@ ONE:
 >ONE : any
 
 while (true) {
->true : true
+>true : boolean
 
     break ONE;
 >ONE : any
@@ -23,7 +23,7 @@ THREE:
 >THREE : any
 
 while (true) {
->true : true
+>true : boolean
 
     break THREE;
 >THREE : any
@@ -33,13 +33,13 @@ FOUR:
 >FOUR : any
 
 while (true) {
->true : true
+>true : boolean
 
     FIVE:
 >FIVE : any
 
     while (true) {
->true : true
+>true : boolean
 
         break FOUR;
 >FOUR : any
@@ -47,13 +47,13 @@ while (true) {
 }
 
 while (true) {
->true : true
+>true : boolean
 
     SIX:
 >SIX : any
 
     while (true)
->true : true
+>true : boolean
 
         break SIX;
 >SIX : any
@@ -63,13 +63,13 @@ SEVEN:
 >SEVEN : any
 
 while (true)
->true : true
+>true : boolean
 
     while (true)
->true : true
+>true : boolean
 
         while (true)
->true : true
+>true : boolean
 
             break SEVEN;
 >SEVEN : any
@@ -78,7 +78,7 @@ EIGHT:
 >EIGHT : any
 
 while (true) {
->true : true
+>true : boolean
 
     var fn = function () { }
 >fn : () => void

@@ -7,4 +7,6 @@
 // @Filename: a.ts
 //// /*2*/export class Foo {}
 
-verify.goToDefinition("1", "2");
+goTo.marker('1');
+goTo.definition();
+verify.caretAtMarker('2');

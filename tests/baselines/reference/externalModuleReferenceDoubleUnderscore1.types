@@ -14,31 +14,31 @@ declare module '__timezonecomplete/basics' {
 >TimeUnit : TimeUnit
 
         Second = 0,
->Second : TimeUnit.Second
->0 : 0
+>Second : TimeUnit
+>0 : number
 
         Minute = 1,
->Minute : TimeUnit.Minute
->1 : 1
+>Minute : TimeUnit
+>1 : number
 
         Hour = 2,
->Hour : TimeUnit.Hour
->2 : 2
+>Hour : TimeUnit
+>2 : number
 
         Day = 3,
->Day : TimeUnit.Day
->3 : 3
+>Day : TimeUnit
+>3 : number
 
         Week = 4,
->Week : TimeUnit.Week
->4 : 4
+>Week : TimeUnit
+>4 : number
 
         Month = 5,
->Month : TimeUnit.Month
->5 : 5
+>Month : TimeUnit
+>5 : number
 
         Year = 6,
->Year : TimeUnit.Year
->6 : 6
+>Year : TimeUnit
+>6 : number
     }
 }

@@ -10,4 +10,8 @@
 ////}
 ////export default Class;
 
-verify.goToDefinition("classAliasDefinition", "classDefinition");
+goTo.file("b.ts");
+
+goTo.marker('classAliasDefinition');
+goTo.definition();
+verify.caretAtMarker('classDefinition');

@@ -20,9 +20,11 @@
 ////declare function fn(a: string);
 ////fn(/*12*/"hello");
 
-verify.quickInfoAt("1", "function foo(): void", "This comment should appear for foo");
+goTo.marker('1');
+verify.quickInfoIs("function foo(): void", "This comment should appear for foo");
 
-verify.quickInfoAt("2", "function foo(): void", "This comment should appear for foo");
+goTo.marker('2');
+verify.quickInfoIs("function foo(): void", "This comment should appear for foo");
 
 goTo.marker('3');
 verify.completionListContains('foo', 'function foo(): void', 'This comment should appear for foo');
@@ -30,15 +32,18 @@ verify.completionListContains('foo', 'function foo(): void', 'This comment shoul
 goTo.marker('4');
 verify.currentSignatureHelpDocCommentIs("This comment should appear for foo");
 
-verify.quickInfoAt("5", "function fooWithParameters(a: string, b: number): void", "This is comment for function signature");
+goTo.marker('5');
+verify.quickInfoIs("function fooWithParameters(a: string, b: number): void", "This is comment for function signature");
 
-verify.quickInfoAt("6", "(local var) d: string");
+goTo.marker('6');
+verify.quickInfoIs('(local var) d: string', '');
 
 goTo.marker('7');
 verify.completionListContains('a', '(parameter) a: string', 'this is comment about a');
 verify.completionListContains('b', '(parameter) b: number', 'this is comment for b');
 
-verify.quickInfoAt("8", "function fooWithParameters(a: string, b: number): void", "This is comment for function signature");
+goTo.marker('8');
+verify.quickInfoIs("function fooWithParameters(a: string, b: number): void", "This is comment for function signature");
 
 goTo.marker('9');
 verify.completionListContains('fooWithParameters', 'function fooWithParameters(a: string, b: number): void', 'This is comment for function signature');

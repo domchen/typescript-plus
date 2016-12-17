@@ -27,7 +27,6 @@ namespace ts {
         reScanSlashToken(): SyntaxKind;
         reScanTemplateToken(): SyntaxKind;
         scanJsxIdentifier(): SyntaxKind;
-        scanJsxAttributeValue(): SyntaxKind;
         reScanJsxToken(): SyntaxKind;
         scanJsxToken(): SyntaxKind;
         scanJSDocToken(): SyntaxKind;
@@ -440,7 +439,9 @@ namespace ts {
 
       /* @internal */
       export function skipTrivia(text: string, pos: number, stopAfterLineBreak?: boolean, stopAtComments = false): number {
-          if (positionIsSynthesized(pos)) {
+          // Using ! with a greater than test is a fast way of testing the following conditions:
+          //  pos === undefined || pos === null || isNaN(pos) || pos < 0;
+          if (!(pos >= 0)) {
               return pos;
           }
 
@@ -589,34 +590,20 @@ namespace ts {
     }
 
     /**
-     * Invokes a callback for each comment range following the provided position.
-     *
-     * Single-line comment ranges include the leading double-slash characters but not the ending
-     * line break. Multi-line comment ranges include the leading slash-asterisk and trailing
-     * asterisk-slash characters.
-     *
-     * @param reduce If true, accumulates the result of calling the callback in a fashion similar
-     *      to reduceLeft. If false, iteration stops when the callback returns a truthy value.
-     * @param text The source text to scan.
-     * @param pos The position at which to start scanning.
-     * @param trailing If false, whitespace is skipped until the first line break and comments
-     *      between that location and the next token are returned. If true, comments occurring
-     *      between the given position and the next line break are returned.
-     * @param cb The callback to execute as each comment range is encountered.
-     * @param state A state value to pass to each iteration of the callback.
-     * @param initial An initial value to pass when accumulating results (when "reduce" is true).
-     * @returns If "reduce" is true, the accumulated value. If "reduce" is false, the first truthy
-     *      return value of the callback.
+     * Extract comments from text prefixing the token closest following `pos`.
+     * The return value is an array containing a TextRange for each comment.
+     * Single-line comment ranges include the beginning '//' characters but not the ending line break.
+     * Multi - line comment ranges include the beginning '/* and ending '<asterisk>/' characters.
+     * The return value is undefined if no comments were found.
+     * @param trailing
+     * If false, whitespace is skipped until the first line break and comments between that location
+     * and the next token are returned.
+     * If true, comments occurring between the given position and the next line break are returned.
      */
-    function iterateCommentRanges<T, U>(reduce: boolean, text: string, pos: number, trailing: boolean, cb: (pos: number, end: number, kind: SyntaxKind, hasTrailingNewLine: boolean, state: T, memo: U) => U, state: T, initial?: U): U {
-        let pendingPos: number;
-        let pendingEnd: number;
-        let pendingKind: SyntaxKind;
-        let pendingHasTrailingNewLine: boolean;
-        let hasPendingCommentRange = false;
+    function getCommentRanges(text: string, pos: number, trailing: boolean): CommentRange[] {
+        let result: CommentRange[];
         let collecting = trailing || pos === 0;
-        let accumulator = initial;
-        scan: while (pos >= 0 && pos < text.length) {
+        while (pos < text.length) {
             const ch = text.charCodeAt(pos);
             switch (ch) {
                 case CharacterCodes.carriageReturn:
@@ -626,14 +613,12 @@ namespace ts {
                 case CharacterCodes.lineFeed:
                     pos++;
                     if (trailing) {
-                        break scan;
+                        return result;
                     }
-
                     collecting = true;
-                    if (hasPendingCommentRange) {
-                        pendingHasTrailingNewLine = true;
+                    if (result && result.length) {
+                        lastOrUndefined(result).hasTrailingNewLine = true;
                     }
-
                     continue;
                 case CharacterCodes.tab:
                 case CharacterCodes.verticalTab:
@@ -666,78 +651,38 @@ namespace ts {
                                 pos++;
                             }
                         }
-
                         if (collecting) {
-                            if (hasPendingCommentRange) {
-                                accumulator = cb(pendingPos, pendingEnd, pendingKind, pendingHasTrailingNewLine, state, accumulator);
-                                if (!reduce && accumulator) {
-                                    // If we are not reducing and we have a truthy result, return it.
-                                    return accumulator;
-                                }
-
-                                hasPendingCommentRange = false;
+                            if (!result) {
+                                result = [];
                             }
 
-                            pendingPos = startPos;
-                            pendingEnd = pos;
-                            pendingKind = kind;
-                            pendingHasTrailingNewLine = hasTrailingNewLine;
-                            hasPendingCommentRange = true;
+                            result.push({ pos: startPos, end: pos, hasTrailingNewLine, kind });
                         }
-
                         continue;
                     }
-                    break scan;
+                    break;
                 default:
                     if (ch > CharacterCodes.maxAsciiCharacter && (isWhiteSpace(ch))) {
-                        if (hasPendingCommentRange && isLineBreak(ch)) {
-                            pendingHasTrailingNewLine = true;
+                        if (result && result.length && isLineBreak(ch)) {
+                            lastOrUndefined(result).hasTrailingNewLine = true;
                         }
                         pos++;
                         continue;
                     }
-                    break scan;
+                    break;
             }
+            return result;
         }
 
-        if (hasPendingCommentRange) {
-            accumulator = cb(pendingPos, pendingEnd, pendingKind, pendingHasTrailingNewLine, state, accumulator);
-        }
-
-        return accumulator;
-    }
-
-    export function forEachLeadingCommentRange<T, U>(text: string, pos: number, cb: (pos: number, end: number, kind: SyntaxKind, hasTrailingNewLine: boolean, state: T) => U, state?: T) {
-        return iterateCommentRanges(/*reduce*/ false, text, pos, /*trailing*/ false, cb, state);
-    }
-
-    export function forEachTrailingCommentRange<T, U>(text: string, pos: number, cb: (pos: number, end: number, kind: SyntaxKind, hasTrailingNewLine: boolean, state: T) => U, state?: T) {
-        return iterateCommentRanges(/*reduce*/ false, text, pos, /*trailing*/ true, cb, state);
-    }
-
-    export function reduceEachLeadingCommentRange<T, U>(text: string, pos: number, cb: (pos: number, end: number, kind: SyntaxKind, hasTrailingNewLine: boolean, state: T, memo: U) => U, state: T, initial: U) {
-        return iterateCommentRanges(/*reduce*/ true, text, pos, /*trailing*/ false, cb, state, initial);
-    }
-
-    export function reduceEachTrailingCommentRange<T, U>(text: string, pos: number, cb: (pos: number, end: number, kind: SyntaxKind, hasTrailingNewLine: boolean, state: T, memo: U) => U, state: T, initial: U) {
-        return iterateCommentRanges(/*reduce*/ true, text, pos, /*trailing*/ true, cb, state, initial);
-    }
-
-    function appendCommentRange(pos: number, end: number, kind: SyntaxKind, hasTrailingNewLine: boolean, _state: any, comments: CommentRange[]) {
-        if (!comments) {
-            comments = [];
-        }
-
-        comments.push({ pos, end, hasTrailingNewLine, kind });
-        return comments;
+        return result;
     }
 
     export function getLeadingCommentRanges(text: string, pos: number): CommentRange[] {
-        return reduceEachLeadingCommentRange(text, pos, appendCommentRange, undefined, undefined);
+        return getCommentRanges(text, pos, /*trailing*/ false);
     }
 
     export function getTrailingCommentRanges(text: string, pos: number): CommentRange[] {
-        return reduceEachTrailingCommentRange(text, pos, appendCommentRange, undefined, undefined);
+        return getCommentRanges(text, pos, /*trailing*/ true);
     }
 
     /** Optionally, get the shebang */
@@ -760,7 +705,7 @@ namespace ts {
     }
 
     /* @internal */
-    export function isIdentifierText(name: string, languageVersion: ScriptTarget): boolean {
+    export function isIdentifier(name: string, languageVersion: ScriptTarget): boolean {
         if (!isIdentifierStart(name.charCodeAt(0), languageVersion)) {
             return false;
         }
@@ -818,7 +763,6 @@ namespace ts {
             reScanSlashToken,
             reScanTemplateToken,
             scanJsxIdentifier,
-            scanJsxAttributeValue,
             reScanJsxToken,
             scanJsxToken,
             scanJSDocToken,
@@ -913,7 +857,7 @@ namespace ts {
             return value;
         }
 
-        function scanString(allowEscapes = true): string {
+        function scanString(): string {
             const quote = text.charCodeAt(pos);
             pos++;
             let result = "";
@@ -931,7 +875,7 @@ namespace ts {
                     pos++;
                     break;
                 }
-                if (ch === CharacterCodes.backslash && allowEscapes) {
+                if (ch === CharacterCodes.backslash) {
                     result += text.substring(start, pos);
                     result += scanEscapeSequence();
                     start = pos;
@@ -1190,7 +1134,7 @@ namespace ts {
         }
 
         function scanBinaryOrOctalDigits(base: number): number {
-            Debug.assert(base === 2 || base === 8, "Expected either base 2 or base 8");
+            Debug.assert(base !== 2 || base !== 8, "Expected either base 2 or base 8");
 
             let value = 0;
             // For counting number of digits; Valid binaryIntegerLiteral must have at least one binary digit following B or b.
@@ -1739,69 +1683,46 @@ namespace ts {
             return token;
         }
 
-        function scanJsxAttributeValue(): SyntaxKind {
-            startPos = pos;
-
-            switch (text.charCodeAt(pos)) {
-                case CharacterCodes.doubleQuote:
-                case CharacterCodes.singleQuote:
-                    tokenValue = scanString(/*allowEscapes*/ false);
-                    return token = SyntaxKind.StringLiteral;
-                default:
-                    // If this scans anything other than `{`, it's a parse error.
-                    return scan();
-            }
-        }
-
         function scanJSDocToken(): SyntaxKind {
             if (pos >= end) {
                 return token = SyntaxKind.EndOfFileToken;
             }
 
             startPos = pos;
+
+            // Eat leading whitespace
+            let ch = text.charCodeAt(pos);
+            while (pos < end) {
+                ch = text.charCodeAt(pos);
+                if (isWhiteSpaceSingleLine(ch)) {
+                    pos++;
+                }
+                else {
+                    break;
+                }
+            }
             tokenPos = pos;
 
-            const ch = text.charCodeAt(pos);
             switch (ch) {
-                case CharacterCodes.tab:
-                case CharacterCodes.verticalTab:
-                case CharacterCodes.formFeed:
-                case CharacterCodes.space:
-                    while (pos < end && isWhiteSpaceSingleLine(text.charCodeAt(pos))) {
-                        pos++;
-                    }
-                    return token = SyntaxKind.WhitespaceTrivia;
                 case CharacterCodes.at:
-                    pos++;
-                    return token = SyntaxKind.AtToken;
+                    return pos += 1, token = SyntaxKind.AtToken;
                 case CharacterCodes.lineFeed:
                 case CharacterCodes.carriageReturn:
-                    pos++;
-                    return token = SyntaxKind.NewLineTrivia;
+                    return pos += 1, token = SyntaxKind.NewLineTrivia;
                 case CharacterCodes.asterisk:
-                    pos++;
-                    return token = SyntaxKind.AsteriskToken;
+                    return pos += 1, token = SyntaxKind.AsteriskToken;
                 case CharacterCodes.openBrace:
-                    pos++;
-                    return token = SyntaxKind.OpenBraceToken;
+                    return pos += 1, token = SyntaxKind.OpenBraceToken;
                 case CharacterCodes.closeBrace:
-                    pos++;
-                    return token = SyntaxKind.CloseBraceToken;
+                    return pos += 1, token = SyntaxKind.CloseBraceToken;
                 case CharacterCodes.openBracket:
-                    pos++;
-                    return token = SyntaxKind.OpenBracketToken;
+                    return pos += 1, token = SyntaxKind.OpenBracketToken;
                 case CharacterCodes.closeBracket:
-                    pos++;
-                    return token = SyntaxKind.CloseBracketToken;
+                    return pos += 1, token = SyntaxKind.CloseBracketToken;
                 case CharacterCodes.equals:
-                    pos++;
-                    return token = SyntaxKind.EqualsToken;
+                    return pos += 1, token = SyntaxKind.EqualsToken;
                 case CharacterCodes.comma:
-                    pos++;
-                    return token = SyntaxKind.CommaToken;
-                case CharacterCodes.dot:
-                    pos++;
-                    return token = SyntaxKind.DotToken;
+                    return pos += 1, token = SyntaxKind.CommaToken;
             }
 
             if (isIdentifierStart(ch, ScriptTarget.Latest)) {

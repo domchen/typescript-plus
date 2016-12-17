@@ -8,17 +8,17 @@ includes = "abcde".includes("cd");
 >includes : boolean
 >"abcde".includes("cd") : boolean
 >"abcde".includes : (searchString: string, position?: number) => boolean
->"abcde" : "abcde"
+>"abcde" : string
 >includes : (searchString: string, position?: number) => boolean
->"cd" : "cd"
+>"cd" : string
 
 includes = "abcde".includes("cd", 2);
 >includes = "abcde".includes("cd", 2) : boolean
 >includes : boolean
 >"abcde".includes("cd", 2) : boolean
 >"abcde".includes : (searchString: string, position?: number) => boolean
->"abcde" : "abcde"
+>"abcde" : string
 >includes : (searchString: string, position?: number) => boolean
->"cd" : "cd"
->2 : 2
+>"cd" : string
+>2 : number
 

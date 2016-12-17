@@ -15,8 +15,13 @@
 ////x./*2*/commonProperty;
 ////x./*3*/commonFunction;
 
-verify.quickInfos({
-    1: "var x: One | Two",
-    2: "(property) commonProperty: string | number",
-    3: "(method) commonFunction(): number"
-});
+
+goTo.marker("1");
+verify.quickInfoIs('var x: One | Two');
+
+
+goTo.marker("2");
+verify.quickInfoIs('(property) commonProperty: string | number');
+
+goTo.marker("3");
+verify.quickInfoIs('(method) commonFunction(): number');

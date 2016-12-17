@@ -5,7 +5,7 @@ class C {
 
 //// [restParamModifier.js]
 var C = (function () {
-    function C(string) {
+    function C(public, string) {
         if (string === void 0) { string = []; }
     }
     return C;

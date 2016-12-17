@@ -2,4 +2,5 @@
 
 ////<(aa: number) =>void >(function myFn(b/**/b) { });
 
-verify.quickInfoAt("", "(parameter) bb: number");
+goTo.marker();
+verify.quickInfoIs('(parameter) bb: number');

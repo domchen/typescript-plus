@@ -109,9 +109,8 @@ var Base = (function () {
 var Derived = (function (_super) {
     __extends(Derived, _super);
     function Derived() {
-        var _this = _super.apply(this, arguments) || this;
-        _this.a = 1;
-        return _this;
+        _super.apply(this, arguments);
+        this.a = 1;
     }
     Derived.prototype.f = function () { return 1; };
     return Derived;

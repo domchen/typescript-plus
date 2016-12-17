@@ -58,10 +58,9 @@ var M;
             return Bar;
         }());
         S.Bar = Bar;
-        // Emit Foo
-        // Foo, <Foo />;
     })(S = M.S || (M.S = {}));
 })(M || (M = {}));
+var M;
 (function (M) {
     // Emit M.Foo
     M.Foo, <M.Foo />;
@@ -73,10 +72,12 @@ var M;
         S.Bar, <S.Bar />;
     })(S = M.S || (M.S = {}));
 })(M || (M = {}));
+var M;
 (function (M) {
     // Emit M.S.Bar
     M.S.Bar, <M.S.Bar />;
 })(M || (M = {}));
+var M;
 (function (M_1) {
     var M = 100;
     // Emit M_1.Foo

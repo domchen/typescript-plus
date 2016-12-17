@@ -8,4 +8,6 @@
 /////*2*/class Foo {}
 ////export var x = 0;
 
-verify.goToDefinition("1", "2");
+goTo.marker('1');
+goTo.definition();
+verify.caretAtMarker('2');

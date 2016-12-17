@@ -15,5 +15,6 @@
 ////    var r = a.fo/*1*/o + a.bar;
 ////}
 
-verify.quickInfoAt("1", "(property) M2.A.foo: string", undefined);
+goTo.marker('1');
+verify.quickInfoIs("(property) M2.A.foo: string", undefined);
 verify.numberOfErrorsInCurrentFile(0);

@@ -52,14 +52,25 @@ var __extends = (this && this.__extends) || function (d, b) {
 var B = (function () {
     function B() {
     }
+    Object.defineProperty(B.prototype, "readonlyProp", {
+        get: function () { },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(B.prototype, "mismatch", {
+        get: function () { },
+        set: function (val) { } // error, not same type
+        ,
+        enumerable: true,
+        configurable: true
+    });
     return B;
 }());
 var C = (function (_super) {
     __extends(C, _super);
     function C() {
-        var _this = _super.apply(this, arguments) || this;
-        _this.ro = "readonly please";
-        return _this;
+        _super.apply(this, arguments);
+        this.ro = "readonly please";
     }
     Object.defineProperty(C.prototype, "concreteWithNoBody", {
         get: function () { },
@@ -78,21 +89,25 @@ var WrongTypeProperty = (function () {
 var WrongTypePropertyImpl = (function (_super) {
     __extends(WrongTypePropertyImpl, _super);
     function WrongTypePropertyImpl() {
-        var _this = _super.apply(this, arguments) || this;
-        _this.num = "nope, wrong";
-        return _this;
+        _super.apply(this, arguments);
+        this.num = "nope, wrong";
     }
     return WrongTypePropertyImpl;
 }(WrongTypeProperty));
 var WrongTypeAccessor = (function () {
     function WrongTypeAccessor() {
     }
+    Object.defineProperty(WrongTypeAccessor.prototype, "num", {
+        get: function () { },
+        enumerable: true,
+        configurable: true
+    });
     return WrongTypeAccessor;
 }());
 var WrongTypeAccessorImpl = (function (_super) {
     __extends(WrongTypeAccessorImpl, _super);
     function WrongTypeAccessorImpl() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     Object.defineProperty(WrongTypeAccessorImpl.prototype, "num", {
         get: function () { return "nope, wrong"; },
@@ -104,9 +119,8 @@ var WrongTypeAccessorImpl = (function (_super) {
 var WrongTypeAccessorImpl2 = (function (_super) {
     __extends(WrongTypeAccessorImpl2, _super);
     function WrongTypeAccessorImpl2() {
-        var _this = _super.apply(this, arguments) || this;
-        _this.num = "nope, wrong";
-        return _this;
+        _super.apply(this, arguments);
+        this.num = "nope, wrong";
     }
     return WrongTypeAccessorImpl2;
 }(WrongTypeAccessor));
@@ -114,6 +128,7 @@ var AbstractAccessorMismatch = (function () {
     function AbstractAccessorMismatch() {
     }
     Object.defineProperty(AbstractAccessorMismatch.prototype, "p1", {
+        get: function () { },
         set: function (val) { },
         enumerable: true,
         configurable: true
@@ -121,6 +136,7 @@ var AbstractAccessorMismatch = (function () {
     ;
     Object.defineProperty(AbstractAccessorMismatch.prototype, "p2", {
         get: function () { return "should work"; },
+        set: function (val) { },
         enumerable: true,
         configurable: true
     });

@@ -2,4 +2,6 @@
 
 ////var f3 = <(x: string) => string> function (/**/x) { return x.toLowerCase(); };
 
-verify.quickInfoAt("", "(parameter) x: string");
+goTo.marker();
+verify.quickInfoIs('(parameter) x: string');
+ 

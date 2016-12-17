@@ -6,11 +6,6 @@ namespace ts {
         fileWatcher?: FileWatcher;
     }
 
-    interface Statistic {
-        name: string;
-        value: string;
-    }
-
     const defaultFormatDiagnosticsHost: FormatDiagnosticsHost = {
         getCurrentDirectory: () => sys.getCurrentDirectory(),
         getNewLine: () => sys.newLine,
@@ -29,7 +24,7 @@ namespace ts {
         }
     }
 
-    function reportEmittedFiles(files: string[]): void {
+    function reportEmittedFiles(files: string[], host: CompilerHost): void {
         if (!files || files.length == 0) {
             return;
         }
@@ -111,7 +106,7 @@ namespace ts {
         return count;
     }
 
-    function getDiagnosticText(_message: DiagnosticMessage, ..._args: any[]): string {
+    function getDiagnosticText(message: DiagnosticMessage, ...args: any[]): string {
         const diagnostic = createCompilerDiagnostic.apply(undefined, arguments);
         return <string>diagnostic.messageText;
     }
@@ -235,6 +230,18 @@ namespace ts {
         return s;
     }
 
+    function reportStatisticalValue(name: string, value: string) {
+        sys.write(padRight(name + ":", 12) + padLeft(value.toString(), 10) + sys.newLine);
+    }
+
+    function reportCountStatistic(name: string, count: number) {
+        reportStatisticalValue(name, "" + count);
+    }
+
+    function reportTimeStatistic(name: string, time: number) {
+        reportStatisticalValue(name, (time / 1000).toFixed(2) + "s");
+    }
+
     function isJSONSupported() {
         return typeof JSON === "object" && typeof JSON.parse === "function";
     }
@@ -250,8 +257,8 @@ namespace ts {
         let compilerOptions: CompilerOptions;                       // Compiler options for compilation
         let compilerHost: CompilerHost;                             // Compiler host
         let hostGetSourceFile: typeof compilerHost.getSourceFile;   // getSourceFile method from default host
-        let timerHandleForRecompilation: any;                    // Handle for 0.25s wait timer to trigger recompilation
-        let timerHandleForDirectoryChanges: any;                 // Handle for 0.25s wait timer to trigger directory change handler
+        let timerHandleForRecompilation: number;                    // Handle for 0.25s wait timer to trigger recompilation
+        let timerHandleForDirectoryChanges: number;                 // Handle for 0.25s wait timer to trigger directory change handler
 
         // This map stores and reuses results of fileExists check that happen inside 'createProgram'
         // This allows to save time in module resolution heavy scenarios when existence of the same file might be checked multiple times.
@@ -456,7 +463,7 @@ namespace ts {
             const sourceFile = hostGetSourceFile(fileName, languageVersion, onError);
             if (sourceFile && isWatchSet(compilerOptions) && sys.watchFile) {
                 // Attach a file watcher
-                sourceFile.fileWatcher = sys.watchFile(sourceFile.fileName, (_fileName: string, removed?: boolean) => sourceFileChanged(sourceFile, removed));
+                sourceFile.fileWatcher = sys.watchFile(sourceFile.fileName, (fileName: string, removed?: boolean) => sourceFileChanged(sourceFile, removed));
             }
             return sourceFile;
         }
@@ -482,7 +489,10 @@ namespace ts {
             sourceFile.fileWatcher.close();
             sourceFile.fileWatcher = undefined;
             if (removed) {
-                unorderedRemoveItem(rootFileNames, sourceFile.fileName);
+                const index = rootFileNames.indexOf(sourceFile.fileName);
+                if (index >= 0) {
+                    rootFileNames.splice(index, 1);
+                }
             }
             startTimerForRecompilation();
         }
@@ -503,14 +513,10 @@ namespace ts {
         }
 
         function startTimerForHandlingDirectoryChanges() {
-            if (!sys.setTimeout || !sys.clearTimeout) {
-                return;
-            }
-
             if (timerHandleForDirectoryChanges) {
-                sys.clearTimeout(timerHandleForDirectoryChanges);
+                clearTimeout(timerHandleForDirectoryChanges);
             }
-            timerHandleForDirectoryChanges = sys.setTimeout(directoryChangeHandler, 250);
+            timerHandleForDirectoryChanges = setTimeout(directoryChangeHandler, 250);
         }
 
         function directoryChangeHandler() {
@@ -529,14 +535,10 @@ namespace ts {
         // operations (such as saving all modified files in an editor) a chance to complete before we kick
         // off a new compilation.
         function startTimerForRecompilation() {
-            if (!sys.setTimeout || !sys.clearTimeout) {
-                return;
-            }
-
             if (timerHandleForRecompilation) {
-                sys.clearTimeout(timerHandleForRecompilation);
+                clearTimeout(timerHandleForRecompilation);
             }
-            timerHandleForRecompilation = sys.setTimeout(recompile, 250);
+            timerHandleForRecompilation = setTimeout(recompile, 250);
         }
 
         function recompile() {
@@ -548,14 +550,23 @@ namespace ts {
 
     function compile(fileNames: string[], compilerOptions: CompilerOptions, compilerHost: CompilerHost) {
         const hasDiagnostics = compilerOptions.diagnostics || compilerOptions.extendedDiagnostics;
-        let statistics: Statistic[];
-        if (hasDiagnostics) {
-            performance.enable();
-            statistics = [];
-        }
-
+        if (hasDiagnostics) performance.enable();
+        let exitStatus:number = ExitStatus.Success;
         const program = createProgram(fileNames, compilerOptions, compilerHost);
-        const exitStatus = compileProgram();
+        if(compilerOptions.reorderFiles) {
+            let sortResult = ts.reorderSourceFiles(program);
+            if (sortResult.circularReferences.length > 0) {
+                let errorText:string = "";
+                errorText += "error: Find circular dependencies when reordering file :" + ts.sys.newLine;
+                errorText += "    at " + sortResult.circularReferences.join(ts.sys.newLine + "    at ") + ts.sys.newLine + "    at ...";
+                sys.write(errorText+sys.newLine);
+                exitStatus = ExitStatus.DiagnosticsPresent_OutputsGenerated;
+            }
+        }
+        const exitCode = compileProgram();
+        if(exitCode != ExitStatus.Success){
+            exitStatus = exitCode;
+        }
 
         if (compilerOptions.listFiles) {
             forEach(program.getSourceFiles(), file => {
@@ -596,7 +607,6 @@ namespace ts {
                 reportTimeStatistic("Emit time", emitTime);
             }
             reportTimeStatistic("Total time", programTime + bindTime + checkTime + emitTime);
-            reportStatistics();
 
             performance.disable();
         }
@@ -625,7 +635,7 @@ namespace ts {
 
             reportDiagnostics(sortAndDeduplicateDiagnostics(diagnostics), compilerHost);
 
-            reportEmittedFiles(emitOutput.emittedFiles);
+            reportEmittedFiles(emitOutput.emittedFiles, compilerHost);
 
             if (emitOutput.emitSkipped && diagnostics.length > 0) {
                 // If the emitter didn't emit anything, then pass that value along.
@@ -638,44 +648,15 @@ namespace ts {
             }
             return ExitStatus.Success;
         }
-
-        function reportStatistics() {
-            let nameSize = 0;
-            let valueSize = 0;
-            for (const { name, value } of statistics) {
-                if (name.length > nameSize) {
-                    nameSize = name.length;
-                }
-
-                if (value.length > valueSize) {
-                    valueSize = value.length;
-                }
-            }
-
-            for (const { name, value } of statistics) {
-                sys.write(padRight(name + ":", nameSize + 2) + padLeft(value.toString(), valueSize) + sys.newLine);
-            }
-        }
-
-        function reportStatisticalValue(name: string, value: string) {
-            statistics.push({ name, value });
-        }
-
-        function reportCountStatistic(name: string, count: number) {
-            reportStatisticalValue(name, "" + count);
-        }
-
-        function reportTimeStatistic(name: string, time: number) {
-            reportStatisticalValue(name, (time / 1000).toFixed(2) + "s");
-        }
     }
 
     function printVersion() {
-        sys.write(getDiagnosticText(Diagnostics.Version_0, ts.version) + sys.newLine);
+        sys.write("Version : " + ts.version_plus + sys.newLine);
+        sys.write("typescript-version : " + ts.version + sys.newLine);
     }
 
     function printHelp() {
-        const output: string[] = [];
+        let output = "";
 
         // We want to align our "syntax" and "examples" commands to a certain margin.
         const syntaxLength = getDiagnosticText(Diagnostics.Syntax_Colon_0, "").length;
@@ -686,17 +667,17 @@ namespace ts {
         let syntax = makePadding(marginLength - syntaxLength);
         syntax += "tsc [" + getDiagnosticText(Diagnostics.options) + "] [" + getDiagnosticText(Diagnostics.file) + " ...]";
 
-        output.push(getDiagnosticText(Diagnostics.Syntax_Colon_0, syntax));
-        output.push(sys.newLine + sys.newLine);
+        output += getDiagnosticText(Diagnostics.Syntax_Colon_0, syntax);
+        output += sys.newLine + sys.newLine;
 
         // Build up the list of examples.
         const padding = makePadding(marginLength);
-        output.push(getDiagnosticText(Diagnostics.Examples_Colon_0, makePadding(marginLength - examplesLength) + "tsc hello.ts") + sys.newLine);
-        output.push(padding + "tsc --outFile file.js file.ts" + sys.newLine);
-        output.push(padding + "tsc @args.txt" + sys.newLine);
-        output.push(sys.newLine);
+        output += getDiagnosticText(Diagnostics.Examples_Colon_0, makePadding(marginLength - examplesLength) + "tsc hello.ts") + sys.newLine;
+        output += padding + "tsc --outFile file.js file.ts" + sys.newLine;
+        output += padding + "tsc @args.txt" + sys.newLine;
+        output += sys.newLine;
 
-        output.push(getDiagnosticText(Diagnostics.Options_Colon) + sys.newLine);
+        output += getDiagnosticText(Diagnostics.Options_Colon) + sys.newLine;
 
         // Sort our options by their names, (e.g. "--noImplicitAny" comes before "--watch")
         const optsList = filter(optionDeclarations.slice(), v => !v.experimental);
@@ -763,20 +744,18 @@ namespace ts {
             const usage = usageColumn[i];
             const description = descriptionColumn[i];
             const kindsList = optionsDescriptionMap[description];
-            output.push(usage + makePadding(marginLength - usage.length + 2) + description + sys.newLine);
+            output += usage + makePadding(marginLength - usage.length + 2) + description + sys.newLine;
 
             if (kindsList) {
-                output.push(makePadding(marginLength + 4));
+                output += makePadding(marginLength + 4);
                 for (const kind of kindsList) {
-                    output.push(kind + " ");
+                    output += kind + " ";
                 }
-                output.push(sys.newLine);
+                output += sys.newLine;
             }
         }
 
-        for (const line of output) {
-            sys.write(line);
-        }
+        sys.write(output);
         return;
 
         function getParamType(option: CommandLineOption) {
@@ -804,10 +783,6 @@ namespace ts {
 
         return;
     }
-}
-
-if (ts.sys.tryEnableSourceMapsForHost && /^development$/i.test(ts.sys.getEnvironmentVariable("NODE_ENV"))) {
-    ts.sys.tryEnableSourceMapsForHost();
 }
 
 ts.executeCommandLine(ts.sys.args);

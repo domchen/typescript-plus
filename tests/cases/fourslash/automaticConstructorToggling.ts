@@ -16,27 +16,42 @@ var C = 'C';
 var D = 'D'
 goTo.marker(B);
 edit.insert('constructor(val: T) { }');
-verify.quickInfos({
-    Asig: "constructor A<string>(): A<string>",
-    Bsig: "constructor B<string>(val: string): B<string>",
-    Csig: "constructor C<string>(val: string): C<string>",
-    Dsig: "constructor D<T>(val: T): D<T>" // Cannot resolve signature
-});
+goTo.marker('Asig');
+verify.quickInfoIs("constructor A<string>(): A<string>");
+
+goTo.marker('Bsig');
+verify.quickInfoIs("constructor B<string>(val: string): B<string>");
+
+goTo.marker('Csig'); 
+verify.quickInfoIs("constructor C<string>(val: string): C<string>");
+
+goTo.marker('Dsig');
+verify.quickInfoIs("constructor D<T>(val: T): D<T>"); // Cannot resolve signature
 
 goTo.marker(C);
 edit.deleteAtCaret('constructor(val: T) { }'.length);
-verify.quickInfos({
-    Asig: "constructor A<string>(): A<string>",
-    Bsig: "constructor B<string>(val: string): B<string>",
-    Csig: "constructor C<T>(): C<T>", // Cannot resolve signature
-    Dsig: "constructor D<T>(val: T): D<T>" // Cannot resolve signature
-});
+goTo.marker('Asig');
+verify.quickInfoIs("constructor A<string>(): A<string>");
+
+goTo.marker('Bsig');
+verify.quickInfoIs("constructor B<string>(val: string): B<string>");
+
+goTo.marker('Csig');
+verify.quickInfoIs("constructor C<T>(): C<T>"); // Cannot resolve signature
+
+goTo.marker('Dsig');
+verify.quickInfoIs("constructor D<T>(val: T): D<T>"); // Cannot resolve signature
 
 goTo.marker(D);
 edit.deleteAtCaret("val: T".length);
-verify.quickInfos({
-    Asig: "constructor A<string>(): A<string>",
-    Bsig: "constructor B<string>(val: string): B<string>",
-    Csig: "constructor C<T>(): C<T>", // Cannot resolve signature
-    Dsig: "constructor D<string>(): D<string>"
-});
+goTo.marker('Asig');
+verify.quickInfoIs("constructor A<string>(): A<string>");
+
+goTo.marker('Bsig');
+verify.quickInfoIs("constructor B<string>(val: string): B<string>");
+
+goTo.marker('Csig');
+verify.quickInfoIs("constructor C<T>(): C<T>"); // Cannot resolve signature
+
+goTo.marker('Dsig');
+verify.quickInfoIs("constructor D<string>(): D<string>");

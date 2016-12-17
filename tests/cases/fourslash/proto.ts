@@ -7,14 +7,14 @@
 /////*3*/
 ////var /*4*/fun: (__proto__: any) => boolean;
 
-verify.quickInfos({
-    1: "interface M.__proto__",
-    2: "var __proto__: M.__proto__"
-});
-
+goTo.marker('1');
+verify.quickInfoIs("interface M.__proto__", "");
+goTo.marker('2');
+verify.quickInfoIs("var __proto__: M.__proto__", "");
 goTo.marker('3');
 verify.completionListContains("__proto__", "var __proto__: M.__proto__", "");
 edit.insert("__proto__");
-verify.goToDefinitionIs("2");
-
-verify.quickInfoAt("4", "var fun: (__proto__: any) => boolean");
+goTo.definition();
+verify.caretAtMarker('2');
+goTo.marker('4');
+verify.quickInfoIs("var fun: (__proto__: any) => boolean", "");

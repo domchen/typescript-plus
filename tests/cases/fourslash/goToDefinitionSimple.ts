@@ -7,4 +7,10 @@
 //// var n = new /*1*/c();
 //// var n = new c/*3*/();
 
-verify.goToDefinition(["1", "3"], "2");
+goTo.marker('1');
+goTo.definition();
+verify.caretAtMarker('2');
+
+goTo.marker('3');
+goTo.definition();
+verify.caretAtMarker('2');

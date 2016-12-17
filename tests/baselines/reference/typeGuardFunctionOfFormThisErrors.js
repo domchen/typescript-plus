@@ -79,7 +79,7 @@ var RoyalGuard = (function () {
 var LeadGuard = (function (_super) {
     __extends(LeadGuard, _super);
     function LeadGuard() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     LeadGuard.prototype.lead = function () { };
     ;
@@ -88,7 +88,7 @@ var LeadGuard = (function (_super) {
 var FollowerGuard = (function (_super) {
     __extends(FollowerGuard, _super);
     function FollowerGuard() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     FollowerGuard.prototype.follow = function () { };
     ;

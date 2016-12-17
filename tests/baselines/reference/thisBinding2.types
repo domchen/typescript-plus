@@ -17,7 +17,7 @@ class C {
 
    var x = 1;
 >x : number
->1 : 1
+>1 : number
 
    return this.x;
 >this.x : number
@@ -35,7 +35,7 @@ class C {
 
    var x = 1;
 >x : number
->1 : 1
+>1 : number
 
    return this.x;
 >this.x : any
@@ -57,7 +57,7 @@ var messenger = {
 
     message: "Hello World",
 >message : string
->"Hello World" : "Hello World"
+>"Hello World" : string
 
     start: function () {
 >start : () => number
@@ -71,7 +71,7 @@ var messenger = {
 >this.message : any
 >this : any
 >message : any
->3000 : 3000
+>3000 : number
     }
 };
 

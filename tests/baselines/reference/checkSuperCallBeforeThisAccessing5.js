@@ -25,7 +25,7 @@ var Based = (function () {
 var Derived = (function (_super) {
     __extends(Derived, _super);
     function Derived() {
-        return _super.call(this, this.x) || this;
+        _super.call(this, this.x);
     }
     return Derived;
 }(Based));

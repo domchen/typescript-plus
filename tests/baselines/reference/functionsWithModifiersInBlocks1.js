@@ -7,5 +7,6 @@
 
 //// [functionsWithModifiersInBlocks1.js]
 {
-    export function f() { }
+    function f() { }
+    exports.f = f;
 }

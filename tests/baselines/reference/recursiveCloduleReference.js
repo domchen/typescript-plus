@@ -19,6 +19,7 @@ var M;
         return C;
     }());
     M.C = C;
+    var C;
     (function (C_1) {
         C_1.C = M.C;
     })(C = M.C || (M.C = {}));

@@ -136,7 +136,9 @@ class CompilerBaselineRunner extends RunnerBase {
 
             // check errors
             it("Correct errors for " + fileName, () => {
-                 Harness.Compiler.doErrorBaseline(justName, toBeCompiled.concat(otherFiles), result.errors);
+                if (this.errors) {
+                    Harness.Compiler.doErrorBaseline(justName, toBeCompiled.concat(otherFiles), result.errors);
+                }
             });
 
             it (`Correct module resolution tracing for ${fileName}`, () => {
@@ -152,7 +154,7 @@ class CompilerBaselineRunner extends RunnerBase {
                 if (options.sourceMap || options.inlineSourceMap) {
                     Harness.Baseline.runBaseline(justName.replace(/\.tsx?$/, ".sourcemap.txt"), () => {
                         const record = result.getSourceMapRecord();
-                        if ((options.noEmitOnError && result.errors.length !== 0) || record === undefined) {
+                        if (options.noEmitOnError && result.errors.length !== 0 && record === undefined) {
                             // Because of the noEmitOnError option no files are created. We need to return null because baselining isn't required.
                             /* tslint:disable:no-null-keyword */
                             return null;

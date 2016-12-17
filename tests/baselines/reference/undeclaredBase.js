@@ -14,7 +14,7 @@ var M;
     var C = (function (_super) {
         __extends(C, _super);
         function C() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return C;
     }(M.I));

@@ -175,7 +175,7 @@ namespace ts.formatting {
                 return rangeContainsRange((<InterfaceDeclaration>parent).members, node);
             case SyntaxKind.ModuleDeclaration:
                 const body = (<ModuleDeclaration>parent).body;
-                return body && body.kind === SyntaxKind.ModuleBlock && rangeContainsRange((<ModuleBlock>body).statements, node);
+                return body && body.kind === SyntaxKind.Block && rangeContainsRange((<Block>body).statements, node);
             case SyntaxKind.SourceFile:
             case SyntaxKind.Block:
             case SyntaxKind.ModuleBlock:
@@ -248,7 +248,7 @@ namespace ts.formatting {
             }
         };
 
-        function rangeHasNoErrors(): boolean {
+        function rangeHasNoErrors(r: TextRange): boolean {
             return false;
         }
     }
@@ -624,11 +624,10 @@ namespace ts.formatting {
                     return inheritedIndentation;
                 }
 
-                // JSX text shouldn't affect indenting
-                if (isToken(child) && child.kind !== SyntaxKind.JsxText) {
+                if (isToken(child)) {
                     // if child node is a token, it does not impact indentation, proceed it using parent indentation scope rules
                     const tokenInfo = formattingScanner.readTokenInfo(child);
-                    Debug.assert(tokenInfo.token.end === child.end, "Token end is child end");
+                    Debug.assert(tokenInfo.token.end === child.end);
                     consumeTokenAndAdvanceScanner(tokenInfo, node, parentDynamicIndentation, child);
                     return inheritedIndentation;
                 }

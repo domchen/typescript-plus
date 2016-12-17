@@ -2,14 +2,14 @@
 
 var elemA = 42;
 >elemA : number
->42 : 42
+>42 : number
 
 === tests/cases/compiler/b.jsx ===
 var elemB = <b>{"test"}</b>;
 >elemB : any
 ><b>{"test"}</b> : any
 >b : any
->"test" : "test"
+>"test" : string
 >b : any
 
 === tests/cases/compiler/c.js ===
@@ -17,19 +17,19 @@ var elemC = <c>{42}</c>;
 >elemC : any
 ><c>{42}</c> : any
 >c : any
->42 : 42
+>42 : number
 >c : any
 
 === tests/cases/compiler/d.ts ===
 var elemD = 42;
 >elemD : number
->42 : 42
+>42 : number
 
 === tests/cases/compiler/e.tsx ===
 var elemE = <e>{true}</e>;
 >elemE : any
 ><e>{true}</e> : any
 >e : any
->true : true
+>true : boolean
 >e : any
 

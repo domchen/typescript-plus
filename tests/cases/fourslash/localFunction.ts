@@ -9,9 +9,11 @@
 ////var x = function /*4*/bar4() {
 ////}
 
-verify.quickInfos({
-    1: "function foo(): void",
-    2: "(local function) bar2(): void",
-    3: "(local function) bar3(): void",
-    4: "(local function) bar4(): void"
-});
+goTo.marker("1");
+verify.quickInfoIs('function foo(): void');
+goTo.marker("2");
+verify.quickInfoIs('(local function) bar2(): void');
+goTo.marker("3");
+verify.quickInfoIs('(local function) bar3(): void');
+goTo.marker("4");
+verify.quickInfoIs('(local function) bar4(): void');

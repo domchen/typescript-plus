@@ -2,10 +2,10 @@
 
 declare module "file1" {
     class foo {}
->foo : foo
+>foo : 
 
     namespace foo {
->foo : typeof foo
+>foo : typeof 
 
         class A {}
 >A : A

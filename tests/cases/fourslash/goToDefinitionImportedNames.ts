@@ -14,5 +14,8 @@
 ////    x;
 ////}
 
+goTo.file("b.ts");
 
-verify.goToDefinition("classAliasDefinition", "classDefinition");
+goTo.marker('classAliasDefinition');
+goTo.definition();
+verify.caretAtMarker('classDefinition');

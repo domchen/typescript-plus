@@ -4,7 +4,7 @@ class C {
 
     static staticProp = 10;
 >staticProp : number
->10 : 10
+>10 : number
 
     get [C.staticProp]() {
 >C.staticProp : number
@@ -12,7 +12,7 @@ class C {
 >staticProp : number
 
         return "hello";
->"hello" : "hello"
+>"hello" : string
     }
     set [C.staticProp](x: string) {
 >C.staticProp : number

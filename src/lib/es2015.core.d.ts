@@ -13,15 +13,15 @@ interface Array<T> {
     find(predicate: (value: T, index: number, obj: Array<T>) => boolean, thisArg?: any): T | undefined;
 
     /**
-      * Returns the index of the first element in the array where predicate is true, and -1
+      * Returns the index of the first element in the array where predicate is true, and undefined
       * otherwise.
       * @param predicate find calls predicate once for each element of the array, in ascending
-      * order, until it finds one where predicate returns true. If such an element is found,
+      * order, until it finds one where predicate returns true. If such an element is found, 
       * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
       * @param thisArg If provided, it will be used as the this value for each invocation of
       * predicate. If it is not provided, undefined is used instead.
       */
-    findIndex(predicate: (value: T, index: number, obj: Array<T>) => boolean, thisArg?: any): number;
+    findIndex(predicate: (value: T) => boolean, thisArg?: any): number;
 
     /**
       * Returns the this object after filling the section identified by start and end with value
@@ -201,17 +201,17 @@ interface NumberConstructor {
 
     /**
       * Returns true if passed value is finite.
-      * Unlike the global isFinite, Number.isFinite doesn't forcibly convert the parameter to a
+      * Unlike the global isFininte, Number.isFinite doesn't forcibly convert the parameter to a
       * number. Only finite values of the type number, result in true.
       * @param number A numeric value.
       */
-    isFinite(value: any): value is number;
+    isFinite(number: number): boolean;
 
     /**
       * Returns true if the value passed is an integer, false otherwise.
       * @param number A numeric value.
       */
-    isInteger(value: any): value is number;
+    isInteger(number: number): boolean;
 
     /**
       * Returns a Boolean value that indicates whether a value is the reserved value NaN (not a
@@ -219,13 +219,13 @@ interface NumberConstructor {
       * to a number. Only values of the type number, that are also NaN, result in true.
       * @param number A numeric value.
       */
-    isNaN(value: any): value is number;
+    isNaN(number: number): boolean;
 
     /**
       * Returns true if the value passed is a safe integer.
       * @param number A numeric value.
       */
-    isSafeInteger(value: any): value is number;
+    isSafeInteger(number: number): boolean;
 
     /**
       * The value of the largest integer n such that n and n + 1 are both exactly representable as
@@ -360,15 +360,15 @@ interface ReadonlyArray<T> {
   find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean, thisArg?: any): T | undefined;
 
   /**
-    * Returns the index of the first element in the array where predicate is true, and -1
+    * Returns the index of the first element in the array where predicate is true, and undefined
     * otherwise.
     * @param predicate find calls predicate once for each element of the array, in ascending
-    * order, until it finds one where predicate returns true. If such an element is found,
+    * order, until it finds one where predicate returns true. If such an element is found, 
     * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
     * @param thisArg If provided, it will be used as the this value for each invocation of
     * predicate. If it is not provided, undefined is used instead.
     */
-  findIndex(predicate: (value: T, index: number, obj: Array<T>) => boolean, thisArg?: any): number;
+  findIndex(predicate: (value: T) => boolean, thisArg?: any): number;
 }
 
 interface RegExp {

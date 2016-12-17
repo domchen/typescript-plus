@@ -18,7 +18,7 @@ module foo {
 
         test() { return true; }
 >test : () => boolean
->true : true
+>true : boolean
     }
  
     interface I1 {

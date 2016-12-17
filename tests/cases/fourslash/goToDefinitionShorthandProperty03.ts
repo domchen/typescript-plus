@@ -7,7 +7,10 @@
 ////    /*letProp*/y
 ////}
 
-verify.goToDefinition({
-    varProp: "varDef",
-    letProp: "letDef"
-});
+goTo.marker("varProp");
+goTo.definition();
+verify.caretAtMarker("varDef");
+
+goTo.marker("letProp");
+goTo.definition();
+verify.caretAtMarker("letDef");

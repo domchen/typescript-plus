@@ -18,4 +18,15 @@
 ////
 ////var x = (snapcrackle || magnitude || art)./*usage*/pop;
 
-verify.goToDefinition("usage", ["def1", "def2", "def3"]);
+goTo.marker("usage");
+verify.definitionCountIs(3);
+goTo.definition(0);
+verify.caretAtMarker("def1");
+
+goTo.marker("usage");
+goTo.definition(1);
+verify.caretAtMarker("def2");
+
+goTo.marker("usage");
+goTo.definition(2);
+verify.caretAtMarker("def3");

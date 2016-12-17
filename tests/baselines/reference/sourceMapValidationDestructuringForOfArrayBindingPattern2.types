@@ -16,17 +16,17 @@ let robotA: Robot = [1, "mower", "mowing"];
 >robotA : [number, string, string]
 >Robot : [number, string, string]
 >[1, "mower", "mowing"] : [number, string, string]
->1 : 1
->"mower" : "mower"
->"mowing" : "mowing"
+>1 : number
+>"mower" : string
+>"mowing" : string
 
 let robotB: Robot = [2, "trimmer", "trimming"];
 >robotB : [number, string, string]
 >Robot : [number, string, string]
 >[2, "trimmer", "trimming"] : [number, string, string]
->2 : 2
->"trimmer" : "trimmer"
->"trimming" : "trimming"
+>2 : number
+>"trimmer" : string
+>"trimming" : string
 
 let robots = [robotA, robotB];
 >robots : [number, string, string][]
@@ -45,19 +45,19 @@ let multiRobotA: MultiSkilledRobot = ["mower", ["mowing", ""]];
 >multiRobotA : [string, [string, string]]
 >MultiSkilledRobot : [string, [string, string]]
 >["mower", ["mowing", ""]] : [string, [string, string]]
->"mower" : "mower"
+>"mower" : string
 >["mowing", ""] : [string, string]
->"mowing" : "mowing"
->"" : ""
+>"mowing" : string
+>"" : string
 
 let multiRobotB: MultiSkilledRobot = ["trimmer", ["trimming", "edging"]];
 >multiRobotB : [string, [string, string]]
 >MultiSkilledRobot : [string, [string, string]]
 >["trimmer", ["trimming", "edging"]] : [string, [string, string]]
->"trimmer" : "trimmer"
+>"trimmer" : string
 >["trimming", "edging"] : [string, string]
->"trimming" : "trimming"
->"edging" : "edging"
+>"trimming" : string
+>"edging" : string
 
 let multiRobots = [multiRobotA, multiRobotB];
 >multiRobots : [string, [string, string]][]

@@ -9,7 +9,7 @@ new class {
 >hi : () => string
 
         return "Hi!";
->"Hi!" : "Hi!"
+>"Hi!" : string
     }
 }().hi();
 >hi : () => string

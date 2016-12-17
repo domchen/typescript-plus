@@ -5,9 +5,9 @@ var v: string;
 for (v of ["hello"]) { }
 >v : string
 >["hello"] : string[]
->"hello" : "hello"
+>"hello" : string
 
 for (v of "hello") { }
 >v : string
->"hello" : "hello"
+>"hello" : string
 

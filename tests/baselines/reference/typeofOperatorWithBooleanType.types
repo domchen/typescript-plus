@@ -16,7 +16,7 @@ class A {
 
     static foo() { return false; }
 >foo : () => boolean
->false : false
+>false : boolean
 }
 module M {
 >M : typeof M
@@ -40,16 +40,16 @@ var ResultIsString1 = typeof BOOLEAN;
 var ResultIsString2 = typeof true;
 >ResultIsString2 : string
 >typeof true : string
->true : true
+>true : boolean
 
 var ResultIsString3 = typeof { x: true, y: false };
 >ResultIsString3 : string
 >typeof { x: true, y: false } : string
 >{ x: true, y: false } : { x: boolean; y: boolean; }
 >x : boolean
->true : true
+>true : boolean
 >y : boolean
->false : false
+>false : boolean
 
 // boolean type expressions
 var ResultIsString4 = typeof objA.a;
@@ -90,7 +90,7 @@ var ResultIsString8 = typeof typeof BOOLEAN;
 // miss assignment operators
 typeof true;
 >typeof true : string
->true : true
+>true : boolean
 
 typeof BOOLEAN;
 >typeof BOOLEAN : string
@@ -102,10 +102,10 @@ typeof foo();
 >foo : () => boolean
 
 typeof true, false;
->typeof true, false : false
+>typeof true, false : boolean
 >typeof true : string
->true : true
->false : false
+>true : boolean
+>false : boolean
 
 typeof objA.a;
 >typeof objA.a : string
@@ -143,9 +143,9 @@ var y = { a: true, b: false};
 >y : { a: boolean; b: boolean; }
 >{ a: true, b: false} : { a: boolean; b: boolean; }
 >a : boolean
->true : true
+>true : boolean
 >b : boolean
->false : false
+>false : boolean
 
 z: typeof y.a;
 >z : any

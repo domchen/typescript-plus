@@ -32,7 +32,7 @@ var BaseClass = (function () {
 var DerivedClass = (function (_super) {
     __extends(DerivedClass, _super);
     function DerivedClass() {
-        return _super.call(this) || this;
+        _super.call(this);
     }
     DerivedClass.prototype._init = function () {
     };

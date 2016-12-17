@@ -28,26 +28,26 @@ var robotA: Robot = { name: "mower", skills: { primary: "mowing", secondary: "no
 >Robot : Robot
 >{ name: "mower", skills: { primary: "mowing", secondary: "none" } } : { name: string; skills: { primary: string; secondary: string; }; }
 >name : string
->"mower" : "mower"
+>"mower" : string
 >skills : { primary: string; secondary: string; }
 >{ primary: "mowing", secondary: "none" } : { primary: string; secondary: string; }
 >primary : string
->"mowing" : "mowing"
+>"mowing" : string
 >secondary : string
->"none" : "none"
+>"none" : string
 
 var robotB: Robot = { name: "trimmer", skills: { primary: "trimming", secondary: "edging" } };
 >robotB : Robot
 >Robot : Robot
 >{ name: "trimmer", skills: { primary: "trimming", secondary: "edging" } } : { name: string; skills: { primary: string; secondary: string; }; }
 >name : string
->"trimmer" : "trimmer"
+>"trimmer" : string
 >skills : { primary: string; secondary: string; }
 >{ primary: "trimming", secondary: "edging" } : { primary: string; secondary: string; }
 >primary : string
->"trimming" : "trimming"
+>"trimming" : string
 >secondary : string
->"edging" : "edging"
+>"edging" : string
 
 var {
     skills: {
@@ -56,19 +56,19 @@ var {
         primary: primaryA = "noSkill",
 >primary : any
 >primaryA : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
         secondary: secondaryA = "noSkill"
 >secondary : any
 >secondaryA : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
     } = { primary: "noSkill", secondary: "noSkill" }
 >{ primary: "noSkill", secondary: "noSkill" } : { primary?: string; secondary?: string; }
 >primary : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >secondary : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
 } = robotA;
 >robotA : Robot
@@ -77,7 +77,7 @@ var {
     name: nameB = "noNameSpecified",
 >name : any
 >nameB : string
->"noNameSpecified" : "noNameSpecified"
+>"noNameSpecified" : string
 
     skills: {
 >skills : any
@@ -85,19 +85,19 @@ var {
         primary: primaryB = "noSkill",
 >primary : any
 >primaryB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
         secondary: secondaryB = "noSkill"
 >secondary : any
 >secondaryB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
     } = { primary: "noSkill", secondary: "noSkill" }
 >{ primary: "noSkill", secondary: "noSkill" } : { primary?: string; secondary?: string; }
 >primary : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >secondary : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
 } = robotB;
 >robotB : Robot
@@ -106,7 +106,7 @@ var {
     name: nameC = "noNameSpecified",
 >name : any
 >nameC : string
->"noNameSpecified" : "noNameSpecified"
+>"noNameSpecified" : string
 
     skills: {
 >skills : any
@@ -114,32 +114,32 @@ var {
         primary: primaryB = "noSkill",
 >primary : any
 >primaryB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
         secondary: secondaryB = "noSkill"
 >secondary : any
 >secondaryB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
     } = { primary: "noSkill", secondary: "noSkill" }
 >{ primary: "noSkill", secondary: "noSkill" } : { primary?: string; secondary?: string; }
 >primary : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >secondary : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 
 } = <Robot>{ name: "Edger", skills: { primary: "edging", secondary: "branch trimming" } };
 ><Robot>{ name: "Edger", skills: { primary: "edging", secondary: "branch trimming" } } : Robot
 >Robot : Robot
 >{ name: "Edger", skills: { primary: "edging", secondary: "branch trimming" } } : { name: string; skills: { primary: string; secondary: string; }; }
 >name : string
->"Edger" : "Edger"
+>"Edger" : string
 >skills : { primary: string; secondary: string; }
 >{ primary: "edging", secondary: "branch trimming" } : { primary: string; secondary: string; }
 >primary : string
->"edging" : "edging"
+>"edging" : string
 >secondary : string
->"branch trimming" : "branch trimming"
+>"branch trimming" : string
 
 if (nameB == nameB) {
 >nameB == nameB : boolean

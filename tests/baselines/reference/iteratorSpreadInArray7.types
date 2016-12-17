@@ -28,7 +28,7 @@ class SymbolIterator {
 
             done: false
 >done : boolean
->false : false
+>false : boolean
 
         };
     }

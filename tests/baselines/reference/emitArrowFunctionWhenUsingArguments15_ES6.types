@@ -5,7 +5,7 @@ function f() {
 
     var arguments = "hello";
 >arguments : string
->"hello" : "hello"
+>"hello" : string
 
     if (Math.random()) {
 >Math.random() : number
@@ -14,8 +14,8 @@ function f() {
 >random : () => number
 
         const arguments = 100;
->arguments : 100
->100 : 100
+>arguments : number
+>100 : number
 
         return () => arguments;
 >() => arguments : () => IArguments

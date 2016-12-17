@@ -8,7 +8,7 @@
 ////    }
 ////}
 
-verify.quickInfos({
-    1: "this: this",
-    2: "this: Bar<T>"
-});
+goTo.marker('1');
+verify.quickInfoIs('this: this');
+goTo.marker('2');
+verify.quickInfoIs('this: Bar<T>');

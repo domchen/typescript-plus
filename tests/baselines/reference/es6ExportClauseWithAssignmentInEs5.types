@@ -2,34 +2,34 @@
 
 var foo = 2;
 >foo : number
->2 : 2
+>2 : number
 
 foo = 3;
->foo = 3 : 3
+>foo = 3 : number
 >foo : number
->3 : 3
+>3 : number
 
 var baz = 3;
 >baz : number
->3 : 3
+>3 : number
 
 baz = 4;
->baz = 4 : 4
+>baz = 4 : number
 >baz : number
->4 : 4
+>4 : number
 
 var buzz = 10;
 >buzz : number
->10 : 10
+>10 : number
 
 buzz += 3;
 >buzz += 3 : number
 >buzz : number
->3 : 3
+>3 : number
 
 var bizz = 8;
 >bizz : number
->8 : 8
+>8 : number
 
 bizz++; // compiles to exports.bizz = bizz += 1
 >bizz++ : number

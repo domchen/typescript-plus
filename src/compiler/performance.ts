@@ -12,7 +12,7 @@ namespace ts.performance {
 
     const profilerEvent = typeof onProfilerEvent === "function" && onProfilerEvent.profiler === true
             ? onProfilerEvent
-            : (_markName: string) => { };
+            : (markName: string) => { };
 
     let enabled = false;
     let profilerStart = 0;

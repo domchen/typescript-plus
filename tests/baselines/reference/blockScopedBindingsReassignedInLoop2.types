@@ -1,9 +1,9 @@
 === tests/cases/compiler/blockScopedBindingsReassignedInLoop2.ts ===
 for (let x = 1, y = 2; x < y; ++x, --y) {
 >x : number
->1 : 1
+>1 : number
 >y : number
->2 : 2
+>2 : number
 >x < y : boolean
 >x : number
 >y : number
@@ -31,17 +31,17 @@ for (let x = 1, y = 2; x < y; ++x, --y) {
     }
     else {
         y = 5;
->y = 5 : 5
+>y = 5 : number
 >y : number
->5 : 5
+>5 : number
     }
 }
 
 for (let x = 1, y = 2; x < y; ++x, --y) {
 >x : number
->1 : 1
+>1 : number
 >y : number
->2 : 2
+>2 : number
 >x < y : boolean
 >x : number
 >y : number
@@ -69,9 +69,9 @@ for (let x = 1, y = 2; x < y; ++x, --y) {
     }
     else {
         y = 5;
->y = 5 : 5
+>y = 5 : number
 >y : number
->5 : 5
+>5 : number
     }
 }
 
@@ -80,9 +80,9 @@ loop:
 
 for (let x = 1, y = 2; x < y; ++x, --y) {
 >x : number
->1 : 1
+>1 : number
 >y : number
->2 : 2
+>2 : number
 >x < y : boolean
 >x : number
 >y : number
@@ -111,9 +111,9 @@ for (let x = 1, y = 2; x < y; ++x, --y) {
     }
     else {
         y = 5;
->y = 5 : 5
+>y = 5 : number
 >y : number
->5 : 5
+>5 : number
     }
 }
 
@@ -122,9 +122,9 @@ loop:
 
 for (let x = 1, y = 2; x < y; ++x, --y) {
 >x : number
->1 : 1
+>1 : number
 >y : number
->2 : 2
+>2 : number
 >x < y : boolean
 >x : number
 >y : number
@@ -153,8 +153,8 @@ for (let x = 1, y = 2; x < y; ++x, --y) {
     }
     else {
         y = 5;
->y = 5 : 5
+>y = 5 : number
 >y : number
->5 : 5
+>5 : number
     }
 }

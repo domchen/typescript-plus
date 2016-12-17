@@ -36,20 +36,18 @@ var Foo = (function () {
 var b = (function (_super) {
     __extends(b, _super);
     function b() {
-        var _this = _super.call(this) || this;
+        _super.call(this);
         var _super = 10; // Should be error 
-        return _this;
     }
     return b;
 }(Foo));
 var c = (function (_super) {
     __extends(c, _super);
     function c() {
-        var _this = _super.call(this) || this;
+        _super.call(this);
         var x = function () {
             var _super = 10; // Should be error
         };
-        return _this;
     }
     return c;
 }(Foo));

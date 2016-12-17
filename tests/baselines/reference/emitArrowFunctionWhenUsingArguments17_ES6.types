@@ -7,7 +7,7 @@ function f() {
 >arguments : string
 >{ arguments: "hello" } : { arguments: string; }
 >arguments : string
->"hello" : "hello"
+>"hello" : string
 
     if (Math.random()) {
 >Math.random() : number
@@ -19,9 +19,9 @@ function f() {
 >() => arguments[0] : () => any
 >arguments[0] : any
 >arguments : IArguments
->0 : 0
+>0 : number
     }
     var arguments = "world";
 >arguments : string
->"world" : "world"
+>"world" : string
 }

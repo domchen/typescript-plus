@@ -116,6 +116,7 @@ var M;
     var someModuleVar = 4;
     function someModuleFunction() { return 5; }
 })(M || (M = {}));
+var M;
 (function (M) {
     M.c = M.x;
     M.meb = M.E.B;

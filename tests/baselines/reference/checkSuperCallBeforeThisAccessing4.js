@@ -33,7 +33,7 @@ var Based = (function () {
 var Derived = (function (_super) {
     __extends(Derived, _super);
     function Derived() {
-        var _this;
+        var _this = this;
         (function () {
             _this; // No error
         });
@@ -43,11 +43,10 @@ var Derived = (function (_super) {
         (function () {
             _this; // No error
         })();
-        _this = _super.call(this) || this;
-        _this = _super.call(this) || this;
-        _this.x = 10;
-        var that = _this;
-        return _this;
+        _super.call(this);
+        _super.call(this);
+        this.x = 10;
+        var that = this;
     }
     return Derived;
 }(Based));

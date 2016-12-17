@@ -20,7 +20,7 @@ void {};
 var C5a = (function (_super) {
     __extends(C5a, _super);
     function C5a() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return C5a;
 }(null));

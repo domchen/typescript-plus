@@ -1,8 +1,8 @@
 === tests/cases/compiler/assignmentCompatForEnums.ts ===
 enum TokenType { One, Two };
 >TokenType : TokenType
->One : TokenType.One
->Two : TokenType.Two
+>One : TokenType
+>Two : TokenType
 
 var list = {};
 >list : {}
@@ -27,7 +27,7 @@ function foo() {
 >TokenType : TokenType
 >list['one'] : any
 >list : {}
->'one' : "one"
+>'one' : string
 }
 
 

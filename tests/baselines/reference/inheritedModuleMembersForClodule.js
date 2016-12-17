@@ -38,10 +38,11 @@ var C = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return D;
 }(C));
+var D;
 (function (D) {
     function foo() {
         return 0;
@@ -52,7 +53,7 @@ var D = (function (_super) {
 var E = (function (_super) {
     __extends(E, _super);
     function E() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     E.bar = function () {
         return this.foo();

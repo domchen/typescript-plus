@@ -4,22 +4,22 @@ var array = [{ x: "", y: 0 }]
 >[{ x: "", y: 0 }] : { x: string; y: number; }[]
 >{ x: "", y: 0 } : { x: string; y: number; }
 >x : string
->"" : ""
+>"" : string
 >y : number
->0 : 0
+>0 : number
 
 for (var {x: a = "", y: b = true} of array) {
 >x : any
 >a : string
->"" : ""
+>"" : string
 >y : any
->b : number | true
->true : true
+>b : number | boolean
+>true : boolean
 >array : { x: string; y: number; }[]
 
     a;
 >a : string
 
     b;
->b : number | true
+>b : number | boolean
 }

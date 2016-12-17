@@ -10,7 +10,8 @@
 //// 
 
 // Sanity check: type name here should include the type parameter
-verify.quickInfoAt("1", "class Dictionary<V>");
+goTo.marker('1');
+verify.quickInfoIs('class Dictionary<V>');
 
 // Add a similar class -- name does not match
 goTo.marker('2');

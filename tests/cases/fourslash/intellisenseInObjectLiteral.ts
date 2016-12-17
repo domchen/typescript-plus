@@ -8,4 +8,5 @@
 ////     }
 //// }
 
-verify.quickInfoAt("", "var x: number");
+goTo.marker();
+verify.quickInfoIs("var x: number", "");

@@ -25,7 +25,7 @@ var A = (function () {
 var B = (function (_super) {
     __extends(B, _super);
     function B() {
-        return _super.call(this, function (value) { return String(value); }) || this;
+        _super.call(this, function (value) { return String(value); });
     }
     return B;
 }(A));

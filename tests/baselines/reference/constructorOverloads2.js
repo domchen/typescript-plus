@@ -40,7 +40,7 @@ var FooBase = (function () {
 var Foo = (function (_super) {
     __extends(Foo, _super);
     function Foo(x, y) {
-        return _super.call(this, x) || this;
+        _super.call(this, x);
     }
     Foo.prototype.bar1 = function () { };
     return Foo;

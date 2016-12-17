@@ -88,25 +88,25 @@ var missingCurliesWithArrow;
     })(withStatement || (withStatement = {}));
     var withoutStatement;
     (function (withoutStatement) {
-        var a = function () { return ; };
+        var a = ;
     })(withoutStatement || (withoutStatement = {}));
     ;
-    var b = function () { return ; };
+    var b = ;
 })(missingCurliesWithArrow || (missingCurliesWithArrow = {}));
-var c = function (x) { return ; };
+var c = ;
 ;
-var d = function (x, y) { return ; };
+var d = ;
 ;
-var e = function (x, y) { return ; };
+var e = ;
 ;
-var f = function () { return ; };
+var f = ;
 var ce_nEst_pas_une_arrow_function;
 (function (ce_nEst_pas_une_arrow_function) {
     var a = ();
-    var b = function () { return ; };
+    var b = ;
     var c = (x);
-    var d = function (x, y) { return ; };
-    var e = function (x, y) { return ; };
+    var d = ;
+    var e = ;
 })(ce_nEst_pas_une_arrow_function || (ce_nEst_pas_une_arrow_function = {}));
 var okay;
 (function (okay) {

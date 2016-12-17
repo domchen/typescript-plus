@@ -3,29 +3,29 @@ enum TShirtSize {
 >TShirtSize : TShirtSize
 
    Small,
->Small : TShirtSize.Small
+>Small : TShirtSize
 
    Medium,
->Medium : TShirtSize.Medium
+>Medium : TShirtSize
 
    Large
->Large : TShirtSize.Large
+>Large : TShirtSize
 }
 var mySize = TShirtSize.Large;
 >mySize : TShirtSize
->TShirtSize.Large : TShirtSize.Large
+>TShirtSize.Large : TShirtSize
 >TShirtSize : typeof TShirtSize
->Large : TShirtSize.Large
+>Large : TShirtSize
 
 var test = TShirtSize[mySize];
 >test : string
 >TShirtSize[mySize] : string
 >TShirtSize : typeof TShirtSize
->mySize : TShirtSize.Large
+>mySize : TShirtSize
 
 // specifically checking output here, bug was that test used to be undefined at runtime
 test + ''
 >test + '' : string
 >test : string
->'' : ""
+>'' : string
 

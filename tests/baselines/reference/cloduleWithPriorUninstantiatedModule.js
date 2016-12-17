@@ -22,6 +22,7 @@ var Moclodule = (function () {
     return Moclodule;
 }());
 // Instantiated module.
+var Moclodule;
 (function (Moclodule) {
     var Manager = (function () {
         function Manager() {

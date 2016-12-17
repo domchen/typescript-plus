@@ -6,7 +6,7 @@ function f(arguments) {
 
     var _arguments = 10;
 >_arguments : number
->10 : 10
+>10 : number
 
     var a = () => () => arguments;
 >a : () => () => IArguments

@@ -38,7 +38,7 @@ var A = (function () {
 var B = (function (_super) {
     __extends(B, _super);
     function B() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return B;
 }(A));
@@ -51,7 +51,7 @@ var AA = (function () {
 var BB = (function (_super) {
     __extends(BB, _super);
     function BB() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     BB.prototype.bar = function () { };
     return BB;
@@ -59,14 +59,14 @@ var BB = (function (_super) {
 var CC = (function (_super) {
     __extends(CC, _super);
     function CC() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return CC;
 }(BB)); // error
 var DD = (function (_super) {
     __extends(DD, _super);
     function DD() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     DD.prototype.foo = function () { };
     return DD;

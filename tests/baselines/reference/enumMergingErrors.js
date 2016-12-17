@@ -59,6 +59,7 @@ var M;
     })(M.E3 || (M.E3 = {}));
     var E3 = M.E3;
 })(M || (M = {}));
+var M;
 (function (M) {
     (function (E1) {
         E1[E1["B"] = 'foo'.length] = "B";
@@ -73,6 +74,7 @@ var M;
     })(M.E3 || (M.E3 = {}));
     var E3 = M.E3;
 })(M || (M = {}));
+var M;
 (function (M) {
     (function (E1) {
         E1[E1["C"] = 0] = "C";
@@ -95,12 +97,14 @@ var M1;
     })(M1.E1 || (M1.E1 = {}));
     var E1 = M1.E1;
 })(M1 || (M1 = {}));
+var M1;
 (function (M1) {
     (function (E1) {
         E1[E1["B"] = 0] = "B";
     })(M1.E1 || (M1.E1 = {}));
     var E1 = M1.E1;
 })(M1 || (M1 = {}));
+var M1;
 (function (M1) {
     (function (E1) {
         E1[E1["C"] = 0] = "C";
@@ -115,12 +119,14 @@ var M2;
     })(M2.E1 || (M2.E1 = {}));
     var E1 = M2.E1;
 })(M2 || (M2 = {}));
+var M2;
 (function (M2) {
     (function (E1) {
         E1[E1["B"] = 0] = "B";
     })(M2.E1 || (M2.E1 = {}));
     var E1 = M2.E1;
 })(M2 || (M2 = {}));
+var M2;
 (function (M2) {
     (function (E1) {
         E1[E1["C"] = 0] = "C";

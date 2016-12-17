@@ -3,4 +3,6 @@
 ////var obj;
 ////for (var /**/p in obj) { }
 
-verify.quickInfoAt("", "var p: string");
+goTo.marker();
+
+verify.quickInfoIs('var p: string', "");

@@ -1,25 +1,10 @@
 === tests/cases/compiler/classExpressionWithStaticProperties1.ts ===
-var v = class C {
+var v = class C { static a = 1; static b = 2 };
 >v : typeof C
->class C {    static a = 1;    static b = 2;    static c = C.a + C.b;} : typeof C
->C : typeof C
-
-    static a = 1;
->a : number
->1 : 1
-
-    static b = 2;
->b : number
->2 : 2
-
-    static c = C.a + C.b;
->c : number
->C.a + C.b : number
->C.a : number
+>class C { static a = 1; static b = 2 } : typeof C
 >C : typeof C
 >a : number
->C.b : number
->C : typeof C
+>1 : number
 >b : number
+>2 : number
 
-};

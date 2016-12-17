@@ -1,14 +1,17 @@
 /// <reference path="fourslash.ts" />
 
 //@Filename: a.ts
-////var /*def1*/x: number;
+////var x: number;
 
 //@Filename: b.ts
-////var /*def2*/x: number;
+////var x: number;
 
 //@Filename: c.ts
 /////// <reference path="a.ts" />
 /////// <reference path="b.ts" />
-/////*use*/x++;
+/////**/x++;
 
-verify.goToDefinition("use", ["def1", "def2"]);
+goTo.file("c.ts");
+goTo.marker();
+
+verify.definitionCountIs(2);

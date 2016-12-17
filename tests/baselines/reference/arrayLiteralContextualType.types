@@ -11,11 +11,11 @@ class Giraffe {
 
     name = "Giraffe";
 >name : string
->"Giraffe" : "Giraffe"
+>"Giraffe" : string
 
     neckLength = "3m";
 >neckLength : string
->"3m" : "3m"
+>"3m" : string
 }
 
 class Elephant {
@@ -23,11 +23,11 @@ class Elephant {
 
     name = "Elephant";
 >name : string
->"Elephant" : "Elephant"
+>"Elephant" : string
 
     trunkDiameter = "20cm";
 >trunkDiameter : string
->"20cm" : "20cm"
+>"20cm" : string
 }
 
 function foo(animals: IAnimal[]) { }

@@ -15,35 +15,35 @@ interface Boolean {
 
 var x = true;
 >x : boolean
->true : true
+>true : boolean
 
 var a: string = x.doStuff();
 >a : string
 >x.doStuff() : string
 >x.doStuff : () => string
->x : true
+>x : boolean
 >doStuff : () => string
 
 var b: string = x.doOtherStuff('hm');
 >b : string
->x.doOtherStuff('hm') : "hm"
+>x.doOtherStuff('hm') : string
 >x.doOtherStuff : <T>(x: T) => T
->x : true
+>x : boolean
 >doOtherStuff : <T>(x: T) => T
->'hm' : "hm"
+>'hm' : string
 
 var c: string = x['doStuff']();
 >c : string
 >x['doStuff']() : string
 >x['doStuff'] : () => string
->x : true
->'doStuff' : "doStuff"
+>x : boolean
+>'doStuff' : string
 
 var d: string = x['doOtherStuff']('hm');
 >d : string
->x['doOtherStuff']('hm') : "hm"
+>x['doOtherStuff']('hm') : string
 >x['doOtherStuff'] : <T>(x: T) => T
->x : true
->'doOtherStuff' : "doOtherStuff"
->'hm' : "hm"
+>x : boolean
+>'doOtherStuff' : string
+>'hm' : string
 

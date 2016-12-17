@@ -1,5 +1,5 @@
 //@target: ES5
-var Symbol: any;
+var Symbol;
 
 class C {
     [Symbol.iterator]() { }

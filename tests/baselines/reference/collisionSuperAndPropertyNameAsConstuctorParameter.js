@@ -44,32 +44,30 @@ var a = (function () {
 var b1 = (function (_super) {
     __extends(b1, _super);
     function b1(_super) {
-        return _super.call(this) || this;
+        _super.call(this);
     }
     return b1;
 }(a));
 var b2 = (function (_super) {
     __extends(b2, _super);
     function b2(_super) {
-        var _this = _super.call(this) || this;
-        _this._super = _super;
-        return _this;
+        _super.call(this);
+        this._super = _super;
     }
     return b2;
 }(a));
 var b3 = (function (_super) {
     __extends(b3, _super);
     function b3(_super) {
-        return _super.call(this) || this;
+        _super.call(this);
     }
     return b3;
 }(a));
 var b4 = (function (_super) {
     __extends(b4, _super);
     function b4(_super) {
-        var _this = _super.call(this) || this;
-        _this._super = _super;
-        return _this;
+        _super.call(this);
+        this._super = _super;
     }
     return b4;
 }(a));

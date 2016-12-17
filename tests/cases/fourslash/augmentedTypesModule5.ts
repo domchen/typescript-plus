@@ -6,7 +6,8 @@
 ////r./*2*/
 ////var /*4*/r2 = m3e./*3*/
 
-verify.quickInfoAt("1", "var r: m3e");
+goTo.marker('1');
+verify.quickInfoIs('var r: m3e');
 
 goTo.marker('2');
 verify.completionListContains('foo');
@@ -17,4 +18,5 @@ goTo.marker('3');
 verify.completionListContains('y');
 edit.insert('y;');
 
-verify.quickInfoAt("4", "var r2: number");
+goTo.marker('4');
+verify.quickInfoIs('var r2: number');

@@ -36,7 +36,7 @@ var Foo = (function () {
 var b = (function (_super) {
     __extends(b, _super);
     function b() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     b.prototype.foo = function () {
         var _super = 10; // Should be error 
@@ -46,7 +46,7 @@ var b = (function (_super) {
 var c = (function (_super) {
     __extends(c, _super);
     function c() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     c.prototype.foo = function () {
         var x = function () {

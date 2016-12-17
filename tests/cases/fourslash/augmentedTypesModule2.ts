@@ -5,7 +5,8 @@
 ////var x: m2f./*1*/
 ////var /*2*/r = m2f/*3*/;
 
-verify.quickInfoAt("11", "function m2f(x: number): void\nnamespace m2f");
+goTo.marker('11');
+verify.quickInfoIs('function m2f(x: number): void\nnamespace m2f');
 
 goTo.marker('1');
 verify.completionListContains('I');
@@ -14,7 +15,8 @@ edit.insert('I.');
 verify.not.completionListContains('foo');
 edit.backspace(1);
 
-verify.quickInfoAt("2", "var r: (x: number) => void");
+goTo.marker('2');
+verify.quickInfoIs('var r: (x: number) => void');
 
 goTo.marker('3');
 edit.insert('(');

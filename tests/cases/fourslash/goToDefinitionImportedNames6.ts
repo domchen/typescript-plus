@@ -14,4 +14,8 @@
 ////    x;
 ////}
 
-verify.goToDefinition("moduleAliasDefinition", "moduleDefinition");
+goTo.file("b.ts");
+
+goTo.marker('moduleAliasDefinition');
+goTo.definition();
+verify.caretAtMarker('moduleDefinition');

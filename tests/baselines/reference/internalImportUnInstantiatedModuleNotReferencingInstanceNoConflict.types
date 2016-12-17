@@ -12,7 +12,7 @@ module B {
 
     var A = 1;
 >A : number
->1 : 1
+>1 : number
 
     import Y = A;
 >Y : any

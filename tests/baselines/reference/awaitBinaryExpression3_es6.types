@@ -6,19 +6,12 @@ declare var p: Promise<number>;
 >p : Promise<number>
 >Promise : Promise<T>
 
-declare function before(): void;
->before : () => void
-
-declare function after(): void;
->after : () => void
-
 async function func(): Promise<void> {
 >func : () => Promise<void>
 >Promise : Promise<T>
 
-    before();
->before() : void
->before : () => void
+    "before";
+>"before" : string
 
     var b = await p + a;
 >b : number
@@ -27,7 +20,6 @@ async function func(): Promise<void> {
 >p : Promise<number>
 >a : number
 
-    after();
->after() : void
->after : () => void
+    "after";
+>"after" : string
 }

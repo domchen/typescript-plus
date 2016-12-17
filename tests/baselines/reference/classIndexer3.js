@@ -24,7 +24,7 @@ var C123 = (function () {
 var D123 = (function (_super) {
     __extends(D123, _super);
     function D123() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return D123;
 }(C123));

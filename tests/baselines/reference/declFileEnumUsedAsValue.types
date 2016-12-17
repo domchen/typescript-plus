@@ -4,13 +4,13 @@ enum e {
 >e : e
 
     a,
->a : e.a
+>a : e
 
     b,
->b : e.b
+>b : e
 
     c
->c : e.c
+>c : e
 }
 var x = e;
 >x : typeof e

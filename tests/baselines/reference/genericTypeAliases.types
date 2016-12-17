@@ -21,7 +21,7 @@ var tree: Tree<number> = {
 
         left: 0,
 >left : number
->0 : 0
+>0 : number
 
         right: {
 >right : { left: number; right: number; }
@@ -29,17 +29,17 @@ var tree: Tree<number> = {
 
             left: 1,
 >left : number
->1 : 1
+>1 : number
 
             right: 2
 >right : number
->2 : 2
+>2 : number
 
         },
     },
     right: 3
 >right : number
->3 : 3
+>3 : number
 
 };
 
@@ -54,15 +54,15 @@ var ls: Lazy<string>;
 >Lazy : Lazy<T>
 
 ls = "eager";
->ls = "eager" : "eager"
+>ls = "eager" : string
 >ls : Lazy<string>
->"eager" : "eager"
+>"eager" : string
 
 ls = () => "lazy";
 >ls = () => "lazy" : () => string
 >ls : Lazy<string>
 >() => "lazy" : () => string
->"lazy" : "lazy"
+>"lazy" : string
 
 type Foo<T> = T | { x: Foo<T> };
 >Foo : Foo<T>
@@ -100,16 +100,16 @@ y = x;
 >x : Foo<string>
 
 x = "string";
->x = "string" : "string"
+>x = "string" : string
 >x : Foo<string>
->"string" : "string"
+>"string" : string
 
 x = { x: "hello" };
 >x = { x: "hello" } : { x: string; }
 >x : Foo<string>
 >{ x: "hello" } : { x: string; }
 >x : string
->"hello" : "hello"
+>"hello" : string
 
 x = { x: { x: "world" } };
 >x = { x: { x: "world" } } : { x: { x: string; }; }
@@ -118,23 +118,23 @@ x = { x: { x: "world" } };
 >x : { x: string; }
 >{ x: "world" } : { x: string; }
 >x : string
->"world" : "world"
+>"world" : string
 
 var z: Foo<number>;
 >z : Foo<number>
 >Foo : Foo<T>
 
 z = 42;
->z = 42 : 42
+>z = 42 : number
 >z : Foo<number>
->42 : 42
+>42 : number
 
 z = { x: 42 };
 >z = { x: 42 } : { x: number; }
 >z : Foo<number>
 >{ x: 42 } : { x: number; }
 >x : number
->42 : 42
+>42 : number
 
 z = { x: { x: 42 } };
 >z = { x: { x: 42 } } : { x: { x: number; }; }
@@ -143,7 +143,7 @@ z = { x: { x: 42 } };
 >x : { x: number; }
 >{ x: 42 } : { x: number; }
 >x : number
->42 : 42
+>42 : number
 
 type Strange<T> = string;  // Type parameter not used
 >Strange : string
@@ -154,9 +154,9 @@ var s: Strange<number>;
 >Strange : string
 
 s = "hello";
->s = "hello" : "hello"
+>s = "hello" : string
 >s : string
->"hello" : "hello"
+>"hello" : string
 
 interface Tuple<A, B> {
 >Tuple : Tuple<A, B>
@@ -194,81 +194,81 @@ var p: TaggedPair<number>;
 >TaggedPair : TaggedPair<T>
 
 p.a = 1;
->p.a = 1 : 1
+>p.a = 1 : number
 >p.a : number
 >p : TaggedPair<number>
 >a : number
->1 : 1
+>1 : number
 
 p.b = 2;
->p.b = 2 : 2
+>p.b = 2 : number
 >p.b : number
 >p : TaggedPair<number>
 >b : number
->2 : 2
+>2 : number
 
 p.tag = "test";
->p.tag = "test" : "test"
+>p.tag = "test" : string
 >p.tag : string
 >p : TaggedPair<number>
 >tag : string
->"test" : "test"
+>"test" : string
 
 function f<A>() {
->f : <A>() => A[] | { x: A[] | any; }
+>f : <A>() => Foo<A[]>
 >A : A
 
     type Foo<T> = T | { x: Foo<T> };
->Foo : T | { x: T | any; }
+>Foo : Foo<T>
 >T : T
 >T : T
->x : T | { x: T | any; }
->Foo : T | { x: T | any; }
+>x : Foo<T>
+>Foo : Foo<T>
 >T : T
 
     var x: Foo<A[]>;
->x : A[] | { x: A[] | any; }
->Foo : T | { x: T | any; }
+>x : Foo<A[]>
+>Foo : Foo<T>
 >A : A
 
     return x;
->x : A[] | { x: A[] | any; }
+>x : Foo<A[]>
 }
 
 function g<B>() {
->g : <B>() => B[] | { x: B[] | any; }
+>g : <B>() => Bar<B[]>
 >B : B
 
     type Bar<U> = U | { x: Bar<U> };
->Bar : U | { x: U | any; }
+>Bar : Bar<U>
 >U : U
 >U : U
->x : U | { x: U | any; }
->Bar : U | { x: U | any; }
+>x : Bar<U>
+>Bar : Bar<U>
 >U : U
 
     var x: Bar<B[]>;
->x : B[] | { x: B[] | any; }
->Bar : U | { x: U | any; }
+>x : Bar<B[]>
+>Bar : Bar<U>
 >B : B
 
     return x;
->x : B[] | { x: B[] | any; }
+>x : Bar<B[]>
 }
 
 // Deeply instantiated generics
 var a = f<string>();
->a : string[] | { x: string[] | any; }
->f<string>() : string[] | { x: string[] | any; }
->f : <A>() => A[] | { x: A[] | any; }
+>a : Foo<string>
+>f<string>() : Foo<string>
+>f : <A>() => Foo<A[]>
 
 var b = g<string>();
->b : string[] | { x: string[] | any; }
->g<string>() : string[] | { x: string[] | any; }
->g : <B>() => B[] | { x: B[] | any; }
+>b : Bar<string>
+>g<string>() : Bar<string>
+>g : <B>() => Bar<B[]>
 
 a = b;
->a = b : string[] | { x: string[] | any; }
->a : string[] | { x: string[] | any; }
->b : string[] | { x: string[] | any; }
+>a = b : Bar<string>
+>a : Foo<string>
+>b : Bar<string>
 

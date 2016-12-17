@@ -8,4 +8,5 @@
 ////var i: I;
 ////var /**/r = i[1];
 
-verify.quickInfoAt("", "var r: string");
+goTo.marker();
+verify.quickInfoIs('var r: string');

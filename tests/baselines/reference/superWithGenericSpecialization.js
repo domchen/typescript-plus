@@ -28,7 +28,7 @@ var C = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        return _super.call(this) || this;
+        _super.call(this); // uses the type parameter type of the base class, ie string
     }
     return D;
 }(C));

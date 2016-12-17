@@ -56,6 +56,7 @@ var NonGeneric;
         });
         return C;
     }());
+    var C;
     (function (C) {
         C.bar = ''; // not reflected in class type
     })(C || (C = {}));
@@ -81,6 +82,7 @@ var Generic;
         });
         return C;
     }());
+    var C;
     (function (C) {
         C.bar = ''; // not reflected in class type
     })(C || (C = {}));

@@ -27,6 +27,7 @@ var c5a = (function () {
     c5a.prototype.foo = function () { };
     return c5a;
 }());
+var c5a;
 (function (c5a) {
     var y = 2;
 })(c5a || (c5a = {})); // should be ok
@@ -36,6 +37,7 @@ var c5b = (function () {
     c5b.prototype.foo = function () { };
     return c5b;
 }());
+var c5b;
 (function (c5b) {
     c5b.y = 2;
 })(c5b || (c5b = {})); // should be ok

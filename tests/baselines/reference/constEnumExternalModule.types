@@ -14,7 +14,7 @@ const enum E {
 
     V = 100
 >V : E
->100 : 100
+>100 : number
 }
 
 export = E

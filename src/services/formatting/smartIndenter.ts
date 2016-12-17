@@ -208,7 +208,7 @@ namespace ts.formatting {
             // - parent is SourceFile - by default immediate children of SourceFile are not indented except when user indents them manually
             // - parent and child are not on the same line
             const useActualIndentation =
-                (isDeclaration(current) || isStatementButNotDeclaration(current)) &&
+                (isDeclaration(current) || isStatement(current)) &&
                 (parent.kind === SyntaxKind.SourceFile || !parentAndChildShareLine);
 
             if (!useActualIndentation) {
@@ -332,7 +332,7 @@ namespace ts.formatting {
                 (<CallExpression>node.parent).expression !== node) {
 
                 const fullCallOrNewExpression = (<CallExpression | NewExpression>node.parent).expression;
-                const startingExpression = getStartingExpression(fullCallOrNewExpression);
+                const startingExpression = getStartingExpression(<PropertyAccessExpression | CallExpression | ElementAccessExpression>fullCallOrNewExpression);
 
                 if (fullCallOrNewExpression === startingExpression) {
                     return Value.Unknown;
@@ -350,14 +350,15 @@ namespace ts.formatting {
 
             return Value.Unknown;
 
-            function getStartingExpression(node: Expression) {
+            function getStartingExpression(node: PropertyAccessExpression | CallExpression | ElementAccessExpression) {
                 while (true) {
                     switch (node.kind) {
                         case SyntaxKind.CallExpression:
                         case SyntaxKind.NewExpression:
                         case SyntaxKind.PropertyAccessExpression:
                         case SyntaxKind.ElementAccessExpression:
-                            node = (<PropertyAccessExpression | CallExpression | NewExpression | ElementAccessExpression | PropertyAccessExpression>node).expression;
+
+                            node = <PropertyAccessExpression | CallExpression | ElementAccessExpression | PropertyAccessExpression>node.expression;
                             break;
                         default:
                             return node;

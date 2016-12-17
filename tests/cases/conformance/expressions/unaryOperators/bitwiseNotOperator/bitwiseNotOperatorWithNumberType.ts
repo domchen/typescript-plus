@@ -1,5 +1,3 @@
-// @allowUnreachableCode: true
-
 // ~ operator on number type
 var NUMBER: number;
 var NUMBER1: number[] = [1, 2];

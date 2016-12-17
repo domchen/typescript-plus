@@ -157,6 +157,7 @@ var TargetIsPublic;
     e = d; // errror
     e = e;
 })(TargetIsPublic || (TargetIsPublic = {}));
+var TargetIsPublic;
 (function (TargetIsPublic) {
     // targets
     var Base = (function () {

@@ -19,6 +19,7 @@ var M;
     M.v = 0;
 })(M = exports.M || (exports.M = {}));
 var x = 0;
+var M;
 (function (M) {
     M.v;
 })(M = exports.M || (exports.M = {}));

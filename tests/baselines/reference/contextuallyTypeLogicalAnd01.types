@@ -6,13 +6,13 @@ let x: (a: string) => string;
 
 let y = true;
 >y : boolean
->true : true
+>true : boolean
 
 x = y && (a => a);
 >x = y && (a => a) : (a: string) => string
 >x : (a: string) => string
 >y && (a => a) : (a: string) => string
->y : true
+>y : boolean
 >(a => a) : (a: string) => string
 >a => a : (a: string) => string
 >a : string

@@ -20,7 +20,7 @@ var CStatic;
 var E = (function (_super) {
     __extends(E, _super);
     function E() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return E;
 }(CStatic));

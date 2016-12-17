@@ -2,4 +2,7 @@
 
 ////var x: st/*primitive*/ring;
 
-verify.goToDefinition("primitive", []);
+goTo.marker("primitive");
+verify.not.definitionLocationExists();
+
+

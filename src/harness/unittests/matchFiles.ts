@@ -3,7 +3,6 @@
 
 namespace ts {
     const caseInsensitiveBasePath = "c:/dev/";
-    const caseInsensitiveTsconfigPath = "c:/dev/tsconfig.json";
     const caseInsensitiveHost = new Utils.MockParseConfigHost(caseInsensitiveBasePath, /*useCaseSensitiveFileNames*/ false, [
         "c:/dev/a.ts",
         "c:/dev/a.d.ts",
@@ -88,8 +87,6 @@ namespace ts {
         "c:/dev/w/.u/e.ts",
         "c:/dev/g.min.js/.g/g.ts"
     ]);
-
-    const defaultExcludes = ["node_modules", "bower_components", "jspm_packages"];
 
     describe("matchFiles", () => {
         describe("with literal file list", () => {
@@ -192,14 +189,11 @@ namespace ts {
                 };
                 const expected: ts.ParsedCommandLine = {
                     options: {},
-                    errors: [
-                        ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                            caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(defaultExcludes))
-                    ],
+                    errors: [],
                     fileNames: [],
                     wildcardDirectories: {},
                 };
-                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                 assert.deepEqual(actual.fileNames, expected.fileNames);
                 assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                 assert.deepEqual(actual.errors, expected.errors);
@@ -213,14 +207,11 @@ namespace ts {
                 };
                 const expected: ts.ParsedCommandLine = {
                     options: {},
-                    errors: [
-                        ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                            caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(defaultExcludes))
-                    ],
+                    errors: [],
                     fileNames: [],
                     wildcardDirectories: {},
                 };
-                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                 assert.deepEqual(actual.fileNames, expected.fileNames);
                 assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                 assert.deepEqual(actual.errors, expected.errors);
@@ -560,16 +551,13 @@ namespace ts {
                 };
                 const expected: ts.ParsedCommandLine = {
                     options: {},
-                    errors: [
-                        ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                            caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(defaultExcludes))
-                    ],
+                    errors: [],
                     fileNames: [],
                     wildcardDirectories: {
                         "c:/dev": ts.WatchDirectoryFlags.Recursive
                     },
                 };
-                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                 assert.deepEqual(actual.fileNames, expected.fileNames);
                 assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                 assert.deepEqual(actual.errors, expected.errors);
@@ -631,7 +619,7 @@ namespace ts {
             it("with common package folders and no exclusions", () => {
                 const json = {
                     include: [
-                        "**/a.ts"
+                       "**/a.ts"
                     ]
                 };
                 const expected: ts.ParsedCommandLine = {
@@ -713,16 +701,13 @@ namespace ts {
                     options: {
                         allowJs: false
                     },
-                    errors: [
-                        ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                            caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(defaultExcludes))
-                    ],
+                    errors: [],
                     fileNames: [],
                     wildcardDirectories: {
                         "c:/dev/js": ts.WatchDirectoryFlags.None
                     }
                 };
-                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                 assert.deepEqual(actual.fileNames, expected.fileNames);
                 assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                 assert.deepEqual(actual.errors, expected.errors);
@@ -843,14 +828,11 @@ namespace ts {
                 };
                 const expected: ts.ParsedCommandLine = {
                     options: {},
-                    errors: [
-                        ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                            caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(json.exclude))]
-                    ,
+                    errors: [],
                     fileNames: [],
                     wildcardDirectories: {}
                 };
-                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                 assert.deepEqual(actual.fileNames, expected.fileNames);
                 assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                 assert.deepEqual(actual.errors, expected.errors);
@@ -1048,14 +1030,12 @@ namespace ts {
                     const expected: ts.ParsedCommandLine = {
                         options: {},
                         errors: [
-                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_end_in_a_recursive_directory_wildcard_Asterisk_Asterisk_Colon_0, "**"),
-                            ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                                caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(defaultExcludes))
+                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_end_in_a_recursive_directory_wildcard_Asterisk_Asterisk_Colon_0, "**")
                         ],
                         fileNames: [],
                         wildcardDirectories: {}
                     };
-                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                     assert.deepEqual(actual.fileNames, expected.fileNames);
                     assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                     assert.deepEqual(actual.errors, expected.errors);
@@ -1071,14 +1051,11 @@ namespace ts {
                     };
                     const expected: ts.ParsedCommandLine = {
                         options: {},
-                        errors: [
-                            ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                                caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(json.exclude))
-                        ],
+                        errors: [],
                         fileNames: [],
                         wildcardDirectories: {}
                     };
-                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                     assert.deepEqual(actual.fileNames, expected.fileNames);
                     assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                     assert.deepEqual(actual.errors, expected.errors);
@@ -1094,14 +1071,12 @@ namespace ts {
                     const expected: ts.ParsedCommandLine = {
                         options: {},
                         errors: [
-                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_contain_multiple_recursive_directory_wildcards_Asterisk_Asterisk_Colon_0, "**/x/**/*"),
-                            ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                                caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(defaultExcludes))
+                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_contain_multiple_recursive_directory_wildcards_Asterisk_Asterisk_Colon_0, "**/x/**/*")
                         ],
                         fileNames: [],
                         wildcardDirectories: {}
                     };
-                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                     assert.deepEqual(actual.fileNames, expected.fileNames);
                     assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                     assert.deepEqual(actual.errors, expected.errors);
@@ -1147,14 +1122,12 @@ namespace ts {
                     const expected: ts.ParsedCommandLine = {
                         options: {},
                         errors: [
-                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_contain_a_parent_directory_that_appears_after_a_recursive_directory_wildcard_Asterisk_Asterisk_Colon_0, "**/../*"),
-                            ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                                caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(defaultExcludes))
+                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_contain_a_parent_directory_that_appears_after_a_recursive_directory_wildcard_Asterisk_Asterisk_Colon_0, "**/../*")
                         ],
                         fileNames: [],
                         wildcardDirectories: {}
                     };
-                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                     assert.deepEqual(actual.fileNames, expected.fileNames);
                     assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                     assert.deepEqual(actual.errors, expected.errors);
@@ -1169,14 +1142,12 @@ namespace ts {
                     const expected: ts.ParsedCommandLine = {
                         options: {},
                         errors: [
-                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_contain_a_parent_directory_that_appears_after_a_recursive_directory_wildcard_Asterisk_Asterisk_Colon_0, "**/y/../*"),
-                            ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                                caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(defaultExcludes))
+                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_contain_a_parent_directory_that_appears_after_a_recursive_directory_wildcard_Asterisk_Asterisk_Colon_0, "**/y/../*")
                         ],
                         fileNames: [],
                         wildcardDirectories: {}
                     };
-                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveHost, caseInsensitiveBasePath);
                     assert.deepEqual(actual.fileNames, expected.fileNames);
                     assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                     assert.deepEqual(actual.errors, expected.errors);
@@ -1224,7 +1195,7 @@ namespace ts {
                     const expected: ts.ParsedCommandLine = {
                         options: {},
                         errors: [
-                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_contain_a_parent_directory_that_appears_after_a_recursive_directory_wildcard_Asterisk_Asterisk_Colon_0, "**/y/..")
+                            ts.createCompilerDiagnostic(ts.Diagnostics.File_specification_cannot_contain_a_parent_directory_that_appears_after_a_recursive_directory_wildcard_Asterisk_Asterisk_Colon_0,  "**/y/..")
                         ],
                         fileNames: [
                             "c:/dev/a.ts",
@@ -1349,14 +1320,11 @@ namespace ts {
                     };
                     const expected: ts.ParsedCommandLine = {
                         options: {},
-                        errors: [
-                            ts.createCompilerDiagnostic(ts.Diagnostics.No_inputs_were_found_in_config_file_0_Specified_include_paths_were_1_and_exclude_paths_were_2,
-                                caseInsensitiveTsconfigPath, JSON.stringify(json.include), JSON.stringify(json.exclude))
-                        ],
+                        errors: [],
                         fileNames: [],
                         wildcardDirectories: {}
                     };
-                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveDottedFoldersHost, caseInsensitiveBasePath, undefined, caseInsensitiveTsconfigPath);
+                    const actual = ts.parseJsonConfigFileContent(json, caseInsensitiveDottedFoldersHost, caseInsensitiveBasePath);
                     assert.deepEqual(actual.fileNames, expected.fileNames);
                     assert.deepEqual(actual.wildcardDirectories, expected.wildcardDirectories);
                     assert.deepEqual(actual.errors, expected.errors);

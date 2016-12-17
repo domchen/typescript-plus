@@ -24,7 +24,7 @@ var foo = (function () {
 var bar = (function (_super) {
     __extends(bar, _super);
     function bar() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     bar.prototype.test = function () {
         this.

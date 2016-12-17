@@ -6,4 +6,5 @@
 ////var x: WrappedArray<string>;
 ////var /**/y = x.map(s => s.length);
 
-verify.quickInfoAt("", "var y: number[]");
+goTo.marker();
+verify.quickInfoIs('var y: number[]');

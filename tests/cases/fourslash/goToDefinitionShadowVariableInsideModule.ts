@@ -5,4 +5,6 @@
 ////    /*shadowVariableReference*/shdVar = 1;
 ////}
 
-verify.goToDefinitionForMarkers("shadowVariable");
+goTo.marker('shadowVariableReference');
+goTo.definition();
+verify.caretAtMarker('shadowVariableDefinition');

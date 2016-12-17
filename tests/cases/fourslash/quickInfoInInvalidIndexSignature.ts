@@ -2,4 +2,5 @@
 
 //// function method() { var /**/dictionary = <{ [index]: string; }>{}; }
 
-verify.quickInfoAt("", "(local var) dictionary: {}");
+goTo.marker();
+verify.quickInfoIs('(local var) dictionary: {}');

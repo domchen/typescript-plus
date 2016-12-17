@@ -31,7 +31,7 @@ var Foo = (function () {
 var Bar = (function (_super) {
     __extends(Bar, _super);
     function Bar() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     Bar[symbol] = function () {
         return _super[symbol].call(this);

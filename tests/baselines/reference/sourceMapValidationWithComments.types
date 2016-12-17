@@ -8,7 +8,7 @@ class DebugClass {
         // Start Debugger Test Code
         var i = 0;
 >i : number
->0 : 0
+>0 : number
 
         i++;
 >i++ : number
@@ -50,6 +50,6 @@ class DebugClass {
 
 
         return true;
->true : true
+>true : boolean
     }
 }

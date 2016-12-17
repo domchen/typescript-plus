@@ -1,6 +1,6 @@
 //@target: ES5
 module M {
-    var Symbol: any;
+    var Symbol;
 
     export class C {
         [Symbol.iterator]() { }

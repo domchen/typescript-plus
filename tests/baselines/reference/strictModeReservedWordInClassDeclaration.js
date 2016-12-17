@@ -75,14 +75,14 @@ var F1 = (function () {
 var G = (function (_super) {
     __extends(G, _super);
     function G() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return G;
 }(package));
 var H = (function (_super) {
     __extends(H, _super);
     function H() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return H;
 }(package.A));

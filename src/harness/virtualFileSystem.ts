@@ -10,9 +10,9 @@ namespace Utils {
             this.name = name;
         }
 
-        isDirectory(): this is VirtualDirectory { return false; }
-        isFile(): this is VirtualFile { return false; }
-        isFileSystem(): this is VirtualFileSystem { return false; }
+        isDirectory() { return false; }
+        isFile() { return false; }
+        isFileSystem() { return false; }
     }
 
     export class VirtualFile extends VirtualFileSystemEntry {
@@ -82,8 +82,9 @@ namespace Utils {
                 return file;
             }
             else if (entry.isFile()) {
-                entry.content = content;
-                return entry;
+                const file = <VirtualFile>entry;
+                file.content = content;
+                return file;
             }
             else {
                 return undefined;
@@ -195,18 +196,10 @@ namespace Utils {
     }
 
     export class MockParseConfigHost extends VirtualFileSystem implements ts.ParseConfigHost {
-        constructor(currentDirectory: string, ignoreCase: boolean, files: ts.MapLike<string> | string[]) {
+        constructor(currentDirectory: string, ignoreCase: boolean, files: string[]) {
             super(currentDirectory, ignoreCase);
-            const fileNames = (files instanceof Array) ? files : ts.getOwnKeys(files);
-            for (const file of fileNames) {
-                this.addFile(file, new  Harness.LanguageService.ScriptInfo(file, (files as ts.MapLike<string>)[file], /*isRootFile*/false));
-            }
-        }
-
-        readFile(path: string): string {
-            const value = this.traversePath(path);
-            if (value && value.isFile()) {
-                return value.content.content;
+            for (const file of files) {
+                this.addFile(file);
             }
         }
 

@@ -22,12 +22,14 @@ edit.insert('foo(1);');
 goTo.marker('2');
 verify.completionListContains('x');
 
-verify.quickInfoAt("3", "(local var) r: C<number>");
+goTo.marker('3');
+verify.quickInfoIs('(local var) r: C<number>');
 
 goTo.marker('4');
 verify.completionListContains('x');
 edit.insert('x;');
 
-verify.quickInfoAt("5", "(local var) r2: number");
+goTo.marker('5');
+verify.quickInfoIs('(local var) r2: number');
 
 verify.numberOfErrorsInCurrentFile(0);

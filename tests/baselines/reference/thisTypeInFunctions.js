@@ -227,7 +227,7 @@ var C = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return D;
 }(C));
@@ -336,7 +336,7 @@ var Base1 = (function () {
 var Derived1 = (function (_super) {
     __extends(Derived1, _super);
     function Derived1() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return Derived1;
 }(Base1));
@@ -350,7 +350,7 @@ var Base2 = (function () {
 var Derived2 = (function (_super) {
     __extends(Derived2, _super);
     function Derived2() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return Derived2;
 }(Base2));

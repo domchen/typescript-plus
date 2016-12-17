@@ -43,14 +43,14 @@ var C = (function () {
 var ELoc = (function (_super) {
     __extends(ELoc, _super);
     function ELoc(x) {
-        return _super.call(this, 0, x) || this;
+        _super.call(this, 0, x);
     }
     return ELoc;
 }(C));
 var ELocVar = (function (_super) {
     __extends(ELocVar, _super);
     function ELocVar(x) {
-        return _super.call(this, 0, loc) || this;
+        _super.call(this, 0, loc);
     }
     ELocVar.prototype.m = function () {
         var loc = 10;
@@ -60,27 +60,24 @@ var ELocVar = (function (_super) {
 var D = (function (_super) {
     __extends(D, _super);
     function D(z) {
-        var _this = _super.call(this, _this.z) || this;
-        _this.z = z;
-        return _this;
+        _super.call(this, this.z);
+        this.z = z;
     }
     return D;
 }(C)); // too few params
 var E = (function (_super) {
     __extends(E, _super);
     function E(z) {
-        var _this = _super.call(this, 0, _this.z) || this;
-        _this.z = z;
-        return _this;
+        _super.call(this, 0, this.z);
+        this.z = z;
     }
     return E;
 }(C));
 var F = (function (_super) {
     __extends(F, _super);
     function F(z) {
-        var _this = _super.call(this, "hello", _this.z) || this;
-        _this.z = z;
-        return _this;
+        _super.call(this, "hello", this.z);
+        this.z = z;
     }
     return F;
 }(C)); // first param type

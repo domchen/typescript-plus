@@ -67,7 +67,7 @@ namespace ts.formatting {
                 return result;
             }
 
-            public Contains(): boolean {
+            public Contains(tokenValue: SyntaxKind): boolean {
                 return true;
             }
 

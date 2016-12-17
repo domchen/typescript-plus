@@ -15,5 +15,9 @@
         "m1.ts",
         "test.ts"
     ],
-    "emittedFiles": []
+    "emittedFiles": [
+        "bin/test.js.map",
+        "bin/test.js",
+        "bin/test.d.ts"
+    ]
 }

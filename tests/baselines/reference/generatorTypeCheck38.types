@@ -3,11 +3,11 @@ var yield;
 >yield : any
 
 function* g() {
->g : () => IterableIterator<0>
+>g : () => IterableIterator<number>
 
     yield 0;
 >yield 0 : any
->0 : 0
+>0 : number
 
     var v: typeof yield;
 >v : any

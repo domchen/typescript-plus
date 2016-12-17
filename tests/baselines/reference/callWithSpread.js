@@ -99,9 +99,8 @@ var C = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        var _this = _super.call(this, 1, 2) || this;
-        _this = _super.apply(this, [1, 2].concat(a)) || this;
-        return _this;
+        _super.call(this, 1, 2);
+        _super.apply(this, [1, 2].concat(a));
     }
     D.prototype.foo = function () {
         _super.prototype.foo.call(this, 1, 2);

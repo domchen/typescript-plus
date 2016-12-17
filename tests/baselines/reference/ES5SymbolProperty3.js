@@ -1,5 +1,5 @@
 //// [ES5SymbolProperty3.ts]
-var Symbol: any;
+var Symbol;
 
 class C {
     [Symbol.iterator]() { }

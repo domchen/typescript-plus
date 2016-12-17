@@ -109,7 +109,7 @@ var PortalFx;
                 var Validator = (function (_super) {
                     __extends(Validator, _super);
                     function Validator(message) {
-                        return _super.call(this, message) || this;
+                        _super.call(this, message);
                     }
                     return Validator;
                 }(Portal.Controls.Validators.Validator));

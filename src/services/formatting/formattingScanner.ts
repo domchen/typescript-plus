@@ -31,7 +31,7 @@ namespace ts.formatting {
     }
 
     export function getFormattingScanner(sourceFile: SourceFile, startPos: number, endPos: number): FormattingScanner {
-        Debug.assert(scanner === undefined, "Scanner should be undefined");
+        Debug.assert(scanner === undefined);
         scanner = sourceFile.languageVariant === LanguageVariant.JSX ? jsxScanner : standardScanner;
 
         scanner.setText(sourceFile.text);
@@ -62,7 +62,7 @@ namespace ts.formatting {
         };
 
         function advance(): void {
-            Debug.assert(scanner !== undefined, "Scanner should be present");
+            Debug.assert(scanner !== undefined);
 
             lastTokenInfo = undefined;
             const isStarted = scanner.getStartPos() !== startPos;

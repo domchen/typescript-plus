@@ -10,13 +10,13 @@ module m1 {
 >e : e
 
         weekday,
->weekday : e.weekday
+>weekday : e
 
         weekend,
->weekend : e.weekend
+>weekend : e
 
         holiday
->holiday : e.holiday
+>holiday : e
     }
 }
 var a: { c: m1.c; };
@@ -74,10 +74,10 @@ var d = {
 
     mh: m1.e.holiday
 >mh : m1.e
->m1.e.holiday : m1.e.holiday
+>m1.e.holiday : m1.e
 >m1.e : typeof m1.e
 >m1 : typeof m1
 >e : typeof m1.e
->holiday : m1.e.holiday
+>holiday : m1.e
 
 };

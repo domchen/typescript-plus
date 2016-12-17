@@ -23,6 +23,7 @@ var A;
         return B;
     }());
     A.B = B;
+    var B;
     (function (B) {
         B.x = 1;
     })(B = A.B || (A.B = {}));

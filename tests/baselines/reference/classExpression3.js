@@ -15,17 +15,15 @@ var __extends = (this && this.__extends) || function (d, b) {
 var C = (function (_super) {
     __extends(class_1, _super);
     function class_1() {
-        var _this = _super.apply(this, arguments) || this;
-        _this.c = 3;
-        return _this;
+        _super.apply(this, arguments);
+        this.c = 3;
     }
     return class_1;
 }((function (_super) {
     __extends(class_2, _super);
     function class_2() {
-        var _this = _super.apply(this, arguments) || this;
-        _this.b = 2;
-        return _this;
+        _super.apply(this, arguments);
+        this.b = 2;
     }
     return class_2;
 }((function () {

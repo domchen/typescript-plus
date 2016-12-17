@@ -32,7 +32,7 @@ var B;
     var D = (function (_super) {
         __extends(D, _super);
         function D() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return D;
     }(B.a.C));

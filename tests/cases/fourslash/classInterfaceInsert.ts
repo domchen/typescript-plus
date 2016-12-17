@@ -9,9 +9,11 @@
 ////     }
 //// }
 
-verify.quickInfoAt("className", "class Sphere");
+goTo.marker('className');
+verify.quickInfoIs('class Sphere');
 
 goTo.marker('interfaceGoesHere');
 edit.insert("\r\ninterface Surface {\r\n    reflect: () => number;\r\n}\r\n");
 
-verify.quickInfoAt("className", "class Sphere");
+goTo.marker('className');
+verify.quickInfoIs('class Sphere');

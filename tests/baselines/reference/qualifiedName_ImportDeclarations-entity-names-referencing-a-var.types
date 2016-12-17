@@ -4,7 +4,7 @@ module Alpha {
 
     export var x = 100;
 >x : number
->100 : 100
+>100 : number
 }
 
 module Beta {

@@ -82,7 +82,6 @@ interface TestConfig {
     light?: boolean;
     taskConfigsFolder?: string;
     workerCount?: number;
-    stackTraceLimit?: number | "full";
     tasks?: TaskSet[];
     test?: string[];
     runUnitTests?: boolean;
@@ -115,13 +114,6 @@ if (testConfigContent !== "") {
             }
             runners.push(runner);
         }
-    }
-
-    if (testConfig.stackTraceLimit === "full") {
-        (<any>Error).stackTraceLimit = Infinity;
-    }
-    else if ((+testConfig.stackTraceLimit | 0) > 0) {
-        (<any>Error).stackTraceLimit = testConfig.stackTraceLimit;
     }
 
     if (testConfig.test && testConfig.test.length > 0) {
@@ -222,5 +214,5 @@ else {
 }
 if (!runUnitTests) {
     // patch `describe` to skip unit tests
-    describe = ts.noop as any;
+    describe = <any>(function () { });
 }

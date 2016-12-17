@@ -4,7 +4,7 @@ declare module JSX {
 	interface Element { isElement; }
 }
 
-var T: any, T1: any, T2: any;
+var T, T1, T2;
 
 // This is an element
 var x1 = <T>() => {}</T>;

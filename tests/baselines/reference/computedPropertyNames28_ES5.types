@@ -16,11 +16,11 @@ class C extends Base {
 >{            [(super(), "prop")]() { }        } : { [x: string]: () => void; }
 
             [(super(), "prop")]() { }
->(super(), "prop") : "prop"
->super(), "prop" : "prop"
+>(super(), "prop") : string
+>super(), "prop" : string
 >super() : void
 >super : typeof Base
->"prop" : "prop"
+>"prop" : string
 
         };
     }

@@ -21,25 +21,25 @@ var abc: A & B & C;
 >C : C
 
 abc.a = "hello";
->abc.a = "hello" : "hello"
+>abc.a = "hello" : string
 >abc.a : string
 >abc : A & B & C
 >a : string
->"hello" : "hello"
+>"hello" : string
 
 abc.b = "hello";
->abc.b = "hello" : "hello"
+>abc.b = "hello" : string
 >abc.b : string
 >abc : A & B & C
 >b : string
->"hello" : "hello"
+>"hello" : string
 
 abc.c = "hello";
->abc.c = "hello" : "hello"
+>abc.c = "hello" : string
 >abc.c : string
 >abc : A & B & C
 >c : string
->"hello" : "hello"
+>"hello" : string
 
 interface X { x: A }
 >X : X
@@ -63,31 +63,31 @@ var xyz: X & Y & Z;
 >Z : Z
 
 xyz.x.a = "hello";
->xyz.x.a = "hello" : "hello"
+>xyz.x.a = "hello" : string
 >xyz.x.a : string
 >xyz.x : A & B & C
 >xyz : X & Y & Z
 >x : A & B & C
 >a : string
->"hello" : "hello"
+>"hello" : string
 
 xyz.x.b = "hello";
->xyz.x.b = "hello" : "hello"
+>xyz.x.b = "hello" : string
 >xyz.x.b : string
 >xyz.x : A & B & C
 >xyz : X & Y & Z
 >x : A & B & C
 >b : string
->"hello" : "hello"
+>"hello" : string
 
 xyz.x.c = "hello";
->xyz.x.c = "hello" : "hello"
+>xyz.x.c = "hello" : string
 >xyz.x.c : string
 >xyz.x : A & B & C
 >xyz : X & Y & Z
 >x : A & B & C
 >c : string
->"hello" : "hello"
+>"hello" : string
 
 type F1 = (x: string) => string;
 >F1 : F1
@@ -106,13 +106,13 @@ var s = f("hello");
 >s : string
 >f("hello") : string
 >f : F1 & F2
->"hello" : "hello"
+>"hello" : string
 
 var n = f(42);
 >n : number
 >f(42) : number
 >f : F1 & F2
->42 : 42
+>42 : number
 
 interface D {
 >D : D
@@ -150,24 +150,24 @@ const de: D & E = {
 
             d: 'yes',
 >d : string
->'yes' : "yes"
+>'yes' : string
 
             f: 'no'
 >f : string
->'no' : "no"
+>'no' : string
 
         },
         different: { e: 12 },
 >different : { e: number; }
 >{ e: 12 } : { e: number; }
 >e : number
->12 : 12
+>12 : number
 
         other: { g: 101 }
 >other : { g: number; }
 >{ g: 101 } : { g: number; }
 >g : number
->101 : 101
+>101 : number
     }
 }
 

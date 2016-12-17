@@ -17,53 +17,53 @@ declare var console: {
 }
 var hello = "hello";
 >hello : string
->"hello" : "hello"
+>"hello" : string
 
 var robotA: Robot = { name: "mower", skill: "mowing" };
 >robotA : Robot
 >Robot : Robot
 >{ name: "mower", skill: "mowing" } : { name: string; skill: string; }
 >name : string
->"mower" : "mower"
+>"mower" : string
 >skill : string
->"mowing" : "mowing"
+>"mowing" : string
 
 var robotB: Robot = { name: "trimmer", skill: "trimming" };
 >robotB : Robot
 >Robot : Robot
 >{ name: "trimmer", skill: "trimming" } : { name: string; skill: string; }
 >name : string
->"trimmer" : "trimmer"
+>"trimmer" : string
 >skill : string
->"trimming" : "trimming"
+>"trimming" : string
 
 var { name: nameA = "<NoName>" } = robotA;
 >name : any
 >nameA : string
->"<NoName>" : "<NoName>"
+>"<NoName>" : string
 >robotA : Robot
 
 var { name: nameB = "<NoName>", skill: skillB = "<skillUnspecified>" } = robotB;
 >name : any
 >nameB : string
->"<NoName>" : "<NoName>"
+>"<NoName>" : string
 >skill : any
 >skillB : string
->"<skillUnspecified>" : "<skillUnspecified>"
+>"<skillUnspecified>" : string
 >robotB : Robot
 
 var { name: nameC = "<NoName>", skill: skillC = "<skillUnspecified>" } = { name: "Edger", skill: "cutting edges" };
 >name : any
 >nameC : string
->"<NoName>" : "<NoName>"
+>"<NoName>" : string
 >skill : any
 >skillC : string
->"<skillUnspecified>" : "<skillUnspecified>"
+>"<skillUnspecified>" : string
 >{ name: "Edger", skill: "cutting edges" } : { name?: string; skill?: string; }
 >name : string
->"Edger" : "Edger"
+>"Edger" : string
 >skill : string
->"cutting edges" : "cutting edges"
+>"cutting edges" : string
 
 if (nameA == nameB) {
 >nameA == nameB : boolean

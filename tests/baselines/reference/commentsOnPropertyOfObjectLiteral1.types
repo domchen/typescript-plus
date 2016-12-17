@@ -13,7 +13,7 @@ var resolve = {
 
     id1: /* c1 */ "hello",
 >id1 : string
->"hello" : "hello"
+>"hello" : string
 
     id2:
 >id2 : (details: any) => any

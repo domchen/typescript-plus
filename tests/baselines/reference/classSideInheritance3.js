@@ -33,16 +33,15 @@ var A = (function () {
 var B = (function (_super) {
     __extends(B, _super);
     function B(x, data) {
-        var _this = _super.call(this, x) || this;
-        _this.data = data;
-        return _this;
+        _super.call(this, x);
+        this.data = data;
     }
     return B;
 }(A));
 var C = (function (_super) {
     __extends(C, _super);
     function C(x) {
-        return _super.call(this, x) || this;
+        _super.call(this, x);
     }
     return C;
 }(A));

@@ -11,9 +11,14 @@
 //// class MyElement {}
 //// var z = <My/*3*/Element></My/*4*/Element>
 
-verify.quickInfos({
-    1: "(property) JSX.IntrinsicElements.div: any",
-    2: "(property) JSX.IntrinsicElements.div: any",
-    3: "class MyElement",
-    4: "class MyElement"
-});
+goTo.marker("1");
+verify.quickInfoIs("(property) JSX.IntrinsicElements.div: any", undefined);
+
+goTo.marker("2");
+verify.quickInfoIs("(property) JSX.IntrinsicElements.div: any", undefined);;
+
+goTo.marker("3");
+verify.quickInfoIs("class MyElement", undefined);;
+
+goTo.marker("4");
+verify.quickInfoIs("class MyElement", undefined);;

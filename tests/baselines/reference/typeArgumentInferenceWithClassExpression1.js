@@ -14,11 +14,9 @@ function foo(x) {
     }()); }
     return undefined;
 }
-foo((_a = (function () {
-        function class_2() {
-        }
-        return class_2;
-    }()),
-    _a.prop = "hello",
-    _a)).length;
-var _a;
+foo((function () {
+    function class_2() {
+    }
+    class_2.prop = "hello";
+    return class_2;
+}())).length;

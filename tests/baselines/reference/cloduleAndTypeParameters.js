@@ -19,6 +19,7 @@ var Foo = (function () {
     }
     return Foo;
 }());
+var Foo;
 (function (Foo) {
     var Baz = (function () {
         function Baz() {

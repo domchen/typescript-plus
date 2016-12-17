@@ -26,9 +26,8 @@ var Base = (function () {
 var Foo = (function (_super) {
     __extends(Foo, _super);
     function Foo() {
-        var _this = _super.call(this, _this) || this;
-        _this.x = 0;
-        return _this;
+        _super.call(this, this);
+        this.x = 0;
     }
     return Foo;
 }(Base));

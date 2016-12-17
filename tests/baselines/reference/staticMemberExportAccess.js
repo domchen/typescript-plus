@@ -30,6 +30,7 @@ var Sammy = (function () {
     };
     return Sammy;
 }());
+var Sammy;
 (function (Sammy) {
     Sammy.x = 1;
 })(Sammy || (Sammy = {}));

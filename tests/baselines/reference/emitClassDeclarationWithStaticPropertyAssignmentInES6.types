@@ -4,7 +4,7 @@ class C {
 
     static z: string = "Foo";
 >z : string
->"Foo" : "Foo"
+>"Foo" : string
 }
 
 class D {
@@ -12,10 +12,10 @@ class D {
 
     x = 20000;
 >x : number
->20000 : 20000
+>20000 : number
 
     static b = true;
 >b : boolean
->true : true
+>true : boolean
 }
 

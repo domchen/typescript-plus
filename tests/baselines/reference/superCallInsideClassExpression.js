@@ -35,15 +35,13 @@ var C = (function () {
 var B = (function (_super) {
     __extends(B, _super);
     function B() {
-        var _this;
         var D = (function (_super) {
             __extends(class_1, _super);
             function class_1() {
-                return _super.call(this) || this;
+                _super.call(this);
             }
             return class_1;
         }(C));
-        return _this;
     }
     return B;
 }(A));

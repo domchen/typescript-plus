@@ -27,13 +27,13 @@ function withFew<a, r>(values: a[], haveFew: (values: a[]) => r, haveNone: (reas
 >values.length : number
 >values : a[]
 >length : number
->0 : 0
+>0 : number
 >haveFew(values) : r
 >haveFew : (values: a[]) => r
 >values : a[]
 >haveNone('No values.') : r
 >haveNone : (reason: string) => r
->'No values.' : "No values."
+>'No values.' : string
 }
 function id<a>(value: a) : a { return value; }
 >id : <a>(value: a) => a
@@ -48,9 +48,9 @@ const result = withFew([1, 2, 3], id, fail); // expected result is number[]
 >withFew([1, 2, 3], id, fail) : number[]
 >withFew : <a, r>(values: a[], haveFew: (values: a[]) => r, haveNone: (reason: string) => r) => r
 >[1, 2, 3] : number[]
->1 : 1
->2 : 2
->3 : 3
+>1 : number
+>2 : number
+>3 : number
 >id : <a>(value: a) => a
 >fail : (message: string) => never
 

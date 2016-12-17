@@ -4,8 +4,8 @@
 
 enum E { red, blue }
 >E : E
->red : E.red
->blue : E.blue
+>red : E
+>blue : E
 
 // A contextual signature S is extracted from a function type T as follows:
 //      If T is a function type with exactly one call signature, and if that call signature is non- generic, S is that signature.
@@ -25,7 +25,7 @@ var a0: (n: number, s: string) => number = (num, str) => {
 >toExponential : (fractionDigits?: number) => string
 
     return 0;
->0 : 0
+>0 : number
 }
 
 class Class<T> {
@@ -51,7 +51,7 @@ var a1: (c: Class<Number>) => number = (a1) => {
 >foo : () => void
 
     return 1;
->1 : 1
+>1 : number
 }
 
 // A contextual signature S is extracted from a function type T as follows:
@@ -87,7 +87,7 @@ b2 = (foo, bar) => { return foo + 1; }
 >bar : string
 >foo + 1 : number
 >foo : number
->1 : 1
+>1 : number
 
 b2 = (foo, bar) => { return "hello"; }
 >b2 = (foo, bar) => { return "hello"; } : (foo: number, bar: string) => string
@@ -95,7 +95,7 @@ b2 = (foo, bar) => { return "hello"; }
 >(foo, bar) => { return "hello"; } : (foo: number, bar: string) => string
 >foo : number
 >bar : string
->"hello" : "hello"
+>"hello" : string
 
 var b3: (name: string, num: number, boo: boolean) => void;
 >b3 : (name: string, num: number, boo: boolean) => void
@@ -117,15 +117,15 @@ var b4: (n: E) => string = (number = 1) => { return "hello"; };
 >(number = 1) => { return "hello"; } : (number?: E) => string
 >number : E
 >1 : 1
->"hello" : "hello"
+>"hello" : string
 
 var b5: (n: {}) => string = (number = "string") => { return "hello"; };
 >b5 : (n: {}) => string
 >n : {}
 >(number = "string") => { return "hello"; } : (number?: {}) => string
 >number : {}
->"string" : "string"
->"hello" : "hello"
+>"string" : string
+>"hello" : string
 
 // A contextual signature S is extracted from a function type T as follows:
 //      Otherwise, no contextual signature can be extracted from T and S is undefined.

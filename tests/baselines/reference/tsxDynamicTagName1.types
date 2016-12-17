@@ -2,7 +2,7 @@
 
 var CustomTag = "h1";
 >CustomTag : string
->"h1" : "h1"
+>"h1" : string
 
 <CustomTag> Hello World </CustomTag>  // No error
 ><CustomTag> Hello World </CustomTag> : any

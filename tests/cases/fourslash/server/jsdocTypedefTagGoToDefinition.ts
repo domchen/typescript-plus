@@ -19,7 +19,11 @@
 //// /** @type {Animal} */
 //// var animal; animal.animalName/*4*/
 
-verify.goToDefinition({
-    3: "1",
-    4: "2"
-});
+goTo.file('jsdocCompletion_typedef.js');
+goTo.marker('3');
+goTo.definition();
+verify.caretAtMarker('1');
+
+goTo.marker('4');
+goTo.definition();
+verify.caretAtMarker('2');

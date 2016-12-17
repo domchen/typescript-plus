@@ -1,5 +1,5 @@
 // expected error for all the LHS of assignments
-var value: any;
+var value;
 
 // this
 class C {

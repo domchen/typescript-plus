@@ -12,7 +12,7 @@ class Employee {
 
     public retired = false;
 >retired : boolean
->false : false
+>false : boolean
 
     public manager: Employee = null;
 >manager : Employee

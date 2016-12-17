@@ -21,12 +21,17 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Parent = (function () {
     function Parent() {
     }
+    Object.defineProperty(Parent.prototype, "message", {
+        set: function (str) { },
+        enumerable: true,
+        configurable: true
+    });
     return Parent;
 }());
 var Child = (function (_super) {
     __extends(Child, _super);
     function Child() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     Object.defineProperty(Child.prototype, "message", {
         set: function (str) {

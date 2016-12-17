@@ -2,7 +2,7 @@
 
 var v = 1;
 >v : number
->1 : 1
+>1 : number
 
 function f() { }
 >f : () => void
@@ -17,17 +17,17 @@ enum E {
 >E : E
 
     A, B, C
->A : E.A
->B : E.B
->C : E.C
+>A : E
+>B : E
+>C : E
 }
 const enum D {
 >D : D
 
     A, B, C
->A : D.A
->B : D.B
->C : D.C
+>A : D
+>B : D
+>C : D
 }
 module M {
 >M : typeof M

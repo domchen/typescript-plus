@@ -1,11 +1,11 @@
 === tests/cases/compiler/es6ModuleConst.ts ===
 export const a = "hello";
->a : "hello"
->"hello" : "hello"
+>a : string
+>"hello" : string
 
 export const x: string = a, y = x;
 >x : string
->a : "hello"
+>a : string
 >y : string
 >x : string
 
@@ -23,49 +23,49 @@ export module m1 {
 >m1 : typeof m1
 
     export const k = a;
->k : "hello"
->a : "hello"
+>k : string
+>a : string
 
     export const l: string = b, m = k;
 >l : string
 >b : string
->m : "hello"
->k : "hello"
+>m : string
+>k : string
 
     const n = m1.k;
->n : "hello"
->m1.k : "hello"
+>n : string
+>m1.k : string
 >m1 : typeof m1
->k : "hello"
+>k : string
 
     const o: string = n, p = k;
 >o : string
->n : "hello"
->p : "hello"
->k : "hello"
+>n : string
+>p : string
+>k : string
 }
 module m2 {
 >m2 : typeof m2
 
     export const k = a;
->k : "hello"
->a : "hello"
+>k : string
+>a : string
 
     export const l: string = b, m = k;
 >l : string
 >b : string
->m : "hello"
->k : "hello"
+>m : string
+>k : string
 
     const n = m1.k;
->n : "hello"
->m1.k : "hello"
+>n : string
+>m1.k : string
 >m1 : typeof m1
->k : "hello"
+>k : string
 
     const o: string = n, p = k;
 >o : string
->n : "hello"
->p : "hello"
->k : "hello"
+>n : string
+>p : string
+>k : string
 }

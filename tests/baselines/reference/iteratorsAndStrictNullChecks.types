@@ -4,8 +4,8 @@
 for (const x of ["a", "b"]) {
 >x : string
 >["a", "b"] : string[]
->"a" : "a"
->"b" : "b"
+>"a" : string
+>"b" : string
 
     x.substring;
 >x.substring : (start: number, end?: number | undefined) => string
@@ -17,15 +17,15 @@ for (const x of ["a", "b"]) {
 const xs = [1, 2, 3];
 >xs : number[]
 >[1, 2, 3] : number[]
->1 : 1
->2 : 2
->3 : 3
+>1 : number
+>2 : number
+>3 : number
 
 const ys = [4, 5];
 >ys : number[]
 >[4, 5] : number[]
->4 : 4
->5 : 5
+>4 : number
+>5 : number
 
 xs.push(...ys);
 >xs.push(...ys) : number

@@ -21,13 +21,6 @@ namespace ts.NavigationBar {
         return result;
     }
 
-    export function getNavigationTree(sourceFile: SourceFile): NavigationTree {
-        curSourceFile = sourceFile;
-        const result = convertToTree(rootNavigationBarNode(sourceFile));
-        curSourceFile = undefined;
-        return result;
-    }
-
     // Keep sourceFile handy so we don't have to search for it every time we need to call `getText`.
     let curSourceFile: SourceFile;
     function nodeText(node: Node): string {
@@ -225,13 +218,15 @@ namespace ts.NavigationBar {
                 break;
 
             default:
-                forEach(node.jsDocComments, jsDocComment => {
-                    forEach(jsDocComment.tags, tag => {
-                        if (tag.kind === SyntaxKind.JSDocTypedefTag) {
-                            addLeafNode(tag);
+                if (node.jsDocComments) {
+                    for (const jsDocComment of node.jsDocComments) {
+                        for (const tag of jsDocComment.tags) {
+                            if (tag.kind === SyntaxKind.JSDocTypedefTag) {
+                                addLeafNode(tag);
+                            }
                         }
-                    });
-                });
+                    }
+                }
 
                 forEachChild(node, addChildrenRecursively);
         }
@@ -330,8 +325,10 @@ namespace ts.NavigationBar {
         }
     }
 
+    // More efficient to create a collator once and use its `compare` than to call `a.localeCompare(b)` many times.
+    const collator: { compare(a: string, b: string): number } = typeof Intl === "undefined" ? undefined : new Intl.Collator();
     // Intl is missing in Safari, and node 0.10 treats "a" as greater than "B".
-    const localeCompareIsCorrect = ts.collator && ts.collator.compare("a", "B") < 0;
+    const localeCompareIsCorrect = collator && collator.compare("a", "B") < 0;
     const localeCompareFix: (a: string, b: string) => number = localeCompareIsCorrect ? collator.compare : function(a, b) {
         // This isn't perfect, but it passes all of our tests.
         for (let i = 0; i < Math.min(a.length, b.length); i++) {
@@ -342,7 +339,7 @@ namespace ts.NavigationBar {
             if (chA === "'" && chB === "\"") {
                 return -1;
             }
-            const cmp = ts.compareStrings(chA.toLocaleLowerCase(), chB.toLocaleLowerCase());
+            const cmp = chA.toLocaleLowerCase().localeCompare(chB.toLocaleLowerCase());
             if (cmp !== 0) {
                 return cmp;
             }
@@ -400,12 +397,9 @@ namespace ts.NavigationBar {
             case SyntaxKind.FunctionExpression:
             case SyntaxKind.ClassDeclaration:
             case SyntaxKind.ClassExpression:
-                if (getModifierFlags(node) & ModifierFlags.Default) {
+                if (node.flags & NodeFlags.Default) {
                     return "default";
                 }
-                // We may get a string with newlines or other whitespace in the case of an object dereference
-                // (eg: "app\n.onactivated"), so we should remove the whitespace for readabiltiy in the
-                // navigation bar.
                 return getFunctionOrClassName(<ArrowFunction | FunctionExpression | ClassExpression>node);
             case SyntaxKind.Constructor:
                 return "constructor";
@@ -472,7 +466,6 @@ namespace ts.NavigationBar {
                 case SyntaxKind.MethodDeclaration:
                 case SyntaxKind.GetAccessor:
                 case SyntaxKind.SetAccessor:
-                case SyntaxKind.VariableDeclaration:
                     return hasSomeImportantChild(item);
 
                 case SyntaxKind.ArrowFunction:
@@ -510,16 +503,6 @@ namespace ts.NavigationBar {
     // NavigationBarItem requires an array, but will not mutate it, so just give it this for performance.
     const emptyChildItemArray: NavigationBarItem[] = [];
 
-    function convertToTree(n: NavigationBarNode): NavigationTree {
-        return {
-            text: getItemName(n.node),
-            kind: getNodeKind(n.node),
-            kindModifiers: getNodeModifiers(n.node),
-            spans: getSpans(n),
-            childItems: map(n.children, convertToTree)
-        };
-    }
-
     function convertToTopLevelItem(n: NavigationBarNode): NavigationBarItem {
         return {
             text: getItemName(n.node),
@@ -544,16 +527,16 @@ namespace ts.NavigationBar {
                 grayed: false
             };
         }
-    }
 
-    function getSpans(n: NavigationBarNode): TextSpan[] {
-        const spans = [getNodeSpan(n.node)];
-        if (n.additionalNodes) {
-            for (const node of n.additionalNodes) {
-                spans.push(getNodeSpan(node));
+        function getSpans(n: NavigationBarNode): TextSpan[] {
+            const spans = [getNodeSpan(n.node)];
+            if (n.additionalNodes) {
+                for (const node of n.additionalNodes) {
+                    spans.push(getNodeSpan(node));
+                }
             }
+            return spans;
         }
-        return spans;
     }
 
     function getModuleName(moduleDeclaration: ModuleDeclaration): string {
@@ -605,14 +588,14 @@ namespace ts.NavigationBar {
         // See if it is of the form "<expr> = function(){...}". If so, use the text from the left-hand side.
         else if (node.parent.kind === SyntaxKind.BinaryExpression &&
             (node.parent as BinaryExpression).operatorToken.kind === SyntaxKind.EqualsToken) {
-            return nodeText((node.parent as BinaryExpression).left).replace(whiteSpaceRegex, "");
+            return nodeText((node.parent as BinaryExpression).left);
         }
         // See if it is a property assignment, and if so use the property name
         else if (node.parent.kind === SyntaxKind.PropertyAssignment && (node.parent as PropertyAssignment).name) {
             return nodeText((node.parent as PropertyAssignment).name);
         }
         // Default exports are named "default"
-        else if (getModifierFlags(node) & ModifierFlags.Default) {
+        else if (node.flags & NodeFlags.Default) {
             return "default";
         }
         else {
@@ -623,19 +606,4 @@ namespace ts.NavigationBar {
     function isFunctionOrClassExpression(node: Node): boolean {
         return node.kind === SyntaxKind.FunctionExpression || node.kind === SyntaxKind.ArrowFunction || node.kind === SyntaxKind.ClassExpression;
     }
-
-    /**
-     * Matches all whitespace characters in a string. Eg:
-     * 
-     * "app.
-     * 
-     * onactivated"
-     * 
-     * matches because of the newline, whereas
-     * 
-     * "app.onactivated"
-     * 
-     * does not match.
-     */
-    const whiteSpaceRegex = /\s+/g;
 }

@@ -4,32 +4,32 @@ enum days {
 >days : days
 
     monday,
->monday : days.monday
+>monday : days
 
     tuesday,
->tuesday : days.tuesday
+>tuesday : days
 
     wednesday,
->wednesday : days.wednesday
+>wednesday : days
 
     thursday,
->thursday : days.thursday
+>thursday : days
 
     friday,
->friday : days.friday
+>friday : days
 
     saturday,
->saturday : days.saturday
+>saturday : days
 
     sunday
->sunday : days.sunday
+>sunday : days
 }
 
 var weekendDay = days.saturday;
 >weekendDay : days
->days.saturday : days.saturday
+>days.saturday : days
 >days : typeof days
->saturday : days.saturday
+>saturday : days
 
 var daysOfMonth = days;
 >daysOfMonth : typeof days

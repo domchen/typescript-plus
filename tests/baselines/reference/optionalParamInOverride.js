@@ -22,7 +22,7 @@ var Z = (function () {
 var Y = (function (_super) {
     __extends(Y, _super);
     function Y() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     Y.prototype.func = function (value) { };
     return Y;

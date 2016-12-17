@@ -11,7 +11,7 @@ module A
 >Hello : () => string
         {
             return "from private B";
->"from private B" : "from private B"
+>"from private B" : string
         }
     }
 }
@@ -26,7 +26,7 @@ module A
 >Hello : () => string
         {
             return "from export B";
->"from export B" : "from export B"
+>"from export B" : string
         }
     }
 }

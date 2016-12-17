@@ -3,19 +3,19 @@
 const a = [0];
 >a : number[]
 >[0] : number[]
->0 : 0
+>0 : number
 
 const s = "";
->s : ""
->"" : ""
+>s : string
+>"" : string
 
 const x = 0;
->x : 0
->0 : 0
+>x : number
+>0 : number
 
 const b = false;
->b : false
->false : false
+>b : boolean
+>false : boolean
 
 const v: void = undefined;
 >v : void
@@ -30,11 +30,11 @@ const n = null;
 >null : null
 
 const z = s || x || u;
->z : undefined
->s || x || u : undefined
->s || x : 0
->s : ""
->x : 0
+>z : string | number | undefined
+>s || x || u : string | number | undefined
+>s || x : string | number
+>s : string
+>x : number
 >u : undefined
 
 const a1 = a && a;
@@ -44,22 +44,22 @@ const a1 = a && a;
 >a : number[]
 
 const a2 = a && s;
->a2 : ""
->a && s : ""
+>a2 : string
+>a && s : string
 >a : number[]
->s : ""
+>s : string
 
 const a3 = a && x;
->a3 : 0
->a && x : 0
+>a3 : number
+>a && x : number
 >a : number[]
->x : 0
+>x : number
 
 const a4 = a && b;
->a4 : false
->a && b : false
+>a4 : boolean
+>a && b : boolean
 >a : number[]
->b : false
+>b : boolean
 
 const a5 = a && v;
 >a5 : void
@@ -80,154 +80,154 @@ const a7 = a && n;
 >n : null
 
 const a8 = a && z;
->a8 : undefined
->a && z : undefined
+>a8 : string | number | undefined
+>a && z : string | number | undefined
 >a : number[]
->z : undefined
+>z : string | number | undefined
 
 const s1 = s && a;
->s1 : ""
->s && a : ""
->s : ""
+>s1 : "" | number[]
+>s && a : "" | number[]
+>s : string
 >a : number[]
 
 const s2 = s && s;
->s2 : ""
->s && s : ""
->s : ""
->s : never
+>s2 : string
+>s && s : string
+>s : string
+>s : string
 
 const s3 = s && x;
->s3 : ""
->s && x : ""
->s : ""
->x : 0
+>s3 : number | ""
+>s && x : number | ""
+>s : string
+>x : number
 
 const s4 = s && b;
->s4 : ""
->s && b : ""
->s : ""
->b : false
+>s4 : boolean | ""
+>s && b : boolean | ""
+>s : string
+>b : boolean
 
 const s5 = s && v;
->s5 : ""
->s && v : ""
->s : ""
+>s5 : void | ""
+>s && v : void | ""
+>s : string
 >v : void
 
 const s6 = s && u;
->s6 : ""
->s && u : ""
->s : ""
+>s6 : "" | undefined
+>s && u : "" | undefined
+>s : string
 >u : undefined
 
 const s7 = s && n;
->s7 : ""
->s && n : ""
->s : ""
+>s7 : "" | null
+>s && n : "" | null
+>s : string
 >n : null
 
 const s8 = s && z;
->s8 : ""
->s && z : ""
->s : ""
->z : undefined
+>s8 : string | number | undefined
+>s && z : string | number | undefined
+>s : string
+>z : string | number | undefined
 
 const x1 = x && a;
->x1 : 0
->x && a : 0
->x : 0
+>x1 : 0 | number[]
+>x && a : 0 | number[]
+>x : number
 >a : number[]
 
 const x2 = x && s;
->x2 : 0
->x && s : 0
->x : 0
->s : ""
+>x2 : string | 0
+>x && s : string | 0
+>x : number
+>s : string
 
 const x3 = x && x;
->x3 : 0
->x && x : 0
->x : 0
->x : never
+>x3 : number
+>x && x : number
+>x : number
+>x : number
 
 const x4 = x && b;
->x4 : 0
->x && b : 0
->x : 0
->b : false
+>x4 : boolean | 0
+>x && b : boolean | 0
+>x : number
+>b : boolean
 
 const x5 = x && v;
->x5 : 0
->x && v : 0
->x : 0
+>x5 : void | 0
+>x && v : void | 0
+>x : number
 >v : void
 
 const x6 = x && u;
->x6 : 0
->x && u : 0
->x : 0
+>x6 : 0 | undefined
+>x && u : 0 | undefined
+>x : number
 >u : undefined
 
 const x7 = x && n;
->x7 : 0
->x && n : 0
->x : 0
+>x7 : 0 | null
+>x && n : 0 | null
+>x : number
 >n : null
 
 const x8 = x && z;
->x8 : 0
->x && z : 0
->x : 0
->z : undefined
+>x8 : string | number | undefined
+>x && z : string | number | undefined
+>x : number
+>z : string | number | undefined
 
 const b1 = b && a;
->b1 : false
->b && a : false
->b : false
+>b1 : false | number[]
+>b && a : false | number[]
+>b : boolean
 >a : number[]
 
 const b2 = b && s;
->b2 : false
->b && s : false
->b : false
->s : ""
+>b2 : string | false
+>b && s : string | false
+>b : boolean
+>s : string
 
 const b3 = b && x;
->b3 : false
->b && x : false
->b : false
->x : 0
+>b3 : number | false
+>b && x : number | false
+>b : boolean
+>x : number
 
 const b4 = b && b;
->b4 : false
->b && b : false
->b : false
->b : never
+>b4 : boolean
+>b && b : boolean
+>b : boolean
+>b : true
 
 const b5 = b && v;
->b5 : false
->b && v : false
->b : false
+>b5 : false | void
+>b && v : false | void
+>b : boolean
 >v : void
 
 const b6 = b && u;
->b6 : false
->b && u : false
->b : false
+>b6 : false | undefined
+>b && u : false | undefined
+>b : boolean
 >u : undefined
 
 const b7 = b && n;
->b7 : false
->b && n : false
->b : false
+>b7 : false | null
+>b && n : false | null
+>b : boolean
 >n : null
 
 const b8 = b && z;
->b8 : false
->b && z : false
->b : false
->z : undefined
+>b8 : string | number | false | undefined
+>b && z : string | number | false | undefined
+>b : boolean
+>z : string | number | undefined
 
 const v1 = v && a;
 >v1 : void
@@ -239,19 +239,19 @@ const v2 = v && s;
 >v2 : void
 >v && s : void
 >v : void
->s : ""
+>s : string
 
 const v3 = v && x;
 >v3 : void
 >v && x : void
 >v : void
->x : 0
+>x : number
 
 const v4 = v && b;
 >v4 : void
 >v && b : void
 >v : void
->b : false
+>b : boolean
 
 const v5 = v && v;
 >v5 : void
@@ -275,7 +275,7 @@ const v8 = v && z;
 >v8 : void
 >v && z : void
 >v : void
->z : undefined
+>z : string | number | undefined
 
 const u1 = u && a;
 >u1 : undefined
@@ -287,19 +287,19 @@ const u2 = u && s;
 >u2 : undefined
 >u && s : undefined
 >u : undefined
->s : ""
+>s : string
 
 const u3 = u && x;
 >u3 : undefined
 >u && x : undefined
 >u : undefined
->x : 0
+>x : number
 
 const u4 = u && b;
 >u4 : undefined
 >u && b : undefined
 >u : undefined
->b : false
+>b : boolean
 
 const u5 = u && v;
 >u5 : undefined
@@ -323,7 +323,7 @@ const u8 = u && z;
 >u8 : undefined
 >u && z : undefined
 >u : undefined
->z : undefined
+>z : string | number | undefined
 
 const n1 = n && a;
 >n1 : null
@@ -335,19 +335,19 @@ const n2 = n && s;
 >n2 : null
 >n && s : null
 >n : null
->s : ""
+>s : string
 
 const n3 = n && x;
 >n3 : null
 >n && x : null
 >n : null
->x : 0
+>x : number
 
 const n4 = n && b;
 >n4 : null
 >n && b : null
 >n : null
->b : false
+>b : boolean
 
 const n5 = n && v;
 >n5 : null
@@ -371,53 +371,53 @@ const n8 = n && z;
 >n8 : null
 >n && z : null
 >n : null
->z : undefined
+>z : string | number | undefined
 
 const z1 = z && a;
->z1 : undefined
->z && a : undefined
->z : undefined
+>z1 : "" | 0 | number[] | undefined
+>z && a : "" | 0 | number[] | undefined
+>z : string | number | undefined
 >a : number[]
 
 const z2 = z && s;
->z2 : undefined
->z && s : undefined
->z : undefined
->s : ""
+>z2 : string | 0 | undefined
+>z && s : string | 0 | undefined
+>z : string | number | undefined
+>s : string
 
 const z3 = z && x;
->z3 : undefined
->z && x : undefined
->z : undefined
->x : 0
+>z3 : number | "" | undefined
+>z && x : number | "" | undefined
+>z : string | number | undefined
+>x : number
 
 const z4 = z && b;
->z4 : undefined
->z && b : undefined
->z : undefined
->b : false
+>z4 : boolean | "" | 0 | undefined
+>z && b : boolean | "" | 0 | undefined
+>z : string | number | undefined
+>b : boolean
 
 const z5 = z && v;
->z5 : undefined
->z && v : undefined
->z : undefined
+>z5 : void | "" | 0
+>z && v : void | "" | 0
+>z : string | number | undefined
 >v : void
 
 const z6 = z && u;
->z6 : undefined
->z && u : undefined
->z : undefined
+>z6 : "" | 0 | undefined
+>z && u : "" | 0 | undefined
+>z : string | number | undefined
 >u : undefined
 
 const z7 = z && n;
->z7 : undefined
->z && n : undefined
->z : undefined
+>z7 : "" | 0 | null | undefined
+>z && n : "" | 0 | null | undefined
+>z : string | number | undefined
 >n : null
 
 const z8 = z && z;
->z8 : undefined
->z && z : undefined
->z : undefined
->z : never
+>z8 : string | number | undefined
+>z && z : string | number | undefined
+>z : string | number | undefined
+>z : string | number
 

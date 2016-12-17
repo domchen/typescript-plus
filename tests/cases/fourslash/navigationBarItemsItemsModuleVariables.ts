@@ -20,23 +20,6 @@
 ////}
 goTo.marker("file1");
 // nothing else should show up
-verify.navigationTree({
-    "text": "<global>",
-    "kind": "script",
-    "childItems": [
-        {
-            "text": "Module1",
-            "kind": "module",
-            "childItems": [
-                {
-                    "text": "x",
-                    "kind": "var",
-                    "kindModifiers": "export"
-                }
-            ]
-        }
-    ]
-});
 verify.navigationBar([
     {
         "text": "<global>",
@@ -63,23 +46,6 @@ verify.navigationBar([
 ]);
 
 goTo.marker("file2");
-verify.navigationTree({
-    "text": "<global>",
-    "kind": "script",
-    "childItems": [
-        {
-            "text": "Module1.SubModule",
-            "kind": "module",
-            "childItems": [
-                {
-                    "text": "y",
-                    "kind": "var",
-                    "kindModifiers": "export"
-                }
-            ]
-        }
-    ]
-});
 verify.navigationBar([
     {
         "text": "<global>",

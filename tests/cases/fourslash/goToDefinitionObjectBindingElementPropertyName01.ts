@@ -8,4 +8,7 @@
 ////var foo: I;
 ////var { /*use*/property1: prop1 } = foo;
 
-verify.goToDefinition("use", "def");
+goTo.marker("use");
+verify.definitionLocationExists();
+goTo.definition();
+verify.caretAtMarker("def");

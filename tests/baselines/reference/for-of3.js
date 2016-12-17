@@ -1,5 +1,5 @@
 //// [for-of3.ts]
-var v: any;
+var v;
 for (v++ of []) { }
 
 //// [for-of3.js]

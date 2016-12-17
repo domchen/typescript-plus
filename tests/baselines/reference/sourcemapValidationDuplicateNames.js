@@ -19,6 +19,7 @@ var m1;
     }());
     m1.c = c;
 })(m1 || (m1 = {}));
+var m1;
 (function (m1) {
     var b = new m1.c();
 })(m1 || (m1 = {}));

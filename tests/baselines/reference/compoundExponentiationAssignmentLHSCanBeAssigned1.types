@@ -1,9 +1,9 @@
 === tests/cases/conformance/es7/exponentiationOperator/compoundExponentiationAssignmentLHSCanBeAssigned1.ts ===
 enum E { a, b, c }
 >E : E
->a : E.a
->b : E.b
->c : E.c
+>a : E
+>b : E
+>c : E
 
 var a: any;
 >a : any

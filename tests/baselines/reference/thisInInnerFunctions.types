@@ -4,7 +4,7 @@ class Foo {
 
     x = "hello";
 >x : string
->"hello" : "hello"
+>"hello" : string
 
     bar() {
 >bar : () => void
@@ -13,11 +13,11 @@ class Foo {
 >inner : () => void
 
             this.y = "hi"; // 'this' should be not type to 'Foo' either
->this.y = "hi" : "hi"
+>this.y = "hi" : string
 >this.y : any
 >this : any
 >y : any
->"hi" : "hi"
+>"hi" : string
 
             var f = () => this.y;  // 'this' should be not type to 'Foo' either
 >f : () => any

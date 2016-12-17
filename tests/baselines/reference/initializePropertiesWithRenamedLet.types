@@ -4,21 +4,21 @@ var x0;
 >x0 : any
 
 if (true) {
->true : true
+>true : boolean
 
     let x0;
 >x0 : any
 
     var obj1 = { x0: x0 };
->obj1 : { x0: undefined; }
->{ x0: x0 } : { x0: undefined; }
->x0 : undefined
->x0 : undefined
+>obj1 : { x0: any; }
+>{ x0: x0 } : { x0: any; }
+>x0 : any
+>x0 : any
 
     var obj2 = { x0 };
->obj2 : { x0: undefined; }
->{ x0 } : { x0: undefined; }
->x0 : undefined
+>obj2 : { x0: any; }
+>{ x0 } : { x0: any; }
+>x0 : any
 }
 
 var x, y, z;
@@ -27,20 +27,20 @@ var x, y, z;
 >z : any
 
 if (true) {
->true : true
+>true : boolean
 
     let { x: x } = { x: 0 };
 >x : any
 >x : number
 >{ x: 0 } : { x: number; }
 >x : number
->0 : 0
+>0 : number
 
     let { y } = { y: 0 };
 >y : number
 >{ y: 0 } : { y: number; }
 >y : number
->0 : 0
+>0 : number
 
     let z;
 >z : any
@@ -53,7 +53,7 @@ if (true) {
 >z : any
 >{ z: 0 } : { z: number; }
 >z : number
->0 : 0
+>0 : number
 
     ({ z } = { z: 0 });
 >({ z } = { z: 0 }) : { z: number; }
@@ -62,5 +62,5 @@ if (true) {
 >z : any
 >{ z: 0 } : { z: number; }
 >z : number
->0 : 0
+>0 : number
 }

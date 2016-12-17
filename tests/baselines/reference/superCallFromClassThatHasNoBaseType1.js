@@ -19,7 +19,7 @@ var A = (function () {
 }());
 var B = (function () {
     function B() {
-        _this = _super.call(this, function (value) { return String(value); }) || this;
+        _super.call(this, function (value) { return String(value); });
     }
     return B;
 }());

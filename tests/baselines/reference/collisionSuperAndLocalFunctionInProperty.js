@@ -40,14 +40,13 @@ var Foo = (function () {
 var b = (function (_super) {
     __extends(b, _super);
     function b() {
-        var _this = _super.apply(this, arguments) || this;
-        _this.prop2 = {
+        _super.apply(this, arguments);
+        this.prop2 = {
             doStuff: function () {
                 function _super() {
                 }
             }
         };
-        return _this;
     }
     return b;
 }(Foo));

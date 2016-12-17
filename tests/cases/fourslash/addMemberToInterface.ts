@@ -10,9 +10,11 @@
 
 edit.disableFormatting();
 
-verify.quickInfoAt("check", "namespace Mod");
+goTo.marker('check');
+verify.quickInfoIs('namespace Mod');
 
 goTo.marker('insert');
 edit.insert("x: number;\n");
 
-verify.quickInfoAt("check", "namespace Mod");
+goTo.marker('check');
+verify.quickInfoIs('namespace Mod');

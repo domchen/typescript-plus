@@ -21,14 +21,14 @@ class Foo {
 
 	test = "test";
 >test : string
->"test" : "test"
+>"test" : string
 }
 module Foo {
 >Foo : typeof Foo
 
 	export var answer = 42;
 >answer : number
->42 : 42
+>42 : number
 }
 export = Foo;
 >Foo : Foo

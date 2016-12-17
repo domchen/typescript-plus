@@ -9,7 +9,8 @@
 ////export import B = require('./app');
 ////export var Y = 1;
 
-verify.quickInfos({
-    1: "var A.Y: number",
-    2: "var I: number"
-});
+goTo.marker("1");
+verify.quickInfoIs("var A.Y: number");
+
+goTo.marker("2");
+verify.quickInfoIs("var I: number");

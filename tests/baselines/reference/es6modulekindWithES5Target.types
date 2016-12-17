@@ -5,11 +5,11 @@ export class C {
 
     static s = 0;
 >s : number
->0 : 0
+>0 : number
 
     p = 1;
 >p : number
->1 : 1
+>1 : number
 
     method() { }
 >method : () => void
@@ -30,11 +30,11 @@ export class D {
 
     static s = 0;
 >s : number
->0 : 0
+>0 : number
 
     p = 1;
 >p : number
->1 : 1
+>1 : number
 
     method() { }
 >method : () => void

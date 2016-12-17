@@ -9,11 +9,13 @@
 
 // @Filename: goToDefinitionPartialImplementation_2.ts
 ////module A {
-////    /*Part2Definition*/export interface IA {
+////    export interface IA {
 ////        x: number;
 ////    }
 ////
 ////    var x: /*Part2Use*/IA;
 ////}
 
-verify.goToDefinition("Part2Use", ["Part1Definition", "Part2Definition"]);
+goTo.marker('Part2Use');
+goTo.definition();
+verify.caretAtMarker('Part1Definition');

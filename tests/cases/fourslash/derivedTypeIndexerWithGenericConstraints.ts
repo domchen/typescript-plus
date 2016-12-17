@@ -24,5 +24,6 @@
 ////var r2 = a._itemsByKey['x'];
 ////var result2 = r2.x;
 
-verify.quickInfoAt("", "var r: CollectionItem");
+goTo.marker('');
+verify.quickInfoIs('var r: CollectionItem');
 verify.numberOfErrorsInCurrentFile(0);

@@ -12,7 +12,8 @@ class D extends B<number> {
 
 //// [emitClassDeclarationWithExtensionAndTypeArgumentInES6.js]
 class B {
-    constructor(a) { }
+    constructor(a) {
+    }
 }
 class C extends B {
 }

@@ -19,7 +19,8 @@ verify.completionListContains('m3f');
 goTo.marker('3');
 verify.currentSignatureHelpIs('m3f(): m3f');
 
-verify.quickInfoAt("4", "var r: m3f");
+goTo.marker('4');
+verify.quickInfoIs('var r: m3f');
 
 goTo.marker('5');
 verify.completionListContains('foo');

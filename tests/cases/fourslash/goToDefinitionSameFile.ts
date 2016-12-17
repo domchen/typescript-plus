@@ -13,4 +13,16 @@
 ////class fooCls implements /*localInterfaceReference*/localInterface { }
 ////var fooVar = /*localModuleReference*/localModule.foo;
 
-verify.goToDefinitionForMarkers("localVariable", "localFunction", "localClass", "localInterface", "localModule");
+var markerList = [
+    "localVariable",
+    "localFunction",
+    "localClass",
+    "localInterface",
+    "localModule",
+];
+
+markerList.forEach((marker) => {
+    goTo.marker(marker + 'Reference');
+    goTo.definition();
+    verify.caretAtMarker(marker + 'Definition');
+});

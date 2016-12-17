@@ -19,7 +19,7 @@ class CharField implements Field<string> {
 >input : string
 
         return "Yup";
->"Yup" : "Yup"
+>"Yup" : string
     }
 }
 
@@ -32,7 +32,7 @@ class NumberField implements Field<number> {
 >input : number
 
         return 123;
->123 : 123
+>123 : number
     }
 }
 

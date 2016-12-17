@@ -5,8 +5,8 @@ for (const v of new FooIterator) {
 >FooIterator : typeof FooIterator
 
     const v = 0; // new scope
->v : 0
->0 : 0
+>v : number
+>0 : number
 }
 
 class Foo { }
@@ -28,7 +28,7 @@ class FooIterator {
 
             done: false
 >done : boolean
->false : false
+>false : boolean
 
         };
     }

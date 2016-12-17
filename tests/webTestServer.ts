@@ -47,53 +47,6 @@ function log(msg: string) {
     }
 }
 
-
-let directorySeparator = "/";
-
-function getRootLength(path: string): number {
-    if (path.charAt(0) === directorySeparator) {
-        if (path.charAt(1) !== directorySeparator) return 1;
-        const p1 = path.indexOf("/", 2);
-        if (p1 < 0) return 2;
-        const p2 = path.indexOf("/", p1 + 1);
-        if (p2 < 0) return p1 + 1;
-        return p2 + 1;
-    }
-    if (path.charAt(1) === ":") {
-        if (path.charAt(2) === directorySeparator) return 3;
-        return 2;
-    }
-    // Per RFC 1738 'file' URI schema has the shape file://<host>/<path>
-    // if <host> is omitted then it is assumed that host value is 'localhost',
-    // however slash after the omitted <host> is not removed.
-    // file:///folder1/file1 - this is a correct URI
-    // file://folder2/file2 - this is an incorrect URI
-    if (path.lastIndexOf("file:///", 0) === 0) {
-        return "file:///".length;
-    }
-    const idx = path.indexOf("://");
-    if (idx !== -1) {
-        return idx + "://".length;
-    }
-    return 0;
-}
-
-function getDirectoryPath(path: string): any {
-    path = switchToForwardSlashes(path);
-    return path.substr(0, Math.max(getRootLength(path), path.lastIndexOf(directorySeparator)));
-}
-
-function ensureDirectoriesExist(path: string) {
-    path = switchToForwardSlashes(path);
-    if (path.length > getRootLength(path) && !fs.existsSync(path)) {
-        const parentDirectory = getDirectoryPath(path);
-        ensureDirectoriesExist(parentDirectory);
-        if (!fs.existsSync(path)) {
-            fs.mkdirSync(path);
-        }
-    }
-}
-
 // Copied from the compiler sources
 function dir(dirPath: string, spec?: string, options?: any) {
     options = options || <{ recursive?: boolean; }>{};
@@ -128,7 +81,7 @@ function dir(dirPath: string, spec?: string, options?: any) {
 // fs.rmdirSync won't delete directories with files in it
 function deleteFolderRecursive(dirPath: string) {
     if (fs.existsSync(dirPath)) {
-        fs.readdirSync(dirPath).forEach((file) => {
+        fs.readdirSync(dirPath).forEach((file, index) => {
             const curPath = path.join(path, file);
             if (fs.statSync(curPath).isDirectory()) { // recurse
                 deleteFolderRecursive(curPath);
@@ -141,9 +94,25 @@ function deleteFolderRecursive(dirPath: string) {
     }
 };
 
-function writeFile(path: string, data: any) {
-    ensureDirectoriesExist(getDirectoryPath(path));
-    fs.writeFileSync(path, data);
+function writeFile(p: string, data: any, opts: { recursive: boolean }) {
+    try {
+        fs.writeFileSync(p, data);
+    }
+    catch (e) {
+        mkdir(path.dirname(p));
+        fs.writeFileSync(p, data);
+    }
+}
+
+function mkdir(p: string) {
+    const basePath = path.dirname(p);
+    const shouldCreateParent = p !== basePath && !fs.existsSync(basePath);
+    if (shouldCreateParent) {
+        mkdir(basePath);
+    }
+    if (shouldCreateParent || !fs.existsSync(p)) {
+        fs.mkdirSync(p);
+    }
 }
 
 /// Request Handling ///
@@ -208,13 +177,12 @@ enum RequestType {
     Unknown
 }
 
-function getRequestOperation(req: http.ServerRequest) {
+function getRequestOperation(req: http.ServerRequest, filename: string) {
     if (req.method === "GET" && req.url.indexOf("?") === -1) {
         if (req.url.indexOf(".") !== -1) return RequestType.GetFile;
         else return RequestType.GetDir;
     }
     else {
-
         const queryData: any = url.parse(req.url, /*parseQueryString*/ true).query;
         if (req.method === "GET" && queryData.resolve !== undefined) return RequestType.ResolveFile;
         // mocha uses ?grep=<regexp> query string as equivalent to the --grep command line option used to filter tests
@@ -258,7 +226,7 @@ function handleRequestOperation(req: http.ServerRequest, res: http.ServerRespons
             break;
         case RequestType.WriteFile:
             processPost(req, res, (data) => {
-                writeFile(reqPath, data);
+                writeFile(reqPath, data, { recursive: true });
             });
             send(ResponseCode.Success, res, undefined);
             break;
@@ -306,7 +274,7 @@ http.createServer((req: http.ServerRequest, res: http.ServerResponse) => {
     log(`${req.method} ${req.url}`);
     const uri = url.parse(req.url).pathname;
     const reqPath = path.join(process.cwd(), uri);
-    const operation = getRequestOperation(req);
+    const operation = getRequestOperation(req, reqPath);
     handleRequestOperation(req, res, operation, reqPath);
 }).listen(port);
 

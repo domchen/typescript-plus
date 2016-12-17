@@ -625,204 +625,204 @@ enum E {
 >E : E
 
     abstract,
->abstract : E.abstract
+>abstract : E
 
     as,
->as : E.as
+>as : E
 
     boolean,
->boolean : E.boolean
+>boolean : E
 
     break,
->break : E.break
+>break : E
 
     byte,
->byte : E.byte
+>byte : E
 
     case,
->case : E.case
+>case : E
 
     catch,
->catch : E.catch
+>catch : E
 
     char,
->char : E.char
+>char : E
 
     class,
->class : E.class
+>class : E
 
     continue,
->continue : E.continue
+>continue : E
 
     const,
->const : E.const
+>const : E
 
     debugger,
->debugger : E.debugger
+>debugger : E
 
     default,
->default : E.default
+>default : E
 
     delete,
->delete : E.delete
+>delete : E
 
     do,
->do : E.do
+>do : E
 
     double,
->double : E.double
+>double : E
 
     else,
->else : E.else
+>else : E
 
     enum,
->enum : E.enum
+>enum : E
 
     export,
->export : E.export
+>export : E
 
     extends,
->extends : E.extends
+>extends : E
 
     false,
->false : E.false
+>false : E
 
     final,
->final : E.final
+>final : E
 
     finally,
->finally : E.finally
+>finally : E
 
     float,
->float : E.float
+>float : E
 
     for,
->for : E.for
+>for : E
 
     function,
->function : E.function
+>function : E
 
     goto,
->goto : E.goto
+>goto : E
 
     if,
->if : E.if
+>if : E
 
     implements,
->implements : E.implements
+>implements : E
 
     import,
->import : E.import
+>import : E
 
     in,
->in : E.in
+>in : E
 
     instanceof,
->instanceof : E.instanceof
+>instanceof : E
 
     int,
->int : E.int
+>int : E
 
     interface,
->interface : E.interface
+>interface : E
 
     is,
->is : E.is
+>is : E
 
     long,
->long : E.long
+>long : E
 
     namespace,
->namespace : E.namespace
+>namespace : E
 
     native,
->native : E.native
+>native : E
 
     new,
->new : E.new
+>new : E
 
     null,
->null : E.null
+>null : E
 
     package,
->package : E.package
+>package : E
 
     private,
->private : E.private
+>private : E
 
     protected,
->protected : E.protected
+>protected : E
 
     public,
->public : E.public
+>public : E
 
     return,
->return : E.return
+>return : E
 
     short,
->short : E.short
+>short : E
 
     static,
->static : E.static
+>static : E
 
     super,
->super : E.super
+>super : E
 
     switch,
->switch : E.switch
+>switch : E
 
     synchronized,
->synchronized : E.synchronized
+>synchronized : E
 
     this,
->this : E.this
+>this : E
 
     throw,
->throw : E.throw
+>throw : E
 
     throws,
->throws : E.throws
+>throws : E
 
     transient,
->transient : E.transient
+>transient : E
 
     true,
->true : E.true
+>true : E
 
     try,
->try : E.try
+>try : E
 
     typeof,
->typeof : E.typeof
+>typeof : E
 
     use,
->use : E.use
+>use : E
 
     var,
->var : E.var
+>var : E
 
     void,
->void : E.void
+>void : E
 
     volatile,
->volatile : E.volatile
+>volatile : E
 
     while,
->while : E.while
+>while : E
 
     with,
->with : E.with
+>with : E
 }
 
 var r7 = E.abstract;
 >r7 : E
->E.abstract : E.abstract
+>E.abstract : E
 >E : typeof E
->abstract : E.abstract
+>abstract : E
 
 var r8 = E.as;
 >r8 : E
->E.as : E.as
+>E.as : E
 >E : typeof E
->as : E.as
+>as : E
 

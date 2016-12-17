@@ -31,7 +31,7 @@ var StringTreeCollectionBase = (function () {
 var StringTreeCollection = (function (_super) {
     __extends(StringTreeCollection, _super);
     function StringTreeCollection() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return StringTreeCollection;
 }(StringTreeCollectionBase));

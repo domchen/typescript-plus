@@ -16,35 +16,35 @@ var robotA: Robot = [1, "mower", "mowing"];
 >robotA : [number, string, string]
 >Robot : [number, string, string]
 >[1, "mower", "mowing"] : [number, string, string]
->1 : 1
->"mower" : "mower"
->"mowing" : "mowing"
+>1 : number
+>"mower" : string
+>"mowing" : string
 
 var robotB: Robot = [2, "trimmer", "trimming"];
 >robotB : [number, string, string]
 >Robot : [number, string, string]
 >[2, "trimmer", "trimming"] : [number, string, string]
->2 : 2
->"trimmer" : "trimmer"
->"trimming" : "trimming"
+>2 : number
+>"trimmer" : string
+>"trimming" : string
 
 var multiRobotA: MultiSkilledRobot = ["mower", ["mowing", ""]];
 >multiRobotA : [string, string[]]
 >MultiSkilledRobot : [string, string[]]
 >["mower", ["mowing", ""]] : [string, string[]]
->"mower" : "mower"
+>"mower" : string
 >["mowing", ""] : string[]
->"mowing" : "mowing"
->"" : ""
+>"mowing" : string
+>"" : string
 
 var multiRobotB: MultiSkilledRobot = ["trimmer", ["trimming", "edging"]];
 >multiRobotB : [string, string[]]
 >MultiSkilledRobot : [string, string[]]
 >["trimmer", ["trimming", "edging"]] : [string, string[]]
->"trimmer" : "trimmer"
+>"trimmer" : string
 >["trimming", "edging"] : string[]
->"trimming" : "trimming"
->"edging" : "edging"
+>"trimming" : string
+>"edging" : string
 
 let nameA: string, numberB: number, nameB: string, skillB: string;
 >nameA : string
@@ -68,18 +68,18 @@ let multiRobotAInfo: (string | string[])[];
 >[, nameA = "helloNoName"] = robotA : [number, string, string]
 >[, nameA = "helloNoName"] : [undefined, string]
 > : undefined
->nameA = "helloNoName" : "helloNoName"
+>nameA = "helloNoName" : string
 >nameA : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >robotA : [number, string, string]
 
 [, nameB = "helloNoName"] = getRobotB();
 >[, nameB = "helloNoName"] = getRobotB() : [number, string, string]
 >[, nameB = "helloNoName"] : [undefined, string]
 > : undefined
->nameB = "helloNoName" : "helloNoName"
+>nameB = "helloNoName" : string
 >nameB : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >getRobotB() : [number, string, string]
 >getRobotB : () => [number, string, string]
 
@@ -87,13 +87,13 @@ let multiRobotAInfo: (string | string[])[];
 >[, nameB = "helloNoName"] = [2, "trimmer", "trimming"] : [number, string, string]
 >[, nameB = "helloNoName"] : [undefined, string]
 > : undefined
->nameB = "helloNoName" : "helloNoName"
+>nameB = "helloNoName" : string
 >nameB : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >[2, "trimmer", "trimming"] : [number, string, string]
->2 : 2
->"trimmer" : "trimmer"
->"trimming" : "trimming"
+>2 : number
+>"trimmer" : string
+>"trimming" : string
 
 [, multiSkillB = []] = multiRobotB;
 >[, multiSkillB = []] = multiRobotB : [string, string[]]
@@ -122,151 +122,151 @@ let multiRobotAInfo: (string | string[])[];
 >multiSkillB : string[]
 >[] : undefined[]
 >["roomba", ["vaccum", "mopping"]] : [string, string[]]
->"roomba" : "roomba"
+>"roomba" : string
 >["vaccum", "mopping"] : string[]
->"vaccum" : "vaccum"
->"mopping" : "mopping"
+>"vaccum" : string
+>"mopping" : string
 
 [numberB = -1] = robotB;
 >[numberB = -1] = robotB : [number, string, string]
 >[numberB = -1] : [number]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
+>-1 : number
+>1 : number
 >robotB : [number, string, string]
 
 [numberB = -1] = getRobotB();
 >[numberB = -1] = getRobotB() : [number, string, string]
 >[numberB = -1] : [number]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
+>-1 : number
+>1 : number
 >getRobotB() : [number, string, string]
 >getRobotB : () => [number, string, string]
 
 [numberB = -1] = [2, "trimmer", "trimming"];
 >[numberB = -1] = [2, "trimmer", "trimming"] : [number, string, string]
 >[numberB = -1] : [number]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
+>-1 : number
+>1 : number
 >[2, "trimmer", "trimming"] : [number, string, string]
->2 : 2
->"trimmer" : "trimmer"
->"trimming" : "trimming"
+>2 : number
+>"trimmer" : string
+>"trimming" : string
 
 [nameMB = "helloNoName"] = multiRobotB;
 >[nameMB = "helloNoName"] = multiRobotB : [string, string[]]
 >[nameMB = "helloNoName"] : [string]
->nameMB = "helloNoName" : "helloNoName"
+>nameMB = "helloNoName" : string
 >nameMB : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >multiRobotB : [string, string[]]
 
 [nameMB = "helloNoName"] = getMultiRobotB();
 >[nameMB = "helloNoName"] = getMultiRobotB() : [string, string[]]
 >[nameMB = "helloNoName"] : [string]
->nameMB = "helloNoName" : "helloNoName"
+>nameMB = "helloNoName" : string
 >nameMB : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >getMultiRobotB() : [string, string[]]
 >getMultiRobotB : () => [string, string[]]
 
 [nameMB = "helloNoName"] = ["trimmer", ["trimming", "edging"]];
 >[nameMB = "helloNoName"] = ["trimmer", ["trimming", "edging"]] : [string, string[]]
 >[nameMB = "helloNoName"] : [string]
->nameMB = "helloNoName" : "helloNoName"
+>nameMB = "helloNoName" : string
 >nameMB : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >["trimmer", ["trimming", "edging"]] : [string, string[]]
->"trimmer" : "trimmer"
+>"trimmer" : string
 >["trimming", "edging"] : string[]
->"trimming" : "trimming"
->"edging" : "edging"
+>"trimming" : string
+>"edging" : string
 
 [numberB = -1, nameB = "helloNoName", skillB = "noSkill"] = robotB;
 >[numberB = -1, nameB = "helloNoName", skillB = "noSkill"] = robotB : [number, string, string]
 >[numberB = -1, nameB = "helloNoName", skillB = "noSkill"] : [number, string, string]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
->nameB = "helloNoName" : "helloNoName"
+>-1 : number
+>1 : number
+>nameB = "helloNoName" : string
 >nameB : string
->"helloNoName" : "helloNoName"
->skillB = "noSkill" : "noSkill"
+>"helloNoName" : string
+>skillB = "noSkill" : string
 >skillB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >robotB : [number, string, string]
 
 [numberB = -1, nameB = "helloNoName", skillB = "noSkill"] = getRobotB();
 >[numberB = -1, nameB = "helloNoName", skillB = "noSkill"] = getRobotB() : [number, string, string]
 >[numberB = -1, nameB = "helloNoName", skillB = "noSkill"] : [number, string, string]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
->nameB = "helloNoName" : "helloNoName"
+>-1 : number
+>1 : number
+>nameB = "helloNoName" : string
 >nameB : string
->"helloNoName" : "helloNoName"
->skillB = "noSkill" : "noSkill"
+>"helloNoName" : string
+>skillB = "noSkill" : string
 >skillB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >getRobotB() : [number, string, string]
 >getRobotB : () => [number, string, string]
 
 [numberB = -1, nameB = "helloNoName", skillB = "noSkill"] = [2, "trimmer", "trimming"];
 >[numberB = -1, nameB = "helloNoName", skillB = "noSkill"] = [2, "trimmer", "trimming"] : [number, string, string]
 >[numberB = -1, nameB = "helloNoName", skillB = "noSkill"] : [number, string, string]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
->nameB = "helloNoName" : "helloNoName"
+>-1 : number
+>1 : number
+>nameB = "helloNoName" : string
 >nameB : string
->"helloNoName" : "helloNoName"
->skillB = "noSkill" : "noSkill"
+>"helloNoName" : string
+>skillB = "noSkill" : string
 >skillB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >[2, "trimmer", "trimming"] : [number, string, string]
->2 : 2
->"trimmer" : "trimmer"
->"trimming" : "trimming"
+>2 : number
+>"trimmer" : string
+>"trimming" : string
 
 [nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] = multiRobotB;
 >[nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] = multiRobotB : [string, string[]]
 >[nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] : [string, [string, string]]
->nameMB = "helloNoName" : "helloNoName"
+>nameMB = "helloNoName" : string
 >nameMB : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >[primarySkillB = "noSkill", secondarySkillB = "noSkill"] = [] : [string, string]
 >[primarySkillB = "noSkill", secondarySkillB = "noSkill"] : [string, string]
->primarySkillB = "noSkill" : "noSkill"
+>primarySkillB = "noSkill" : string
 >primarySkillB : string
->"noSkill" : "noSkill"
->secondarySkillB = "noSkill" : "noSkill"
+>"noSkill" : string
+>secondarySkillB = "noSkill" : string
 >secondarySkillB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >[] : [string, string]
 >multiRobotB : [string, string[]]
 
 [nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] = getMultiRobotB();
 >[nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] = getMultiRobotB() : [string, string[]]
 >[nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] : [string, [string, string]]
->nameMB = "helloNoName" : "helloNoName"
+>nameMB = "helloNoName" : string
 >nameMB : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >[primarySkillB = "noSkill", secondarySkillB = "noSkill"] = [] : [string, string]
 >[primarySkillB = "noSkill", secondarySkillB = "noSkill"] : [string, string]
->primarySkillB = "noSkill" : "noSkill"
+>primarySkillB = "noSkill" : string
 >primarySkillB : string
->"noSkill" : "noSkill"
->secondarySkillB = "noSkill" : "noSkill"
+>"noSkill" : string
+>secondarySkillB = "noSkill" : string
 >secondarySkillB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >[] : [string, string]
 >getMultiRobotB() : [string, string[]]
 >getMultiRobotB : () => [string, string[]]
@@ -274,33 +274,33 @@ let multiRobotAInfo: (string | string[])[];
 [nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] =
 >[nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] =    ["trimmer", ["trimming", "edging"]] : [string, [string, string]]
 >[nameMB = "helloNoName", [primarySkillB = "noSkill", secondarySkillB = "noSkill"] = []] : [string, [string, string]]
->nameMB = "helloNoName" : "helloNoName"
+>nameMB = "helloNoName" : string
 >nameMB : string
->"helloNoName" : "helloNoName"
+>"helloNoName" : string
 >[primarySkillB = "noSkill", secondarySkillB = "noSkill"] = [] : [string, string]
 >[primarySkillB = "noSkill", secondarySkillB = "noSkill"] : [string, string]
->primarySkillB = "noSkill" : "noSkill"
+>primarySkillB = "noSkill" : string
 >primarySkillB : string
->"noSkill" : "noSkill"
->secondarySkillB = "noSkill" : "noSkill"
+>"noSkill" : string
+>secondarySkillB = "noSkill" : string
 >secondarySkillB : string
->"noSkill" : "noSkill"
+>"noSkill" : string
 >[] : [string, string]
 
     ["trimmer", ["trimming", "edging"]];
 >["trimmer", ["trimming", "edging"]] : [string, [string, string]]
->"trimmer" : "trimmer"
+>"trimmer" : string
 >["trimming", "edging"] : [string, string]
->"trimming" : "trimming"
->"edging" : "edging"
+>"trimming" : string
+>"edging" : string
 
 [numberB = -1, ...robotAInfo] = robotB;
 >[numberB = -1, ...robotAInfo] = robotB : [number, string, string]
 >[numberB = -1, ...robotAInfo] : (string | number)[]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
+>-1 : number
+>1 : number
 >...robotAInfo : string | number
 >robotAInfo : (string | number)[]
 >robotB : [number, string, string]
@@ -308,10 +308,10 @@ let multiRobotAInfo: (string | string[])[];
 [numberB = -1, ...robotAInfo] = getRobotB();
 >[numberB = -1, ...robotAInfo] = getRobotB() : [number, string, string]
 >[numberB = -1, ...robotAInfo] : (string | number)[]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
+>-1 : number
+>1 : number
 >...robotAInfo : string | number
 >robotAInfo : (string | number)[]
 >getRobotB() : [number, string, string]
@@ -320,18 +320,18 @@ let multiRobotAInfo: (string | string[])[];
 [numberB = -1, ...robotAInfo] = <Robot>[2, "trimmer", "trimming"];
 >[numberB = -1, ...robotAInfo] = <Robot>[2, "trimmer", "trimming"] : [number, string, string]
 >[numberB = -1, ...robotAInfo] : (string | number)[]
->numberB = -1 : -1
+>numberB = -1 : number
 >numberB : number
->-1 : -1
->1 : 1
+>-1 : number
+>1 : number
 >...robotAInfo : string | number
 >robotAInfo : (string | number)[]
 ><Robot>[2, "trimmer", "trimming"] : [number, string, string]
 >Robot : [number, string, string]
 >[2, "trimmer", "trimming"] : [number, string, string]
->2 : 2
->"trimmer" : "trimmer"
->"trimming" : "trimming"
+>2 : number
+>"trimmer" : string
+>"trimming" : string
 
 if (nameA == nameB) {
 >nameA == nameB : boolean

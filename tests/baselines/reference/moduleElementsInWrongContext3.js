@@ -35,25 +35,18 @@ module P {
 var P;
 (function (P) {
     {
-        export = M;
         var v;
         function foo() { }
-        export * from "ambient";
-        export { foo };
-        export { baz as b } from "ambient";
-        export default v;
+        var ambient_2 = require("ambient");
+        P.b = ambient_2.baz;
+        P["default"] = v;
         var C = (function () {
             function C() {
             }
             return C;
         }());
-        P.C = C;
+        exports["default"] = C;
         function bee() { }
         P.bee = bee;
-        import I2 = require("foo");
-        import * as Foo from "ambient";
-        import bar from "ambient";
-        import { baz } from "ambient";
-        import "ambient";
     }
 })(P || (P = {}));

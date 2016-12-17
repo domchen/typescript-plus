@@ -2,17 +2,16 @@
 namespace ts.NavigateTo {
     type RawNavigateToItem = { name: string; fileName: string; matchKind: PatternMatchKind; isCaseSensitive: boolean; declaration: Declaration };
 
-    export function getNavigateToItems(sourceFiles: SourceFile[], checker: TypeChecker, cancellationToken: CancellationToken, searchValue: string, maxResultCount: number, excludeDtsFiles: boolean): NavigateToItem[] {
+    export function getNavigateToItems(program: Program, checker: TypeChecker, cancellationToken: CancellationToken, searchValue: string, maxResultCount: number, excludeDts: boolean): NavigateToItem[] {
         const patternMatcher = createPatternMatcher(searchValue);
         let rawItems: RawNavigateToItem[] = [];
 
-        // Search the declarations in all files and output matched NavigateToItem into array of NavigateToItem[]
-        forEach(sourceFiles, sourceFile => {
-            cancellationToken.throwIfCancellationRequested();
+        // This means "compare in a case insensitive manner."
+        const baseSensitivity: Intl.CollatorOptions = { sensitivity: "base" };
 
-            if (excludeDtsFiles && fileExtensionIs(sourceFile.fileName, ".d.ts")) {
-                return;
-            }
+        // Search the declarations in all files and output matched NavigateToItem into array of NavigateToItem[]
+        forEach(program.getSourceFiles(), sourceFile => {
+            cancellationToken.throwIfCancellationRequested();
 
             const nameToDeclarations = sourceFile.getNamedDeclarations();
             for (const name in nameToDeclarations) {
@@ -44,6 +43,9 @@ namespace ts.NavigateTo {
 
                         const fileName = sourceFile.fileName;
                         const matchKind = bestMatchKind(matches);
+                        if (excludeDts && fileExtensionIs(declaration.getSourceFile().fileName, ".d.ts")) {
+                            continue;
+                        }
                         rawItems.push({ name, fileName, matchKind, isCaseSensitive: allMatchesAreCaseSensitive(matches), declaration });
                     }
                 }
@@ -185,8 +187,8 @@ namespace ts.NavigateTo {
             // We first sort case insensitively.  So "Aaa" will come before "bar".
             // Then we sort case sensitively, so "aaa" will come before "Aaa".
             return i1.matchKind - i2.matchKind ||
-                ts.compareStringsCaseInsensitive(i1.name, i2.name) ||
-                ts.compareStrings(i1.name, i2.name);
+                i1.name.localeCompare(i2.name, undefined, baseSensitivity) ||
+                i1.name.localeCompare(i2.name);
         }
 
         function createNavigateToItem(rawItem: RawNavigateToItem): NavigateToItem {

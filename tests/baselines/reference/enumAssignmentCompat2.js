@@ -44,6 +44,7 @@ var W;
     W[W["b"] = 1] = "b";
     W[W["c"] = 2] = "c";
 })(W || (W = {}));
+var W;
 (function (W) {
     var D = (function () {
         function D() {

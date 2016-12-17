@@ -28,11 +28,9 @@ var A = (function () {
 var B = (function (_super) {
     __extends(B, _super);
     function B() {
-        var _this;
         var x = {
-            x: _this = _super.call(this) || this
+            x: _super.call(this)
         };
-        return _this;
     }
     return B;
 }(A));

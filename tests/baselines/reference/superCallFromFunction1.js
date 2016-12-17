@@ -6,5 +6,5 @@ function foo() {
 
 //// [superCallFromFunction1.js]
 function foo() {
-    _this = _super.call(this, function (value) { return String(value); }) || this;
+    _super.call(this, function (value) { return String(value); });
 }

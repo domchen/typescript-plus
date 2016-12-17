@@ -37,17 +37,18 @@ var M;
     var C = (function (_super) {
         __extends(C, _super);
         function C() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return C;
     }(B));
     M.C = C;
 })(M || (M = {}));
+var M;
 (function (M) {
     var C2 = (function (_super) {
         __extends(C2, _super);
         function C2() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return C2;
     }(M.B));
@@ -58,7 +59,7 @@ var N;
     var C3 = (function (_super) {
         __extends(C3, _super);
         function C3() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return C3;
     }(M.B));

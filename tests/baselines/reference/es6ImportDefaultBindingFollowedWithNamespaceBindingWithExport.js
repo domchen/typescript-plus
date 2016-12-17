@@ -13,7 +13,7 @@ export var x: number = nameSpaceBinding.a;
 exports.a = 10;
 //// [client.js]
 "use strict";
-var nameSpaceBinding = require("./server");
+var server_1 = require("./server"), nameSpaceBinding = server_1;
 exports.x = nameSpaceBinding.a;
 
 

@@ -5,6 +5,7 @@
 ////var b: /*boolean*/boolean;
 ////var v: /*void*/void;
 
-for (const marker of test.markerNames()) {
-    verify.goToDefinition(marker, []);
-}
+test.markers().forEach((m, i, a) => {
+    goTo.position(m.position, m.fileName);
+    verify.not.definitionLocationExists();
+});

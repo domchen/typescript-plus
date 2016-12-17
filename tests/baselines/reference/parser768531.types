@@ -2,7 +2,7 @@
 
 {a: 3}
 >a : any
->3 : 3
+>3 : number
 
 /x/
 >/x/ : RegExp

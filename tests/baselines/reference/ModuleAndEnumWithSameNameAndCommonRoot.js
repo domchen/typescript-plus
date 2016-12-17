@@ -28,6 +28,7 @@ var enumdule;
     }());
     enumdule.Point = Point;
 })(enumdule || (enumdule = {}));
+var enumdule;
 (function (enumdule) {
     enumdule[enumdule["Red"] = 0] = "Red";
     enumdule[enumdule["Blue"] = 1] = "Blue";

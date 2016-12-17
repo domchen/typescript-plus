@@ -4,7 +4,7 @@ function salt() {
 
   function pepper() { return 5;}
 >pepper : () => number
->5 : 5
+>5 : number
 
   return pepper();  
 >pepper() : number
@@ -19,7 +19,7 @@ module M {
 
         function oxygen() { return 6; };
 >oxygen : () => number
->6 : 6
+>6 : number
 
         return oxygen();
 >oxygen() : number

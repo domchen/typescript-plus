@@ -2,12 +2,12 @@
 module Baz { export var x = "hello"; }
 >Baz : typeof Baz
 >x : string
->"hello" : "hello"
+>"hello" : string
 
 Baz.x = "goodbye";
->Baz.x = "goodbye" : "goodbye"
+>Baz.x = "goodbye" : string
 >Baz.x : string
 >Baz : typeof Baz
 >x : string
->"goodbye" : "goodbye"
+>"goodbye" : string
 

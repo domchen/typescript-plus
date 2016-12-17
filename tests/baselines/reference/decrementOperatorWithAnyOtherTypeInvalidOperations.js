@@ -1,6 +1,6 @@
 //// [decrementOperatorWithAnyOtherTypeInvalidOperations.ts]
 // -- operator on any type
-var ANY1: any;
+var ANY1;
 var ANY2: any[] = ["", ""];
 
 var obj: () => {}
@@ -11,7 +11,7 @@ function foo(): any {
 }
 class A {
     public a: any;
-    static foo(): any {
+    static foo() {
         var a;
         return a;
     }

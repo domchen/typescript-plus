@@ -40,7 +40,7 @@ var GenericBase = (function () {
 var Derived = (function (_super) {
     __extends(Derived, _super);
     function Derived() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return Derived;
 }(GenericBase));

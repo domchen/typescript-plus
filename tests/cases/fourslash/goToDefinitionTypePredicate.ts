@@ -5,7 +5,12 @@
 ////     return typeof parameter === "string";
 //// }
 
-verify.goToDefinition({
-    parameterName: "parameterDeclaration",
-    typeReference: "classDeclaration"
-});
+goTo.marker('parameterName');
+
+goTo.definition();
+verify.caretAtMarker('parameterDeclaration');
+
+goTo.marker('typeReference');
+
+goTo.definition();
+verify.caretAtMarker('classDeclaration');

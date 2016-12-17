@@ -27,6 +27,7 @@ var A;
     }());
     A.B = B;
 })(A || (A = {}));
+var A;
 (function (A) {
     var B;
     (function (B) {

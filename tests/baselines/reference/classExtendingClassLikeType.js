@@ -68,38 +68,35 @@ var __extends = (this && this.__extends) || function (d, b) {
 var D0 = (function (_super) {
     __extends(D0, _super);
     function D0() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return D0;
 }(Base));
 var D1 = (function (_super) {
     __extends(D1, _super);
     function D1() {
-        var _this = _super.call(this, "abc", "def") || this;
-        _this.x = "x";
-        _this.y = "y";
-        return _this;
+        _super.call(this, "abc", "def");
+        this.x = "x";
+        this.y = "y";
     }
     return D1;
 }(getBase()));
 var D2 = (function (_super) {
     __extends(D2, _super);
     function D2() {
-        var _this = _super.call(this, 10) || this;
-        _this = _super.call(this, 10, 20) || this;
-        _this.x = 1;
-        _this.y = 2;
-        return _this;
+        _super.call(this, 10);
+        _super.call(this, 10, 20);
+        this.x = 1;
+        this.y = 2;
     }
     return D2;
 }(getBase()));
 var D3 = (function (_super) {
     __extends(D3, _super);
     function D3() {
-        var _this = _super.call(this, "abc", 42) || this;
-        _this.x = "x";
-        _this.y = 2;
-        return _this;
+        _super.call(this, "abc", 42);
+        this.x = "x";
+        this.y = 2;
     }
     return D3;
 }(getBase()));
@@ -107,7 +104,7 @@ var D3 = (function (_super) {
 var D4 = (function (_super) {
     __extends(D4, _super);
     function D4() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return D4;
 }(getBase()));
@@ -115,7 +112,7 @@ var D4 = (function (_super) {
 var D5 = (function (_super) {
     __extends(D5, _super);
     function D5() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return D5;
 }(getBadBase()));

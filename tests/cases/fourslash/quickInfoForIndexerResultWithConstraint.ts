@@ -9,4 +9,5 @@
 ////    var /*1*/r2 = foo(b); // just shows T
 ////}
 
-verify.quickInfoAt("1", "(local var) r2: {\n    [x: string]: T;\n}");
+goTo.marker('1');
+verify.quickInfoIs('(local var) r2: {\n    [x: string]: T;\n}');

@@ -28,9 +28,7 @@ var C = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        var _this;
-        _super.prototype..call(_this);
-        return _this;
+        _super.prototype..call(this);
     }
     D.prototype.bar = function () {
         _super.prototype.bar.call(this, null);

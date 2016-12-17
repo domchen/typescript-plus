@@ -7,6 +7,7 @@ class Foo {
 var Foo = (function () {
     function Foo() {
     }
+    Foo.prototype.banana = ;
     return Foo;
 }());
 break ;

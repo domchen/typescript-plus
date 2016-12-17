@@ -4,12 +4,12 @@ target:
 >target : any
 
 while (true) {
->true : true
+>true : boolean
 }
 
 target: 
 >target : any
 
 while (true) {
->true : true
+>true : boolean
 }

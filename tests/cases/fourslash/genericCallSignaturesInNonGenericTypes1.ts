@@ -15,4 +15,5 @@
 
 ////var /**/b = _(a); 
 
-verify.quickInfoAt("", "var b: WrappedArray<number>");
+goTo.marker();
+verify.quickInfoIs('var b: WrappedArray<number>');

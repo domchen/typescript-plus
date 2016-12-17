@@ -21,7 +21,8 @@
 ////var val = foo(["myString1", "myString2"]);
 /////*1*/val;
 
-verify.quickInfoAt("1", "var val: string");
+goTo.marker('1');
+verify.quickInfoIs("var val: string");
 
 // TypeCheck
 verify.numberOfErrorsInCurrentFile(1);

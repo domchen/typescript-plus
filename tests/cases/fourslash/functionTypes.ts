@@ -23,7 +23,7 @@
 verify.numberOfErrorsInCurrentFile(0);
 for (var i = 1; i <= 7; i++) {
     goTo.marker('' + i);
-    verify.memberListCount(8);
+    verify.memberListCount(7);
     verify.completionListContains('apply');
     verify.completionListContains('arguments');
     verify.completionListContains('bind');
@@ -31,5 +31,4 @@ for (var i = 1; i <= 7; i++) {
     verify.completionListContains('length');
     verify.completionListContains('caller');
     verify.completionListContains('prototype');
-    verify.completionListContains('toString');
 }

@@ -56,10 +56,9 @@ var A = (function () {
 var B = (function (_super) {
     __extends(B, _super);
     function B(x) {
-        var _this = _super.call(this, x) || this;
+        _super.call(this, x);
         // Fails, x is readonly
-        _this.x = 1;
-        return _this;
+        this.x = 1;
     }
     return B;
 }(A));
@@ -68,10 +67,9 @@ var C = (function (_super) {
     // This is the usual behavior of readonly properties:
     // if one is redeclared in a base class, then it can be assigned to.
     function C(x) {
-        var _this = _super.call(this, x) || this;
-        _this.x = x;
-        _this.x = 1;
-        return _this;
+        _super.call(this, x);
+        this.x = x;
+        this.x = 1;
     }
     return C;
 }(A));
@@ -86,10 +84,9 @@ var D = (function () {
 var E = (function (_super) {
     __extends(E, _super);
     function E(x) {
-        var _this = _super.call(this, x) || this;
-        _this.x = x;
-        _this.x = 1;
-        return _this;
+        _super.call(this, x);
+        this.x = x;
+        this.x = 1;
     }
     return E;
 }(D));

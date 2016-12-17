@@ -9,11 +9,11 @@ const enum G {
 
     A = 1,
 >A : G
->1 : 1
+>1 : number
 
     B = 2,
 >B : G
->2 : 2
+>2 : number
 
     C = A + B,
 >C : G
@@ -25,7 +25,7 @@ const enum G {
 >D : G
 >A * 2 : number
 >A : G
->2 : 2
+>2 : number
 }
 
 var o: {
@@ -52,7 +52,7 @@ var a1 = G["A"];
 >a1 : G
 >G["A"] : G
 >G : typeof G
->"A" : "A"
+>"A" : string
 
 var g = o[G.A];
 >g : boolean
@@ -76,7 +76,7 @@ class C {
 >B : G
 
         return true;
->true : true
+>true : boolean
     }
     set [G.B](x: number) { }
 >G.B : G

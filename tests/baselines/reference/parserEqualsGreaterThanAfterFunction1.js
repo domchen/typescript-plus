@@ -2,4 +2,3 @@
 function =>
 
 //// [parserEqualsGreaterThanAfterFunction1.js]
-function () { }

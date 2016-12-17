@@ -1,5 +1,4 @@
 === tests/cases/conformance/expressions/unaryOperators/bitwiseNotOperator/bitwiseNotOperatorWithBooleanType.ts ===
-
 // ~ operator on boolean type
 var BOOLEAN: boolean;
 >BOOLEAN : boolean
@@ -16,7 +15,7 @@ class A {
 
     static foo() { return false; }
 >foo : () => boolean
->false : false
+>false : boolean
 }
 module M {
 >M : typeof M
@@ -40,16 +39,16 @@ var ResultIsNumber1 = ~BOOLEAN;
 var ResultIsNumber2 = ~true;
 >ResultIsNumber2 : number
 >~true : number
->true : true
+>true : boolean
 
 var ResultIsNumber3 = ~{ x: true, y: false };
 >ResultIsNumber3 : number
 >~{ x: true, y: false } : number
 >{ x: true, y: false } : { x: boolean; y: boolean; }
 >x : boolean
->true : true
+>true : boolean
 >y : boolean
->false : false
+>false : boolean
 
 // boolean type expressions
 var ResultIsNumber4 = ~objA.a;
@@ -90,7 +89,7 @@ var ResultIsNumber8 = ~~BOOLEAN;
 // miss assignment operators
 ~true;
 >~true : number
->true : true
+>true : boolean
 
 ~BOOLEAN;
 >~BOOLEAN : number
@@ -102,10 +101,10 @@ var ResultIsNumber8 = ~~BOOLEAN;
 >foo : () => boolean
 
 ~true, false;
->~true, false : false
+>~true, false : boolean
 >~true : number
->true : true
->false : false
+>true : boolean
+>false : boolean
 
 ~objA.a;
 >~objA.a : number

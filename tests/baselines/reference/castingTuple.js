@@ -59,7 +59,7 @@ var D = (function () {
 var E = (function (_super) {
     __extends(E, _super);
     function E() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return E;
 }(A));
@@ -67,7 +67,7 @@ var E = (function (_super) {
 var F = (function (_super) {
     __extends(F, _super);
     function F() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return F;
 }(A));

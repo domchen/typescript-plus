@@ -61,7 +61,7 @@ var BaseClass = (function () {
 var Child = (function (_super) {
     __extends(Child, _super);
     function Child() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     Child.prototype.method = function () { };
     return Child;
@@ -75,7 +75,7 @@ var ChildNoBaseClass = (function () {
 var Grandchild = (function (_super) {
     __extends(Grandchild, _super);
     function Grandchild() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return Grandchild;
 }(ChildNoBaseClass));

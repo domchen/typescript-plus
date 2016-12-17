@@ -48,6 +48,7 @@ var W;
     }());
     W.D = D;
 })(W || (W = {}));
+var W;
 (function (W) {
     W[W["a"] = 0] = "a";
     W[W["b"] = 1] = "b";

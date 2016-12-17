@@ -164,6 +164,7 @@ var Merged2;
         E[E["c"] = 2] = "c";
     })(Merged2.E || (Merged2.E = {}));
     var E = Merged2.E;
+    var E;
     (function (E) {
         E.d = 5;
     })(E = Merged2.E || (Merged2.E = {}));

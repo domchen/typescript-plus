@@ -17,7 +17,7 @@ class A {
 >console.log : (msg: string) => void
 >console : { log(msg: string): void; }
 >log : (msg: string) => void
->'new A' : "new A"
+>'new A' : string
 }
 
 function decorator(target: Object, propertyKey: string) {

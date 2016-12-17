@@ -82,7 +82,7 @@ var Generics;
     var B = (function (_super) {
         __extends(B, _super);
         function B() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return B;
     }(A));
@@ -93,7 +93,7 @@ var Generics;
     var B2 = (function (_super) {
         __extends(B2, _super);
         function B2() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return B2;
     }(A));

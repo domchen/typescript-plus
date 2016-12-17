@@ -50,6 +50,7 @@ var A;
     }());
     A.Point = Point;
 })(A || (A = {}));
+var A;
 (function (A) {
     var Point = (function () {
         function Point() {
@@ -78,6 +79,7 @@ var X;
         })(Z = Y.Z || (Y.Z = {}));
     })(Y = X.Y || (X.Y = {}));
 })(X || (X = {}));
+var X;
 (function (X) {
     var Y;
     (function (Y) {

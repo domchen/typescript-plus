@@ -33,7 +33,7 @@ var M2;
     var B = (function (_super) {
         __extends(B, _super);
         function B() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return B;
     }(M1.A));

@@ -6,18 +6,18 @@ enum Colors {
 
     /** Fancy name for 'blue'*/
     Cornflower /* blue */,
->Cornflower : Colors.Cornflower
+>Cornflower : Colors
 
     /** Fancy name for 'pink'*/
     FancyPink
->FancyPink : Colors.FancyPink
+>FancyPink : Colors
 
 } // trailing comment
 var x = Colors.Cornflower;
 >x : Colors
->Colors.Cornflower : Colors.Cornflower
+>Colors.Cornflower : Colors
 >Colors : typeof Colors
->Cornflower : Colors.Cornflower
+>Cornflower : Colors
 
 x = Colors.FancyPink;
 >x = Colors.FancyPink : Colors.FancyPink

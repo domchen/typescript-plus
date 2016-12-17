@@ -3,15 +3,15 @@ enum foo {
 >foo : foo
 
   b = 1,
->b : foo.b
->1 : 1
+>b : foo
+>1 : number
 
   c = 2,
->c : foo.c
->2 : 2
+>c : foo
+>2 : number
 
   d = 3
->d : foo.d
->3 : 3
+>d : foo
+>3 : number
 }
 

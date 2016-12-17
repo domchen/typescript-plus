@@ -29,10 +29,11 @@ var C = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return D;
 }(C));
+var D;
 (function (D) {
     D.y = D.bar; // error
 })(D || (D = {}));

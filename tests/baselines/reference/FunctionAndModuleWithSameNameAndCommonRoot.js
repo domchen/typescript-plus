@@ -72,6 +72,7 @@ var B;
         return { x: 0, y: 0 };
     }
     B.Point = Point;
+    var Point;
     (function (Point) {
         Point.Origin = { x: 0, y: 0 };
     })(Point = B.Point || (B.Point = {}));

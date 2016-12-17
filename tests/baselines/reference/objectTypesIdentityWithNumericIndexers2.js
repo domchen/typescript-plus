@@ -140,7 +140,7 @@ var Base = (function () {
 var Derived = (function (_super) {
     __extends(Derived, _super);
     function Derived() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return Derived;
 }(Base));
@@ -162,14 +162,14 @@ var C = (function () {
 var PA = (function (_super) {
     __extends(PA, _super);
     function PA() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return PA;
 }(A));
 var PB = (function (_super) {
     __extends(PB, _super);
     function PB() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return PB;
 }(B));

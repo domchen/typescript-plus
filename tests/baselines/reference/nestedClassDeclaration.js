@@ -38,5 +38,4 @@ function foo() {
     }());
 }
 var x = {
-    "class": C4
-}, _a = void 0;
+    class: C4 }, _a = void 0;

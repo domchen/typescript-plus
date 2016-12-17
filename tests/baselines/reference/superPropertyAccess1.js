@@ -50,10 +50,9 @@ var C = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        var _this = _super.call(this) || this;
-        _super.prototype.bar.call(_this);
+        _super.call(this);
+        _super.prototype.bar.call(this);
         _super.prototype.x; // error
-        return _this;
     }
     D.prototype.foo = function () {
         _super.prototype.bar.call(this);

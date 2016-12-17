@@ -10,15 +10,15 @@ function ff() {
 >x : string | undefined
 
     while (true) {
->true : true
+>true : boolean
 
         if (cond) {
 >cond : boolean
 
             x = "";
->x = "" : ""
+>x = "" : string
 >x : string | undefined
->"" : ""
+>"" : string
         }
         else {
             if (x) {

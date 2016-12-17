@@ -1,5 +1,4 @@
 === tests/cases/conformance/expressions/commaOperator/commaOperatorWithSecondOperandObjectType.ts ===
-
 var ANY: any;
 >ANY : any
 
@@ -100,7 +99,7 @@ ANY = null, OBJECT
 
 true, {}
 >true, {} : {}
->true : true
+>true : boolean
 >{} : {}
 
 !BOOLEAN, []
@@ -111,7 +110,7 @@ true, {}
 
 "string", new Date()
 >"string", new Date() : Date
->"string" : "string"
+>"string" : string
 >new Date() : Date
 >Date : DateConstructor
 
@@ -144,7 +143,7 @@ var resultIsObject8 = (true, {});
 >resultIsObject8 : {}
 >(true, {}) : {}
 >true, {} : {}
->true : true
+>true : boolean
 >{} : {}
 
 var resultIsObject9 = (!BOOLEAN, { a: 1, b: "s" });
@@ -155,15 +154,15 @@ var resultIsObject9 = (!BOOLEAN, { a: 1, b: "s" });
 >BOOLEAN : boolean
 >{ a: 1, b: "s" } : { a: number; b: string; }
 >a : number
->1 : 1
+>1 : number
 >b : string
->"s" : "s"
+>"s" : string
 
 var resultIsObject10 = ("string", new Date());
 >resultIsObject10 : Date
 >("string", new Date()) : Date
 >"string", new Date() : Date
->"string" : "string"
+>"string" : string
 >new Date() : Date
 >Date : DateConstructor
 

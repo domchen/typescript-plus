@@ -14,7 +14,7 @@ class C {
 
     public get z() { return 1; }
 >z : number
->1 : 1
+>1 : number
 
     public set z(v) { }
 >z : number

@@ -12,4 +12,5 @@
 ////});
 ////function each<T>(items: T[], handler: (item: T) => void) { }
 
-verify.quickInfoAt("1", "(local var) changes: string[]", undefined);
+goTo.marker('1');
+verify.quickInfoIs("(local var) changes: string[]", undefined);

@@ -1,5 +1,4 @@
-﻿// @target: ES6
-`head${ // single line comment
+﻿`head${ // single line comment
 10
 }
 middle${

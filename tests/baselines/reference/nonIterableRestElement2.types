@@ -9,6 +9,6 @@ var c = {};
 >...c : any
 >c : {}
 >["", 0] : (string | number)[]
->"" : ""
->0 : 0
+>"" : string
+>0 : number
 

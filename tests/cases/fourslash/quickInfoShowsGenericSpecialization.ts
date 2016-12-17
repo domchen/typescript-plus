@@ -3,4 +3,5 @@
 ////class A<T> { }
 ////var /**/foo = new A<number>();
 
-verify.quickInfoAt("", "var foo: A<number>");
+goTo.marker();
+verify.quickInfoIs('var foo: A<number>');

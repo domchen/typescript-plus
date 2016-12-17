@@ -14,7 +14,7 @@ function aEnclosesB(a: Symbol) {
 >Symbol : Symbol
 
     return true;
->true : true
+>true : boolean
 }
 
 class Symbol {

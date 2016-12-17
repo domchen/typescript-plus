@@ -17,25 +17,25 @@ declare var console: {
 }
 var hello = "hello";
 >hello : string
->"hello" : "hello"
+>"hello" : string
 
 var robotA: Robot = { name: "mower", skill: "mowing" };
 >robotA : Robot
 >Robot : Robot
 >{ name: "mower", skill: "mowing" } : { name: string; skill: string; }
 >name : string
->"mower" : "mower"
+>"mower" : string
 >skill : string
->"mowing" : "mowing"
+>"mowing" : string
 
 var robotB: Robot = { name: "trimmer", skill: "trimming" };
 >robotB : Robot
 >Robot : Robot
 >{ name: "trimmer", skill: "trimming" } : { name: string; skill: string; }
 >name : string
->"trimmer" : "trimmer"
+>"trimmer" : string
 >skill : string
->"trimming" : "trimming"
+>"trimming" : string
 
 var { name: nameA } = robotA;
 >name : any
@@ -56,9 +56,9 @@ var { name: nameC, skill: skillC } = { name: "Edger", skill: "cutting edges" };
 >skillC : string
 >{ name: "Edger", skill: "cutting edges" } : { name: string; skill: string; }
 >name : string
->"Edger" : "Edger"
+>"Edger" : string
 >skill : string
->"cutting edges" : "cutting edges"
+>"cutting edges" : string
 
 if (nameA == nameB) {
 >nameA == nameB : boolean

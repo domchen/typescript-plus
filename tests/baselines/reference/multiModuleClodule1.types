@@ -20,11 +20,11 @@ module C {
 
     export var x = 1;
 >x : number
->1 : 1
+>1 : number
 
     var y = 2;
 >y : number
->2 : 2
+>2 : number
 }
 module C {
 >C : typeof C
@@ -34,7 +34,7 @@ module C {
 
     function baz() { return ''; }
 >baz : () => string
->'' : ""
+>'' : string
 }
 
 var c = new C(C.x);

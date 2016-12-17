@@ -10,8 +10,6 @@ The typescript-plus compiler provides extra features to the original typescript 
 
 This project will try to stay up to date with the new release of the original TypeScript project.
 
-Current TypeScript Version: 2.0.5
-
 ## Installing
 
 First make sure you have installed the latest version of [node.js](http://nodejs.org/)

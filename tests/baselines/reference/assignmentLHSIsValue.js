@@ -1,6 +1,6 @@
 //// [assignmentLHSIsValue.ts]
 // expected error for all the LHS of assignments
-var value: any;
+var value;
 
 // this
 class C {
@@ -118,9 +118,8 @@ value;
 var Derived = (function (_super) {
     __extends(Derived, _super);
     function Derived() {
-        var _this = _super.call(this) || this;
+        _super.call(this);
         _super.prototype. = value;
-        return _this;
     }
     Derived.prototype.foo = function () { _super.prototype. = value; };
     Derived.sfoo = function () { _super. = value; };

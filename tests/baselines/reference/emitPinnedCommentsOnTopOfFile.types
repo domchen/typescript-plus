@@ -7,5 +7,5 @@
 
 var x = 10;
 >x : number
->10 : 10
+>10 : number
 

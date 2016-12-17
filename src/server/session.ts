@@ -1,6 +1,6 @@
-/// <reference path="..\compiler\commandLineParser.ts" />
+﻿/// <reference path="..\compiler\commandLineParser.ts" />
 /// <reference path="..\services\services.ts" />
-/// <reference path="protocol.ts" />
+/// <reference path="protocol.d.ts" />
 /// <reference path="editorServices.ts" />
 
 namespace ts.server {
@@ -12,17 +12,6 @@ namespace ts.server {
         const seconds = time[0];
         const nanoseconds = time[1];
         return ((1e9 * seconds) + nanoseconds) / 1000000.0;
-    }
-
-    function shouldSkipSematicCheck(project: Project) {
-        if (project.getCompilerOptions().skipLibCheck !== undefined) {
-            return false;
-        }
-
-        if ((project.projectKind === ProjectKind.Inferred || project.projectKind === ProjectKind.External) && project.isJsOnlyProject()) {
-            return true;
-        }
-        return false;
     }
 
     interface FileStart {
@@ -55,8 +44,7 @@ namespace ts.server {
         return {
             start: scriptInfo.positionToLineOffset(diag.start),
             end: scriptInfo.positionToLineOffset(diag.start + diag.length),
-            text: ts.flattenDiagnosticMessageText(diag.messageText, "\n"),
-            code: diag.code
+            text: ts.flattenDiagnosticMessageText(diag.messageText, "\n")
         };
     }
 
@@ -73,10 +61,6 @@ namespace ts.server {
         project: Project;
     }
 
-    export interface EventSender {
-        event(payload: any, eventName: string): void;
-    }
-
     function allEditsBeforePos(edits: ts.TextChange[], pos: number) {
         for (const edit of edits) {
             if (textSpanEnd(edit.span) >= pos) {
@@ -87,74 +71,67 @@ namespace ts.server {
     }
 
     export namespace CommandNames {
-        export const Brace: protocol.CommandTypes.Brace = "brace";
-        export const BraceFull: protocol.CommandTypes.BraceFull = "brace-full";
-        export const BraceCompletion: protocol.CommandTypes.BraceCompletion = "braceCompletion";
-        export const Change: protocol.CommandTypes.Change = "change";
-        export const Close: protocol.CommandTypes.Close = "close";
-        export const Completions: protocol.CommandTypes.Completions = "completions";
-        export const CompletionsFull: protocol.CommandTypes.CompletionsFull = "completions-full";
-        export const CompletionDetails: protocol.CommandTypes.CompletionDetails = "completionEntryDetails";
-        export const CompileOnSaveAffectedFileList: protocol.CommandTypes.CompileOnSaveAffectedFileList = "compileOnSaveAffectedFileList";
-        export const CompileOnSaveEmitFile: protocol.CommandTypes.CompileOnSaveEmitFile = "compileOnSaveEmitFile";
-        export const Configure: protocol.CommandTypes.Configure = "configure";
-        export const Definition: protocol.CommandTypes.Definition = "definition";
-        export const DefinitionFull: protocol.CommandTypes.DefinitionFull = "definition-full";
-        export const Exit: protocol.CommandTypes.Exit = "exit";
-        export const Format: protocol.CommandTypes.Format = "format";
-        export const Formatonkey: protocol.CommandTypes.Formatonkey = "formatonkey";
-        export const FormatFull: protocol.CommandTypes.FormatFull = "format-full";
-        export const FormatonkeyFull: protocol.CommandTypes.FormatonkeyFull = "formatonkey-full";
-        export const FormatRangeFull: protocol.CommandTypes.FormatRangeFull = "formatRange-full";
-        export const Geterr: protocol.CommandTypes.Geterr = "geterr";
-        export const GeterrForProject: protocol.CommandTypes.GeterrForProject = "geterrForProject";
-        export const Implementation: protocol.CommandTypes.Implementation = "implementation";
-        export const ImplementationFull: protocol.CommandTypes.ImplementationFull = "implementation-full";
-        export const SemanticDiagnosticsSync: protocol.CommandTypes.SemanticDiagnosticsSync = "semanticDiagnosticsSync";
-        export const SyntacticDiagnosticsSync: protocol.CommandTypes.SyntacticDiagnosticsSync = "syntacticDiagnosticsSync";
-        export const NavBar: protocol.CommandTypes.NavBar = "navbar";
-        export const NavBarFull: protocol.CommandTypes.NavBarFull = "navbar-full";
-        export const NavTree: protocol.CommandTypes.NavTree = "navtree";
-        export const NavTreeFull: protocol.CommandTypes.NavTreeFull = "navtree-full";
-        export const Navto: protocol.CommandTypes.Navto = "navto";
-        export const NavtoFull: protocol.CommandTypes.NavtoFull = "navto-full";
-        export const Occurrences: protocol.CommandTypes.Occurrences = "occurrences";
-        export const DocumentHighlights: protocol.CommandTypes.DocumentHighlights = "documentHighlights";
-        export const DocumentHighlightsFull: protocol.CommandTypes.DocumentHighlightsFull = "documentHighlights-full";
-        export const Open: protocol.CommandTypes.Open = "open";
-        export const Quickinfo: protocol.CommandTypes.Quickinfo = "quickinfo";
-        export const QuickinfoFull: protocol.CommandTypes.QuickinfoFull = "quickinfo-full";
-        export const References: protocol.CommandTypes.References = "references";
-        export const ReferencesFull: protocol.CommandTypes.ReferencesFull = "references-full";
-        export const Reload: protocol.CommandTypes.Reload = "reload";
-        export const Rename: protocol.CommandTypes.Rename = "rename";
-        export const RenameInfoFull: protocol.CommandTypes.RenameInfoFull = "rename-full";
-        export const RenameLocationsFull: protocol.CommandTypes.RenameLocationsFull = "renameLocations-full";
-        export const Saveto: protocol.CommandTypes.Saveto = "saveto";
-        export const SignatureHelp: protocol.CommandTypes.SignatureHelp = "signatureHelp";
-        export const SignatureHelpFull: protocol.CommandTypes.SignatureHelpFull = "signatureHelp-full";
-        export const TypeDefinition: protocol.CommandTypes.TypeDefinition = "typeDefinition";
-        export const ProjectInfo: protocol.CommandTypes.ProjectInfo = "projectInfo";
-        export const ReloadProjects: protocol.CommandTypes.ReloadProjects = "reloadProjects";
-        export const Unknown: protocol.CommandTypes.Unknown = "unknown";
-        export const OpenExternalProject: protocol.CommandTypes.OpenExternalProject = "openExternalProject";
-        export const OpenExternalProjects: protocol.CommandTypes.OpenExternalProjects = "openExternalProjects";
-        export const CloseExternalProject: protocol.CommandTypes.CloseExternalProject = "closeExternalProject";
-        export const SynchronizeProjectList: protocol.CommandTypes.SynchronizeProjectList = "synchronizeProjectList";
-        export const ApplyChangedToOpenFiles: protocol.CommandTypes.ApplyChangedToOpenFiles = "applyChangedToOpenFiles";
-        export const EncodedSemanticClassificationsFull: protocol.CommandTypes.EncodedSemanticClassificationsFull = "encodedSemanticClassifications-full";
-        export const Cleanup: protocol.CommandTypes.Cleanup = "cleanup";
-        export const OutliningSpans: protocol.CommandTypes.OutliningSpans = "outliningSpans";
-        export const TodoComments: protocol.CommandTypes.TodoComments = "todoComments";
-        export const Indentation: protocol.CommandTypes.Indentation = "indentation";
-        export const DocCommentTemplate: protocol.CommandTypes.DocCommentTemplate = "docCommentTemplate";
-        export const CompilerOptionsDiagnosticsFull: protocol.CommandTypes.CompilerOptionsDiagnosticsFull = "compilerOptionsDiagnostics-full";
-        export const NameOrDottedNameSpan: protocol.CommandTypes.NameOrDottedNameSpan = "nameOrDottedNameSpan";
-        export const BreakpointStatement: protocol.CommandTypes.BreakpointStatement = "breakpointStatement";
-        export const CompilerOptionsForInferredProjects: protocol.CommandTypes.CompilerOptionsForInferredProjects = "compilerOptionsForInferredProjects";
-        export const GetCodeFixes: protocol.CommandTypes.GetCodeFixes = "getCodeFixes";
-        export const GetCodeFixesFull: protocol.CommandTypes.GetCodeFixesFull = "getCodeFixes-full";
-        export const GetSupportedCodeFixes: protocol.CommandTypes.GetSupportedCodeFixes = "getSupportedCodeFixes";
+        export const Brace = "brace";
+        export const BraceFull = "brace-full";
+        export const BraceCompletion = "braceCompletion";
+        export const Change = "change";
+        export const Close = "close";
+        export const Completions = "completions";
+        export const CompletionsFull = "completions-full";
+        export const CompletionDetails = "completionEntryDetails";
+        export const CompileOnSaveAffectedFileList = "compileOnSaveAffectedFileList";
+        export const CompileOnSaveEmitFile = "compileOnSaveEmitFile";
+        export const Configure = "configure";
+        export const Definition = "definition";
+        export const DefinitionFull = "definition-full";
+        export const Exit = "exit";
+        export const Format = "format";
+        export const Formatonkey = "formatonkey";
+        export const FormatFull = "format-full";
+        export const FormatonkeyFull = "formatonkey-full";
+        export const FormatRangeFull = "formatRange-full";
+        export const Geterr = "geterr";
+        export const GeterrForProject = "geterrForProject";
+        export const SemanticDiagnosticsSync = "semanticDiagnosticsSync";
+        export const SyntacticDiagnosticsSync = "syntacticDiagnosticsSync";
+        export const NavBar = "navbar";
+        export const NavBarFull = "navbar-full";
+        export const Navto = "navto";
+        export const NavtoFull = "navto-full";
+        export const Occurrences = "occurrences";
+        export const DocumentHighlights = "documentHighlights";
+        export const DocumentHighlightsFull = "documentHighlights-full";
+        export const Open = "open";
+        export const Quickinfo = "quickinfo";
+        export const QuickinfoFull = "quickinfo-full";
+        export const References = "references";
+        export const ReferencesFull = "references-full";
+        export const Reload = "reload";
+        export const Rename = "rename";
+        export const RenameInfoFull = "rename-full";
+        export const RenameLocationsFull = "renameLocations-full";
+        export const Saveto = "saveto";
+        export const SignatureHelp = "signatureHelp";
+        export const SignatureHelpFull = "signatureHelp-full";
+        export const TypeDefinition = "typeDefinition";
+        export const ProjectInfo = "projectInfo";
+        export const ReloadProjects = "reloadProjects";
+        export const Unknown = "unknown";
+        export const OpenExternalProject = "openExternalProject";
+        export const OpenExternalProjects = "openExternalProjects";
+        export const CloseExternalProject = "closeExternalProject";
+        export const SynchronizeProjectList = "synchronizeProjectList";
+        export const ApplyChangedToOpenFiles = "applyChangedToOpenFiles";
+        export const EncodedSemanticClassificationsFull = "encodedSemanticClassifications-full";
+        export const Cleanup = "cleanup";
+        export const OutliningSpans = "outliningSpans";
+        export const TodoComments = "todoComments";
+        export const Indentation = "indentation";
+        export const DocCommentTemplate = "docCommentTemplate";
+        export const CompilerOptionsDiagnosticsFull = "compilerOptionsDiagnostics-full";
+        export const NameOrDottedNameSpan = "nameOrDottedNameSpan";
+        export const BreakpointStatement = "breakpointStatement";
+        export const CompilerOptionsForInferredProjects = "compilerOptionsForInferredProjects";
     }
 
     export function formatMessage<T extends protocol.Message>(msg: T, logger: server.Logger, byteLength: (s: string, encoding: string) => number, newLine: string): string {
@@ -169,14 +146,12 @@ namespace ts.server {
         return `Content-Length: ${1 + len}\r\n\r\n${json}${newLine}`;
     }
 
-    export class Session implements EventSender {
+    export class Session {
         private readonly gcTimer: GcTimer;
         protected projectService: ProjectService;
         private errorTimer: any; /*NodeJS.Timer | number*/
         private immediateId: any;
         private changeSeq = 0;
-
-        private eventHander: ProjectServiceEventHandler;
 
         constructor(
             private host: ServerHost,
@@ -186,18 +161,17 @@ namespace ts.server {
             private byteLength: (buf: string, encoding?: string) => number,
             private hrtime: (start?: number[]) => number[],
             protected logger: Logger,
-            protected readonly canUseEvents: boolean,
-            eventHandler?: ProjectServiceEventHandler) {
+            protected readonly canUseEvents: boolean) {
 
-            this.eventHander = canUseEvents
-                ? eventHandler || (event => this.defaultEventHandler(event))
+            const eventHandler: ProjectServiceEventHandler = canUseEvents
+                ? event => this.handleEvent(event)
                 : undefined;
 
-            this.projectService = new ProjectService(host, logger, cancellationToken, useSingleInferredProject, typingsInstaller, this.eventHander);
+            this.projectService = new ProjectService(host, logger, cancellationToken, useSingleInferredProject, typingsInstaller, eventHandler);
             this.gcTimer = new GcTimer(host, /*delay*/ 7000, logger);
         }
 
-        private defaultEventHandler(event: ProjectServiceEvent) {
+        private handleEvent(event: ProjectServiceEvent) {
             switch (event.eventName) {
                 case "context":
                     const { project, fileName } = event.data;
@@ -276,13 +250,12 @@ namespace ts.server {
 
         private semanticCheck(file: NormalizedPath, project: Project) {
             try {
-                let diags: Diagnostic[] = [];
-                if (!shouldSkipSematicCheck(project)) {
-                    diags = project.getLanguageService().getSemanticDiagnostics(file);
-                }
+                const diags = project.getLanguageService().getSemanticDiagnostics(file);
 
-                const bakedDiags = diags.map((diag) => formatDiag(file, project, diag));
-                this.event({ file: file, diagnostics: bakedDiags }, "semanticDiag");
+                if (diags) {
+                    const bakedDiags = diags.map((diag) => formatDiag(file, project, diag));
+                    this.event({ file: file, diagnostics: bakedDiags }, "semanticDiag");
+                }
             }
             catch (err) {
                 this.logError(err, "semantic check");
@@ -367,7 +340,7 @@ namespace ts.server {
             }
         }
 
-        private getEncodedSemanticClassifications(args: protocol.EncodedSemanticClassificationsRequestArgs) {
+        private getEncodedSemanticClassifications(args: protocol.FileSpanRequestArgs) {
             const { file, project } = this.getFileAndProject(args);
             return project.getLanguageService().getEncodedSemanticClassifications(file, args);
         }
@@ -376,7 +349,7 @@ namespace ts.server {
             return projectFileName && this.projectService.findProject(projectFileName);
         }
 
-        private getCompilerOptionsDiagnostics(args: protocol.CompilerOptionsDiagnosticsRequestArgs) {
+        private getCompilerOptionsDiagnostics(args: protocol.ProjectRequestArgs) {
             const project = this.getProject(args.projectFileName);
             return this.convertToDiagnosticsWithLinePosition(project.getLanguageService().getCompilerOptionsDiagnostics(), /*scriptInfo*/ undefined);
         }
@@ -393,11 +366,8 @@ namespace ts.server {
             });
         }
 
-        private getDiagnosticsWorker(args: protocol.FileRequestArgs, isSemantic: boolean, selector: (project: Project, file: string) => Diagnostic[], includeLinePosition: boolean) {
+        private getDiagnosticsWorker(args: protocol.FileRequestArgs, selector: (project: Project, file: string) => Diagnostic[], includeLinePosition: boolean) {
             const { project, file } = this.getFileAndProject(args);
-            if (isSemantic && shouldSkipSematicCheck(project)) {
-                return [];
-            }
             const scriptInfo = project.getScriptInfoForNormalizedPath(file);
             const diagnostics = selector(project, file);
             return includeLinePosition
@@ -450,26 +420,6 @@ namespace ts.server {
             });
         }
 
-        private getImplementation(args: protocol.FileLocationRequestArgs, simplifiedResult: boolean): protocol.FileSpan[] | ImplementationLocation[] {
-            const { file, project } = this.getFileAndProject(args);
-            const scriptInfo = project.getScriptInfoForNormalizedPath(file);
-            const position = this.getPosition(args, scriptInfo);
-            const implementations = project.getLanguageService().getImplementationAtPosition(file, position);
-            if (!implementations) {
-                return [];
-            }
-            if (simplifiedResult) {
-                return implementations.map(impl => ({
-                    file: impl.fileName,
-                    start: scriptInfo.positionToLineOffset(impl.textSpan.start),
-                    end: scriptInfo.positionToLineOffset(ts.textSpanEnd(impl.textSpan))
-                }));
-            }
-            else {
-                return implementations;
-            }
-        }
-
         private getOccurrences(args: protocol.FileLocationRequestArgs): protocol.OccurrencesResponseItem[] {
             const { file, project } = this.getFileAndProject(args);
             const scriptInfo = project.getScriptInfoForNormalizedPath(file);
@@ -496,11 +446,11 @@ namespace ts.server {
         }
 
         private getSyntacticDiagnosticsSync(args: protocol.SyntacticDiagnosticsSyncRequestArgs): protocol.Diagnostic[] | protocol.DiagnosticWithLinePosition[] {
-            return this.getDiagnosticsWorker(args, /*isSemantic*/ false, (project, file) => project.getLanguageService().getSyntacticDiagnostics(file), args.includeLinePosition);
+            return this.getDiagnosticsWorker(args, (project, file) => project.getLanguageService().getSyntacticDiagnostics(file), args.includeLinePosition);
         }
 
         private getSemanticDiagnosticsSync(args: protocol.SemanticDiagnosticsSyncRequestArgs): protocol.Diagnostic[] | protocol.DiagnosticWithLinePosition[] {
-            return this.getDiagnosticsWorker(args, /*isSemantic*/ true, (project, file) => project.getLanguageService().getSemanticDiagnostics(file), args.includeLinePosition);
+            return this.getDiagnosticsWorker(args, (project, file) => project.getLanguageService().getSemanticDiagnostics(file), args.includeLinePosition);
         }
 
         private getDocumentHighlights(args: protocol.DocumentHighlightsRequestArgs, simplifiedResult: boolean): protocol.DocumentHighlightsItem[] | DocumentHighlights[] {
@@ -575,7 +525,7 @@ namespace ts.server {
                 const scriptInfo = this.projectService.getScriptInfo(args.file);
                 projects = scriptInfo.containingProjects;
             }
-            // ts.filter handles case when 'projects' is undefined
+            // ts.filter handles case when 'projects' is undefined 
             projects = filter(projects, p => p.languageServiceEnabled);
             if (!projects || !projects.length) {
                 return Errors.ThrowNoProject();
@@ -762,11 +712,8 @@ namespace ts.server {
          */
         private openClientFile(fileName: NormalizedPath, fileContent?: string, scriptKind?: ScriptKind) {
             const { configFileName, configFileErrors } = this.projectService.openClientFileWithNormalizedPath(fileName, fileContent, scriptKind);
-            if (this.eventHander) {
-                this.eventHander({
-                    eventName: "configFileDiag",
-                    data: { triggerFile: fileName, configFileName, diagnostics: configFileErrors || [] }
-                });
+            if (configFileErrors) {
+                this.configFileDiagnosticEvent(fileName, configFileName, configFileErrors);
             }
         }
 
@@ -782,7 +729,7 @@ namespace ts.server {
             return this.getFileAndProjectWorker(args.file, args.projectFileName, /*refreshInferredProjects*/ false, errorOnMissingProject);
         }
 
-        private getFileAndProjectWorker(uncheckedFileName: string, projectFileName: string, refreshInferredProjects: boolean, errorOnMissingProject: boolean) {
+        private getFileAndProjectWorker(uncheckedFileName: string, projectFileName: string, refreshInferredProjects: boolean,  errorOnMissingProject: boolean) {
             const file = toNormalizedPath(uncheckedFileName);
             const project: Project = this.getProject(projectFileName) || this.projectService.getDefaultProjectForFile(file, refreshInferredProjects);
             if (!project && errorOnMissingProject) {
@@ -811,7 +758,7 @@ namespace ts.server {
         private getIndentation(args: protocol.IndentationRequestArgs) {
             const { file, project } = this.getFileAndProjectWithoutRefreshingInferredProjects(args);
             const position = this.getPosition(args, project.getScriptInfoForNormalizedPath(file));
-            const options = args.options ? convertFormatOptions(args.options) : this.projectService.getFormatCodeOptions(file);
+            const options = args.options || this.projectService.getFormatCodeOptions(file);
             const indentation = project.getLanguageService(/*ensureSynchronized*/ false).getIndentationAtPosition(file, position, options);
             return { position, indentation };
         }
@@ -873,24 +820,30 @@ namespace ts.server {
                 return undefined;
             }
 
-            return edits.map(edit => this.convertTextChangeToCodeEdit(edit, scriptInfo));
+            return edits.map((edit) => {
+                return {
+                    start: scriptInfo.positionToLineOffset(edit.span.start),
+                    end: scriptInfo.positionToLineOffset(ts.textSpanEnd(edit.span)),
+                    newText: edit.newText ? edit.newText : ""
+                };
+            });
         }
 
         private getFormattingEditsForRangeFull(args: protocol.FormatRequestArgs) {
             const { file, project } = this.getFileAndProjectWithoutRefreshingInferredProjects(args);
-            const options = args.options ? convertFormatOptions(args.options) : this.projectService.getFormatCodeOptions(file);
+            const options = args.options || this.projectService.getFormatCodeOptions(file);
             return project.getLanguageService(/*ensureSynchronized*/ false).getFormattingEditsForRange(file, args.position, args.endPosition, options);
         }
 
         private getFormattingEditsForDocumentFull(args: protocol.FormatRequestArgs) {
             const { file, project } = this.getFileAndProjectWithoutRefreshingInferredProjects(args);
-            const options = args.options ? convertFormatOptions(args.options) : this.projectService.getFormatCodeOptions(file);
+            const options = args.options || this.projectService.getFormatCodeOptions(file);
             return project.getLanguageService(/*ensureSynchronized*/ false).getFormattingEditsForDocument(file, options);
         }
 
         private getFormattingEditsAfterKeystrokeFull(args: protocol.FormatOnKeyRequestArgs) {
             const { file, project } = this.getFileAndProjectWithoutRefreshingInferredProjects(args);
-            const options = args.options ? convertFormatOptions(args.options) : this.projectService.getFormatCodeOptions(file);
+            const options = args.options || this.projectService.getFormatCodeOptions(file);
             return project.getLanguageService(/*ensureSynchronized*/ false).getFormattingEditsAfterKeystroke(file, args.position, args.key, options);
         }
 
@@ -966,12 +919,19 @@ namespace ts.server {
                 return completions.entries.reduce((result: protocol.CompletionEntry[], entry: ts.CompletionEntry) => {
                     if (completions.isMemberCompletion || (entry.name.toLowerCase().indexOf(prefix.toLowerCase()) === 0)) {
                         const { name, kind, kindModifiers, sortText, replacementSpan } = entry;
-                        const convertedSpan: protocol.TextSpan =
-                            replacementSpan ? this.decorateSpan(replacementSpan, scriptInfo) : undefined;
+
+                        let convertedSpan: protocol.TextSpan = undefined;
+                        if (replacementSpan) {
+                            convertedSpan = {
+                                start: scriptInfo.positionToLineOffset(replacementSpan.start),
+                                end: scriptInfo.positionToLineOffset(replacementSpan.start + replacementSpan.length)
+                            };
+                        }
+
                         result.push({ name, kind, kindModifiers, sortText, replacementSpan: convertedSpan });
                     }
                     return result;
-                }, []).sort((a, b) => ts.compareStrings(a.name, b.name));
+                }, []).sort((a, b) => a.name.localeCompare(b.name));
             }
             else {
                 return completions;
@@ -1080,12 +1040,11 @@ namespace ts.server {
 
         private reload(args: protocol.ReloadRequestArgs, reqSeq: number) {
             const file = toNormalizedPath(args.file);
-            const tempFileName = args.tmpfile && toNormalizedPath(args.tmpfile);
             const project = this.projectService.getDefaultProjectForFile(file, /*refreshInferredProjects*/ true);
             if (project) {
                 this.changeSeq++;
                 // make sure no changes happen before this one is finished
-                if (project.reloadScript(file, tempFileName)) {
+                if (project.reloadScript(file)) {
                     this.output(undefined, CommandNames.Reload, reqSeq);
                 }
             }
@@ -1106,63 +1065,46 @@ namespace ts.server {
             this.projectService.closeClientFile(file);
         }
 
-        private decorateNavigationBarItems(items: ts.NavigationBarItem[], scriptInfo: ScriptInfo): protocol.NavigationBarItem[] {
-            return map(items, item => ({
+        private decorateNavigationBarItem(project: Project, fileName: NormalizedPath, items: ts.NavigationBarItem[]): protocol.NavigationBarItem[] {
+            if (!items) {
+                return undefined;
+            }
+
+            const scriptInfo = project.getScriptInfoForNormalizedPath(fileName);
+
+            return items.map(item => ({
                 text: item.text,
                 kind: item.kind,
                 kindModifiers: item.kindModifiers,
-                spans: item.spans.map(span => this.decorateSpan(span, scriptInfo)),
-                childItems: this.decorateNavigationBarItems(item.childItems, scriptInfo),
+                spans: item.spans.map(span => ({
+                    start: scriptInfo.positionToLineOffset(span.start),
+                    end: scriptInfo.positionToLineOffset(ts.textSpanEnd(span))
+                })),
+                childItems: this.decorateNavigationBarItem(project, fileName, item.childItems),
                 indent: item.indent
             }));
         }
 
         private getNavigationBarItems(args: protocol.FileRequestArgs, simplifiedResult: boolean): protocol.NavigationBarItem[] | NavigationBarItem[] {
             const { file, project } = this.getFileAndProject(args);
-            const items = project.getLanguageService(/*ensureSynchronized*/ false).getNavigationBarItems(file);
-            return !items
-                ? undefined
-                : simplifiedResult
-                ? this.decorateNavigationBarItems(items, project.getScriptInfoForNormalizedPath(file))
+            const items = project.getLanguageService().getNavigationBarItems(file);
+            if (!items) {
+                return undefined;
+            }
+
+            return simplifiedResult
+                ? this.decorateNavigationBarItem(project, file, items)
                 : items;
-        }
-
-        private decorateNavigationTree(tree: ts.NavigationTree, scriptInfo: ScriptInfo): protocol.NavigationTree {
-            return {
-                text: tree.text,
-                kind: tree.kind,
-                kindModifiers: tree.kindModifiers,
-                spans: tree.spans.map(span => this.decorateSpan(span, scriptInfo)),
-                childItems: map(tree.childItems, item => this.decorateNavigationTree(item, scriptInfo))
-            };
-        }
-
-        private decorateSpan(span: TextSpan, scriptInfo: ScriptInfo): protocol.TextSpan {
-            return {
-                start: scriptInfo.positionToLineOffset(span.start),
-                end: scriptInfo.positionToLineOffset(ts.textSpanEnd(span))
-            };
-        }
-
-        private getNavigationTree(args: protocol.FileRequestArgs, simplifiedResult: boolean): protocol.NavigationTree | NavigationTree {
-            const { file, project } = this.getFileAndProject(args);
-            const tree = project.getLanguageService(/*ensureSynchronized*/ false).getNavigationTree(file);
-            return !tree
-                ? undefined
-                : simplifiedResult
-                ? this.decorateNavigationTree(tree, project.getScriptInfoForNormalizedPath(file))
-                : tree;
         }
 
         private getNavigateToItems(args: protocol.NavtoRequestArgs, simplifiedResult: boolean): protocol.NavtoItem[] | NavigateToItem[] {
             const projects = this.getProjects(args);
 
-            const fileName = args.currentFileOnly ? args.file && normalizeSlashes(args.file) : undefined;
             if (simplifiedResult) {
                 return combineProjectOutput(
                     projects,
                     project => {
-                        const navItems = project.getLanguageService().getNavigateToItems(args.searchValue, args.maxResultCount, fileName, /*excludeDts*/ project.isNonTsProject());
+                        const navItems = project.getLanguageService().getNavigateToItems(args.searchValue, args.maxResultCount, /*excludeDts*/ project.isJsOnlyProject());
                         if (!navItems) {
                             return [];
                         }
@@ -1200,7 +1142,7 @@ namespace ts.server {
             else {
                 return combineProjectOutput(
                     projects,
-                    project => project.getLanguageService().getNavigateToItems(args.searchValue, args.maxResultCount, fileName, /*excludeDts*/ project.isNonTsProject()),
+                    project => project.getLanguageService().getNavigateToItems(args.searchValue, args.maxResultCount, /*excludeDts*/ project.isJsOnlyProject()),
                     /*comparer*/ undefined,
                     navigateToItemIsEqualTo);
             }
@@ -1234,55 +1176,6 @@ namespace ts.server {
             }
         }
 
-        private getSupportedCodeFixes(): string[] {
-            return ts.getSupportedCodeFixes();
-        }
-
-        private getCodeFixes(args: protocol.CodeFixRequestArgs, simplifiedResult: boolean): protocol.CodeAction[] | CodeAction[] {
-            const { file, project } = this.getFileAndProjectWithoutRefreshingInferredProjects(args);
-
-            const scriptInfo = project.getScriptInfoForNormalizedPath(file);
-            const startPosition = getStartPosition();
-            const endPosition = getEndPosition();
-
-            const codeActions = project.getLanguageService().getCodeFixesAtPosition(file, startPosition, endPosition, args.errorCodes);
-            if (!codeActions) {
-                return undefined;
-            }
-            if (simplifiedResult) {
-                return codeActions.map(codeAction => this.mapCodeAction(codeAction, scriptInfo));
-            }
-            else {
-                return codeActions;
-            }
-
-            function getStartPosition() {
-                return args.startPosition !== undefined ? args.startPosition : scriptInfo.lineOffsetToPosition(args.startLine, args.startOffset);
-            }
-
-            function getEndPosition() {
-                return args.endPosition !== undefined ? args.endPosition : scriptInfo.lineOffsetToPosition(args.endLine, args.endOffset);
-            }
-        }
-
-        private mapCodeAction(codeAction: CodeAction, scriptInfo: ScriptInfo): protocol.CodeAction {
-            return {
-                description: codeAction.description,
-                changes: codeAction.changes.map(change => ({
-                    fileName: change.fileName,
-                    textChanges: change.textChanges.map(textChange => this.convertTextChangeToCodeEdit(textChange, scriptInfo))
-                }))
-            };
-        }
-
-        private convertTextChangeToCodeEdit(change: ts.TextChange, scriptInfo: ScriptInfo): protocol.CodeEdit {
-            return {
-                start: scriptInfo.positionToLineOffset(change.span.start),
-                end: scriptInfo.positionToLineOffset(change.span.start + change.span.length),
-                newText: change.newText ? change.newText : ""
-            };
-        }
-
         private getBraceMatching(args: protocol.FileLocationRequestArgs, simplifiedResult: boolean): protocol.TextSpan[] | TextSpan[] {
             const { file, project } = this.getFileAndProjectWithoutRefreshingInferredProjects(args);
 
@@ -1290,11 +1183,19 @@ namespace ts.server {
             const position = this.getPosition(args, scriptInfo);
 
             const spans = project.getLanguageService(/*ensureSynchronized*/ false).getBraceMatchingAtPosition(file, position);
-            return !spans
-                ? undefined
-                : simplifiedResult
-                ? spans.map(span => this.decorateSpan(span, scriptInfo))
-                : spans;
+            if (!spans) {
+                return undefined;
+            }
+            if (simplifiedResult) {
+
+                return spans.map(span => ({
+                    start: scriptInfo.positionToLineOffset(span.start),
+                    end: scriptInfo.positionToLineOffset(span.start + span.length)
+                }));
+            }
+            else {
+                return spans;
+            }
         }
 
         getDiagnosticsForProject(delay: number, fileName: string) {
@@ -1304,7 +1205,7 @@ namespace ts.server {
             }
 
             // No need to analyze lib.d.ts
-            let fileNamesInProject = fileNames.filter(value => value.indexOf("lib.d.ts") < 0);
+            let fileNamesInProject = fileNames.filter((value, index, array) => value.indexOf("lib.d.ts") < 0);
 
             // Sort the file name list to make the recently touched files come first
             const highPriorityFiles: NormalizedPath[] = [];
@@ -1410,12 +1311,6 @@ namespace ts.server {
             [CommandNames.TypeDefinition]: (request: protocol.FileLocationRequest) => {
                 return this.requiredResponse(this.getTypeDefinition(request.arguments));
             },
-            [CommandNames.Implementation]: (request: protocol.Request) => {
-                return this.requiredResponse(this.getImplementation(request.arguments, /*simplifiedResult*/ true));
-            },
-            [CommandNames.ImplementationFull]: (request: protocol.Request) => {
-                return this.requiredResponse(this.getImplementation(request.arguments, /*simplifiedResult*/ false));
-            },
             [CommandNames.References]: (request: protocol.FileLocationRequest) => {
                 return this.requiredResponse(this.getReferences(request.arguments, /*simplifiedResult*/ true));
             },
@@ -1431,8 +1326,24 @@ namespace ts.server {
             [CommandNames.RenameInfoFull]: (request: protocol.FileLocationRequest) => {
                 return this.requiredResponse(this.getRenameInfo(request.arguments));
             },
-            [CommandNames.Open]: (request: protocol.OpenRequest) => {
-                this.openClientFile(toNormalizedPath(request.arguments.file), request.arguments.fileContent, convertScriptKindName(request.arguments.scriptKindName));
+            [CommandNames.Open]: (request: protocol.Request) => {
+                const openArgs = <protocol.OpenRequestArgs>request.arguments;
+                let scriptKind: ScriptKind;
+                switch (openArgs.scriptKindName) {
+                    case "TS":
+                        scriptKind = ScriptKind.TS;
+                        break;
+                    case "JS":
+                        scriptKind = ScriptKind.JS;
+                        break;
+                    case "TSX":
+                        scriptKind = ScriptKind.TSX;
+                        break;
+                    case "JSX":
+                        scriptKind = ScriptKind.JSX;
+                        break;
+                }
+                this.openClientFile(toNormalizedPath(openArgs.file), openArgs.fileContent, scriptKind);
                 return this.notRequired();
             },
             [CommandNames.Quickinfo]: (request: protocol.QuickInfoRequest) => {
@@ -1459,7 +1370,7 @@ namespace ts.server {
             [CommandNames.BraceCompletion]: (request: protocol.BraceCompletionRequest) => {
                 return this.requiredResponse(this.isValidBraceCompletion(request.arguments));
             },
-            [CommandNames.DocCommentTemplate]: (request: protocol.DocCommentTemplateRequest) => {
+            [CommandNames.DocCommentTemplate]: (request: protocol.FileLocationRequest) => {
                 return this.requiredResponse(this.getDocCommentTemplate(request.arguments));
             },
             [CommandNames.Format]: (request: protocol.FormatRequest) => {
@@ -1498,13 +1409,13 @@ namespace ts.server {
             [CommandNames.SignatureHelpFull]: (request: protocol.SignatureHelpRequest) => {
                 return this.requiredResponse(this.getSignatureHelpItems(request.arguments, /*simplifiedResult*/ false));
             },
-            [CommandNames.CompilerOptionsDiagnosticsFull]: (request: protocol.CompilerOptionsDiagnosticsRequest) => {
+            [CommandNames.CompilerOptionsDiagnosticsFull]: (request: protocol.ProjectRequest) => {
                 return this.requiredResponse(this.getCompilerOptionsDiagnostics(request.arguments));
             },
-            [CommandNames.EncodedSemanticClassificationsFull]: (request: protocol.EncodedSemanticClassificationsRequest) => {
+            [CommandNames.EncodedSemanticClassificationsFull]: (request: protocol.FileSpanRequest) => {
                 return this.requiredResponse(this.getEncodedSemanticClassifications(request.arguments));
             },
-            [CommandNames.Cleanup]: () => {
+            [CommandNames.Cleanup]: (request: protocol.Request) => {
                 this.cleanup();
                 return this.requiredResponse(true);
             },
@@ -1563,12 +1474,6 @@ namespace ts.server {
             [CommandNames.NavBarFull]: (request: protocol.FileRequest) => {
                 return this.requiredResponse(this.getNavigationBarItems(request.arguments, /*simplifiedResult*/ false));
             },
-            [CommandNames.NavTree]: (request: protocol.FileRequest) => {
-                return this.requiredResponse(this.getNavigationTree(request.arguments, /*simplifiedResult*/ true));
-            },
-            [CommandNames.NavTreeFull]: (request: protocol.FileRequest) => {
-                return this.requiredResponse(this.getNavigationTree(request.arguments, /*simplifiedResult*/ false));
-            },
             [CommandNames.Occurrences]: (request: protocol.FileLocationRequest) => {
                 return this.requiredResponse(this.getOccurrences(request.arguments));
             },
@@ -1579,24 +1484,14 @@ namespace ts.server {
                 return this.requiredResponse(this.getDocumentHighlights(request.arguments, /*simplifiedResult*/ false));
             },
             [CommandNames.CompilerOptionsForInferredProjects]: (request: protocol.SetCompilerOptionsForInferredProjectsRequest) => {
-                this.setCompilerOptionsForInferredProjects(request.arguments);
-                return this.requiredResponse(true);
+                return this.requiredResponse(this.setCompilerOptionsForInferredProjects(request.arguments));
             },
             [CommandNames.ProjectInfo]: (request: protocol.ProjectInfoRequest) => {
                 return this.requiredResponse(this.getProjectInfo(request.arguments));
             },
-            [CommandNames.ReloadProjects]: () => {
+            [CommandNames.ReloadProjects]: (request: protocol.ReloadProjectsRequest) => {
                 this.projectService.reloadProjects();
                 return this.notRequired();
-            },
-            [CommandNames.GetCodeFixes]: (request: protocol.CodeFixRequest) => {
-                return this.requiredResponse(this.getCodeFixes(request.arguments, /*simplifiedResult*/ true));
-            },
-            [CommandNames.GetCodeFixesFull]: (request: protocol.CodeFixRequest) => {
-                return this.requiredResponse(this.getCodeFixes(request.arguments, /*simplifiedResult*/ false));
-            },
-            [CommandNames.GetSupportedCodeFixes]: () => {
-                return this.requiredResponse(this.getSupportedCodeFixes());
             }
         });
 

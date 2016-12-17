@@ -58,7 +58,7 @@ var templa;
             var AbstractElementController = (function (_super) {
                 __extends(AbstractElementController, _super);
                 function AbstractElementController() {
-                    return _super.call(this) || this;
+                    _super.call(this);
                 }
                 return AbstractElementController;
             }(templa.mvc.AbstractController));
@@ -67,6 +67,7 @@ var templa;
     })(dom = templa.dom || (templa.dom = {}));
 })(templa || (templa = {}));
 // Module
+var templa;
 (function (templa) {
     var dom;
     (function (dom) {
@@ -77,9 +78,8 @@ var templa;
                 var AbstractCompositeElementController = (function (_super) {
                     __extends(AbstractCompositeElementController, _super);
                     function AbstractCompositeElementController() {
-                        var _this = _super.call(this) || this;
-                        _this._controllers = [];
-                        return _this;
+                        _super.call(this);
+                        this._controllers = [];
                     }
                     return AbstractCompositeElementController;
                 }(templa.dom.mvc.AbstractElementController));

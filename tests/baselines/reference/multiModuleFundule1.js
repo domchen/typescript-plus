@@ -14,9 +14,11 @@ var r3 = C.foo();
 
 //// [multiModuleFundule1.js]
 function C(x) { }
+var C;
 (function (C) {
     C.x = 1;
 })(C || (C = {}));
+var C;
 (function (C) {
     function foo() { }
     C.foo = foo;

@@ -6,5 +6,6 @@
 
 goTo.marker();
 verify.quickInfoIs("");
-verify.goToDefinitionIs([]);
+verify.verifyDefinitionsName("", "");
+verify.typeDefinitionCountIs(0);
 verify.referencesAre([]);

@@ -5,7 +5,7 @@ let o = {
 
     d: "bar",
 >d : string
->"bar" : "bar"
+>"bar" : string
 
     m() {
 >m : () => any
@@ -37,7 +37,7 @@ let mutuallyRecursive = {
 
     a: 100,
 >a : number
->100 : 100
+>100 : number
 
     start() {
 >start : () => any
@@ -71,7 +71,7 @@ let mutuallyRecursive = {
         if (n > 0) {
 >n > 0 : boolean
 >n : number
->0 : 0
+>0 : number
 
             return this.passthrough(n - 1);
 >this.passthrough(n - 1) : any
@@ -80,7 +80,7 @@ let mutuallyRecursive = {
 >passthrough : any
 >n - 1 : number
 >n : number
->1 : 1
+>1 : number
         }
         return n;
 >n : number

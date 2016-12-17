@@ -2,7 +2,7 @@
 for (;;) {
     let x = 1;
 >x : number
->1 : 1
+>1 : number
 
     () => x;
 >() => x : () => number
@@ -14,16 +14,16 @@ function foo() {
 
     for (;;) {
         const a = 0;
->a : 0
->0 : 0
+>a : number
+>0 : number
 
         switch(a) {
->a : 0
+>a : number
 
             case 0: return () => a;
 >0 : 0
 >() => a : () => number
->a : 0
+>a : number
         }
     }
 }

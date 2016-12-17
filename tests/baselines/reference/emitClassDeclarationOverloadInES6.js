@@ -16,5 +16,6 @@ class C {
     }
 }
 class D {
-    constructor(x, z = "hello") { }
+    constructor(x, z = "hello") {
+    }
 }

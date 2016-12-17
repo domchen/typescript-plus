@@ -27,12 +27,10 @@ var Base = (function () {
 var D = (function (_super) {
     __extends(D, _super);
     function D() {
-        var _this;
         var x = {
-            j: _this._t
+            j: this._t
         };
-        _this = _super.call(this, undefined) || this;
-        return _this;
+        _super.call(this, undefined);
     }
     return D;
 }(Base));

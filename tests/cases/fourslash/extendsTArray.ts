@@ -10,5 +10,6 @@
 ////var /**/y = x(undefined); // Typeof y should be Date[]
 ////y.length;
 
-verify.quickInfoAt("", "var y: Date[]");
+goTo.marker();
+verify.quickInfoIs('var y: Date[]');
 verify.numberOfErrorsInCurrentFile(0);

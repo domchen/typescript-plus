@@ -19,6 +19,7 @@ module m {
 var m;
 (function (m) {
 })(m || (m = {}));
+var m;
 (function (m) {
     var z = m.x;
     var y = {

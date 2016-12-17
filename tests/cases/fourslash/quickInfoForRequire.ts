@@ -6,5 +6,6 @@
 //@Filename: quickInfoForRequire_input.ts
 ////import a = require("./AA/B/*1*/B");
 
-verify.quickInfoAt("1", "module a");
+goTo.marker('1');
+verify.quickInfoIs('module a');
 verify.referencesAre([]);

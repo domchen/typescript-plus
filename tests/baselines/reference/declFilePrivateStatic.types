@@ -5,11 +5,11 @@ class C {
 
     private static x = 1;
 >x : number
->1 : 1
+>1 : number
 
     static y = 1;
 >y : number
->1 : 1
+>1 : number
 
     private static a() { }
 >a : () => void
@@ -19,11 +19,11 @@ class C {
 
     private static get c() { return 1; }
 >c : number
->1 : 1
+>1 : number
 
     static get d() { return 1; }
 >d : number
->1 : 1
+>1 : number
 
     private static set e(v) { }
 >e : any

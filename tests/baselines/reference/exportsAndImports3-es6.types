@@ -2,7 +2,7 @@
 
 export var v = 1;
 >v : number
->1 : 1
+>1 : number
 
 export function f() { }
 >f : () => void
@@ -17,17 +17,17 @@ export enum E {
 >E : E
 
     A, B, C
->A : E.A
->B : E.B
->C : E.C
+>A : E
+>B : E
+>C : E
 }
 export const enum D {
 >D : D
 
     A, B, C
->A : D.A
->B : D.B
->C : D.C
+>A : D
+>B : D
+>C : D
 }
 export module M {
 >M : typeof M

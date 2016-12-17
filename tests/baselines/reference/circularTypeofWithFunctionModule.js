@@ -27,11 +27,12 @@ var Foo = (function () {
 function maker(value) {
     return maker.Bar;
 }
+var maker;
 (function (maker) {
     var Bar = (function (_super) {
         __extends(Bar, _super);
         function Bar() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         return Bar;
     }(Foo));

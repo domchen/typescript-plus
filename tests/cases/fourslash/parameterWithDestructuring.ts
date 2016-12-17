@@ -12,8 +12,11 @@
 ////    /*3*/a.charAt(0); // Not okay: inferred as `any`
 ////});
 
-verify.quickInfos({
-    1: "var foo: string",
-    2: "var foo: string",
-    3: "var a: string"
-});
+goTo.marker('1');
+verify.quickInfoIs('var foo: string');
+
+goTo.marker('2');
+verify.quickInfoIs('var foo: string');
+
+goTo.marker('3');
+verify.quickInfoIs('var a: string');

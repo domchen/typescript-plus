@@ -13,9 +13,4 @@ middle${
 tail`;
 
 //// [templateStringWithEmbeddedComments.js]
-"head" + 10 + "\nmiddle" + 
-/* Multi-
- * line
- * comment
- */
-20 + "\ntail";
+"head" + 10 + "\nmiddle" + 20 + "\ntail";

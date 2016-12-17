@@ -40,7 +40,7 @@ class C extends B {
 
     get prop() { return "foo"; }
 >prop : string
->"foo" : "foo"
+>"foo" : string
 
     set prop(v) { }
 >prop : string
@@ -48,11 +48,11 @@ class C extends B {
 
     raw = "edge";
 >raw : string
->"edge" : "edge"
+>"edge" : string
 
     readonly ro = "readonly please";
->ro : "readonly please"
->"readonly please" : "readonly please"
+>ro : string
+>"readonly please" : string
 
     readonlyProp: string; // don't have to give a value, in fact
 >readonlyProp : string

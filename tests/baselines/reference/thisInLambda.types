@@ -4,7 +4,7 @@ class Foo {
 
     x = "hello";
 >x : string
->"hello" : "hello"
+>"hello" : string
 
     bar() {
 >bar : () => void

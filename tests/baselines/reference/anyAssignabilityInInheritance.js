@@ -119,6 +119,7 @@ var E;
 })(E || (E = {}));
 var r3 = foo3(a); // any
 function f() { }
+var f;
 (function (f) {
     f.bar = 1;
 })(f || (f = {}));
@@ -128,6 +129,7 @@ var CC = (function () {
     }
     return CC;
 }());
+var CC;
 (function (CC) {
     CC.bar = 1;
 })(CC || (CC = {}));

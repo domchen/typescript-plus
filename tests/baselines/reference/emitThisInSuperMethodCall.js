@@ -43,7 +43,7 @@ var User = (function () {
 var RegisteredUser = (function (_super) {
     __extends(RegisteredUser, _super);
     function RegisteredUser() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     RegisteredUser.prototype.f = function () {
         (function () {
@@ -54,9 +54,8 @@ var RegisteredUser = (function (_super) {
     };
     RegisteredUser.prototype.g = function () {
         function inner() {
-            var _this = this;
             (function () {
-                _super.sayHello.call(_this);
+                _super.sayHello.call(this);
             });
         }
     };

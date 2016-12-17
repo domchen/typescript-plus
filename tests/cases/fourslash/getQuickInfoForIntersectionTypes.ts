@@ -4,4 +4,5 @@
 ////let x = f();
 ////x/**/();
 
-verify.quickInfoAt("", "let x: () => any");
+goTo.marker();
+verify.quickInfoIs("let x: () => any");

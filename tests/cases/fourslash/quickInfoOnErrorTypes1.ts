@@ -5,4 +5,5 @@
 ////    <
 ////};
 
-verify.quickInfoAt("A", "var f: {\n    (): any;\n    x: number;\n}");
+goTo.marker('A');
+verify.quickInfoIs('var f: {\n    (): any;\n    x: number;\n}', "");

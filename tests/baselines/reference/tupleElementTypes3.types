@@ -3,6 +3,6 @@ var [a, b] = [0, undefined];
 >a : number
 >b : any
 >[0, undefined] : [number, undefined]
->0 : 0
+>0 : number
 >undefined : undefined
 

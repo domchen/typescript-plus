@@ -6,4 +6,11 @@
 ////
 ////var x = new Fo/*fooReference*/o<Ba/*barReference*/r>();
 
-verify.goToDefinitionForMarkers("bar", "foo");
+
+goTo.marker("barReference");
+goTo.definition();
+verify.caretAtMarker("barDefinition");
+
+goTo.marker("fooReference");
+goTo.definition();
+verify.caretAtMarker("fooDefinition");

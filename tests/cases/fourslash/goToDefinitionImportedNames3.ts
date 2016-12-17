@@ -27,4 +27,12 @@
 ////    x;
 ////}
 
-verify.goToDefinition(["classReference", "classAliasDefinition"], "classDefinition");
+goTo.file("e.ts");
+
+goTo.marker('classReference');
+goTo.definition();
+verify.caretAtMarker('classDefinition');
+
+goTo.marker('classAliasDefinition');
+goTo.definition();
+verify.caretAtMarker('classDefinition');

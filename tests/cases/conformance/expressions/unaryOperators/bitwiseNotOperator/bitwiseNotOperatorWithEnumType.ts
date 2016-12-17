@@ -1,5 +1,3 @@
-// @allowUnreachableCode: true
-
 // ~ operator on enum type
 
 enum ENUM1 { A, B, "" };

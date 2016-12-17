@@ -13,4 +13,5 @@
 //// }
 ////}
 
-verify.quickInfoAt("", "(property) myProp: string");
+goTo.marker();
+verify.quickInfoIs("(property) myProp: string", undefined);

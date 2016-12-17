@@ -13,11 +13,11 @@ arr.forEach(C => console.log(C.y()));
 //// [classExpressionWithStaticPropertiesES63.js]
 const arr = [];
 for (let i = 0; i < 3; i++) {
-    arr.push((_a = class C {
+    arr.push((C_1 = class C {
         },
-        _a.x = i,
-        _a.y = () => _a.x * 2,
-        _a));
+        C_1.x = i,
+        C_1.y = () => C_1.x * 2,
+        C_1));
 }
 arr.forEach(C => console.log(C.y()));
-var _a;
+var C_1;

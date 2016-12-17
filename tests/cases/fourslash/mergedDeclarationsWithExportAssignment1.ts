@@ -15,15 +15,18 @@
 ////var /*3*/z = new /*2*/Foo();
 ////var /*5*/r2 = Foo./*4*/x;
 
-verify.quickInfoAt("1", "import Foo = require('./mergedDeclarationsWithExportAssignment1_file0')");
+goTo.marker('1');
+verify.quickInfoIs("import Foo = require('./mergedDeclarationsWithExportAssignment1_file0')");
 
 goTo.marker('2');
 verify.completionListContains('Foo');
 
-verify.quickInfoAt("3", "var z: Foo");
+goTo.marker('3');
+verify.quickInfoIs('var z: Foo');
 
 goTo.marker('4');
 verify.completionListContains('x');
 
-verify.quickInfoAt("5", "var r2: number");
+goTo.marker('5');
+verify.quickInfoIs('var r2: number');
 

@@ -2,6 +2,6 @@
 var str: string = ""[0];
 >str : string
 >""[0] : string
->"" : ""
->0 : 0
+>"" : string
+>0 : number
 

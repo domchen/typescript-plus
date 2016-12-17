@@ -1,5 +1,5 @@
 === tests/cases/compiler/anyPlusAny1.ts ===
-var x: any;
+var x;
 >x : Symbol(x, Decl(anyPlusAny1.ts, 0, 3))
 
 x.name = "hello";

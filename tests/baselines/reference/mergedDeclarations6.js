@@ -42,12 +42,12 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define(["require", "exports", "./a"], function (require, exports, a_1) {
+define(["require", "exports", './a'], function (require, exports, a_1) {
     "use strict";
     var B = (function (_super) {
         __extends(B, _super);
         function B() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         B.prototype.setProtected = function () {
         };

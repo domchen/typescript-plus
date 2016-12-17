@@ -56,7 +56,7 @@ var Base = (function () {
 var Derived = (function (_super) {
     __extends(Derived, _super);
     function Derived() {
-        return _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     Derived.prototype.fn = function () {
         return '';
