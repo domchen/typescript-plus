@@ -59,9 +59,9 @@ namespace ts {
     }
 
     const enum Jump {
-        Break       = 1 << 1,
-        Continue    = 1 << 2,
-        Return      = 1 << 3
+        Break = 1 << 1,
+        Continue = 1 << 2,
+        Return = 1 << 3
     }
 
     interface ConvertedLoopState {
@@ -171,6 +171,8 @@ namespace ts {
         } = context;
 
         const resolver = context.getEmitResolver();
+        const compilerOptions = context.getCompilerOptions();
+        const typeChecker = compilerOptions.accessorOptimization ? context.getEmitHost().getTypeChecker() : null;
         const previousOnSubstituteNode = context.onSubstituteNode;
         const previousOnEmitNode = context.onEmitNode;
         context.onEmitNode = onEmitNode;
@@ -961,11 +963,11 @@ namespace ts {
          * @returns The new statement offset into the `statements` array.
          */
         function declareOrCaptureOrReturnThisForConstructorIfNeeded(
-                    statements: Statement[],
-                    ctor: ConstructorDeclaration | undefined,
-                    hasExtendsClause: boolean,
-                    hasSynthesizedSuper: boolean,
-                    statementOffset: number) {
+            statements: Statement[],
+            ctor: ConstructorDeclaration | undefined,
+            hasExtendsClause: boolean,
+            hasSynthesizedSuper: boolean,
+            statementOffset: number) {
             // If this isn't a derived class, just capture 'this' for arrow functions if necessary.
             if (!hasExtendsClause) {
                 if (ctor) {
@@ -1369,7 +1371,13 @@ namespace ts {
                         break;
 
                     case SyntaxKind.MethodDeclaration:
-                        statements.push(transformClassMethodDeclarationToStatement(getClassMemberPrefix(node, member), <MethodDeclaration>member));
+                        const method = <MethodDeclaration>member;
+                        if (method.isJumpTarget || (method.original && (<MethodDeclaration>method.original).isJumpTarget)) {
+                            transformJumpTarget(statements, getClassMemberPrefix(node, member), <MethodDeclaration>member);
+                        }
+                        else {
+                            statements.push(transformClassMethodDeclarationToStatement(getClassMemberPrefix(node, member), <MethodDeclaration>member));
+                        }
                         break;
 
                     case SyntaxKind.GetAccessor:
@@ -1399,6 +1407,44 @@ namespace ts {
          */
         function transformSemicolonClassElementToStatement(member: SemicolonClassElement) {
             return createEmptyStatement(/*location*/ member);
+        }
+
+        function transformJumpTarget(statements: Statement[], receiver: LeftHandSideExpression, member: MethodDeclaration): void {
+            const memberName = createMemberAccessForPropertyName(receiver, visitNode(member.name, visitor, isPropertyName), /*location*/ member.name);
+            statements.push(createStatement(
+                createAssignment(memberName, <Identifier>member.name),
+            ));
+
+            const sourceMapRange = getSourceMapRange(member);
+            const memberFunction = transformMethodToFunctionDeclaration(member, /*location*/ member, /*name*/ <Identifier>member.name);
+            setEmitFlags(memberFunction, EmitFlags.NoComments);
+            setSourceMapRange(memberFunction, sourceMapRange);
+            statements.push(memberFunction);
+        }
+
+        function transformMethodToFunctionDeclaration(node: FunctionLikeDeclaration, location: TextRange, name: Identifier): FunctionDeclaration {
+            const savedContainingNonArrowFunction = enclosingNonArrowFunction;
+            if (node.kind !== SyntaxKind.ArrowFunction) {
+                enclosingNonArrowFunction = node;
+            }
+
+            const expression = setOriginalNode(
+                createFunctionDeclaration(
+                    /*modifiers*/ undefined,
+                    node.modifiers,
+                    node.asteriskToken,
+                    name,
+                    /*typeParameters*/ undefined,
+                    visitParameterList(node.parameters, visitor, context),
+                    /*type*/ undefined,
+                    saveStateAndInvoke(node, transformFunctionBody),
+                    location
+                ),
+                /*original*/ node
+            );
+
+            enclosingNonArrowFunction = savedContainingNonArrowFunction;
+            return expression;
         }
 
         /**
@@ -1468,19 +1514,15 @@ namespace ts {
 
             const properties: ObjectLiteralElementLike[] = [];
             if (getAccessor) {
-                const getterFunction = transformFunctionLikeToExpression(getAccessor, /*location*/ undefined, /*name*/ undefined);
-                setSourceMapRange(getterFunction, getSourceMapRange(getAccessor));
-                setEmitFlags(getterFunction, EmitFlags.NoLeadingComments);
-                const getter = createPropertyAssignment("get", getterFunction);
+                const getterExpression = createAccessorExpression(getAccessor, firstAccessor, receiver);
+                const getter = createPropertyAssignment("get", getterExpression);
                 setCommentRange(getter, getCommentRange(getAccessor));
                 properties.push(getter);
             }
 
             if (setAccessor) {
-                const setterFunction = transformFunctionLikeToExpression(setAccessor, /*location*/ undefined, /*name*/ undefined);
-                setSourceMapRange(setterFunction, getSourceMapRange(setAccessor));
-                setEmitFlags(setterFunction, EmitFlags.NoLeadingComments);
-                const setter = createPropertyAssignment("set", setterFunction);
+                const setterExpression = createAccessorExpression(setAccessor, firstAccessor, receiver);
+                const setter = createPropertyAssignment("set", setterExpression);
                 setCommentRange(setter, getCommentRange(setAccessor));
                 properties.push(setter);
             }
@@ -1503,6 +1545,82 @@ namespace ts {
                 call.startsOnNewLine = true;
             }
             return call;
+        }
+
+        /**
+             * If the accessor method contains only one call to another method, use that method to define the accessor directly.
+             */
+        function createAccessorExpression(accessor: AccessorDeclaration, firstAccessor: AccessorDeclaration, receiver: LeftHandSideExpression): Expression {
+            let expression: Expression;
+            let method = compilerOptions.accessorOptimization ? getJumpTargetOfAccessor(accessor) : null;
+            if (method) {
+                const methodName = <Identifier>getMutableClone(method.name);
+                setEmitFlags(methodName, EmitFlags.NoComments | EmitFlags.NoTrailingSourceMap);
+                setSourceMapRange(methodName, method.name);
+                if (firstAccessor.pos > method.pos) { // the target method has been already emitted.
+                    const target = getMutableClone(receiver);
+                    setEmitFlags(target, EmitFlags.NoComments | EmitFlags.NoTrailingSourceMap);
+                    setSourceMapRange(target, firstAccessor.name);
+                    expression = createPropertyAccess(target, methodName);
+                }
+                else {
+                    expression = methodName;
+                    method.isJumpTarget = true;
+                }
+            }
+            else {
+                expression = transformFunctionLikeToExpression(accessor, /*location*/ undefined, /*name*/ undefined);
+            }
+            setSourceMapRange(expression, getSourceMapRange(accessor));
+            setEmitFlags(expression, EmitFlags.NoLeadingComments);
+            return expression;
+        }
+
+        function getJumpTargetOfAccessor(accessor: AccessorDeclaration): MethodDeclaration {
+            if (accessor.body.statements.length != 1) {
+                return null;
+            }
+            let statement = accessor.body.statements[0];
+            if (statement.kind !== SyntaxKind.ExpressionStatement &&
+                statement.kind !== SyntaxKind.ReturnStatement) {
+                return null;
+            }
+            let expression = (<ReturnStatement>statement).expression;
+            if (expression.kind !== SyntaxKind.CallExpression) {
+                return null;
+            }
+            let callExpression = <CallExpression>expression;
+            if (accessor.kind === SyntaxKind.SetAccessor) {
+                if (callExpression.arguments.length != 1) {
+                    return null;
+                }
+                let argument = callExpression.arguments[0];
+                if (argument.kind !== SyntaxKind.Identifier) {
+                    return null;
+                }
+            }
+            else {
+                if (callExpression.arguments.length != 0) {
+                    return null;
+                }
+            }
+
+            if (callExpression.expression.kind !== SyntaxKind.PropertyAccessExpression) {
+                return null;
+            }
+            let propertyExpression = <PropertyAccessExpression>callExpression.expression;
+            if (propertyExpression.expression.kind !== SyntaxKind.ThisKeyword) {
+                return null;
+            }
+            let symbol = typeChecker.getSymbolAtLocation(propertyExpression.name);
+            if (!symbol || !symbol.valueDeclaration) {
+                return;
+            }
+            let declaration = symbol.valueDeclaration;
+            if (declaration.kind === SyntaxKind.MethodDeclaration) {
+                return <MethodDeclaration>declaration;
+            }
+            return null;
         }
 
         /**
@@ -2449,7 +2567,7 @@ namespace ts {
                 currentParent.kind === SyntaxKind.LabeledStatement
                     ? createLabel((<LabeledStatement>currentParent).label, loop)
                     : loop
-                );
+            );
             return statements;
         }
 
@@ -3126,8 +3244,8 @@ namespace ts {
                 && isClassElement(enclosingNonAsyncFunctionBody)
                 && !hasModifier(enclosingNonAsyncFunctionBody, ModifierFlags.Static)
                 && currentParent.kind !== SyntaxKind.CallExpression
-                    ? createPropertyAccess(createIdentifier("_super"), "prototype")
-                    : createIdentifier("_super");
+                ? createPropertyAccess(createIdentifier("_super"), "prototype")
+                : createIdentifier("_super");
         }
 
         /**

@@ -3081,13 +3081,13 @@ namespace ts {
             }
             if (superInterfaces) {
                 superInterfaces.forEach(superInterface => {
-                    var type = typeChecker.getTypeAtLocation(superInterface)
+                    let type = typeChecker.getTypeAtLocation(superInterface)
                     if (type && type.symbol && type.symbol.flags & SymbolFlags.Interface) {
-                        var fullName = typeChecker.getFullyQualifiedName(type.symbol);
+                        let symbol = type.symbol;
+                        let fullName = typeChecker.getFullyQualifiedName(symbol);
                         result[fullName] = true;
-                        let declaration = type.symbol.valueDeclaration;
-                        if (declaration) {
-                            getImplementedInterfaces(type.symbol.valueDeclaration, result);
+                        if (symbol.valueDeclaration) {
+                            getImplementedInterfaces(symbol.valueDeclaration, result);
                         }
                     }
                 });

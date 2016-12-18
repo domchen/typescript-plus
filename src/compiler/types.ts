@@ -775,6 +775,7 @@ namespace ts {
         kind: SyntaxKind.MethodDeclaration;
         name: PropertyName;
         body?: FunctionBody;
+        isJumpTarget?: boolean;
     }
 
     export interface ConstructorDeclaration extends FunctionLikeDeclaration, ClassElement {
