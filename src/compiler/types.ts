@@ -1694,6 +1694,7 @@ namespace ts {
         name?: Identifier;
         typeParameters?: NodeArray<TypeParameterDeclaration>;
         heritageClauses?: NodeArray<HeritageClause>;
+        typeNames?: string[];
         members: NodeArray<ClassElement>;
     }
 
@@ -3741,6 +3742,8 @@ namespace ts {
 
         /* @internal */
         isSourceFileFromExternalLibrary(file: SourceFile): boolean;
+        /* @internal */
+        getTypeChecker():TypeChecker;
 
         getCommonSourceDirectory(): string;
         getCanonicalFileName(fileName: string): string;

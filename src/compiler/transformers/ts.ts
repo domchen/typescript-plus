@@ -28,6 +28,7 @@ namespace ts {
 
         const resolver = context.getEmitResolver();
         const compilerOptions = context.getCompilerOptions();
+        const typeChecker = compilerOptions.emitReflection ? context.getEmitHost().getTypeChecker() : null;
         const languageVersion = getEmitScriptTarget(compilerOptions);
         const moduleKind = getEmitModuleKind(compilerOptions);
 
@@ -214,11 +215,11 @@ namespace ts {
                 node.kind === SyntaxKind.ImportDeclaration ||
                 node.kind === SyntaxKind.ImportClause ||
                 (node.kind === SyntaxKind.ImportEqualsDeclaration &&
-                 (<ImportEqualsDeclaration>node).moduleReference.kind === SyntaxKind.ExternalModuleReference)) {
+                    (<ImportEqualsDeclaration>node).moduleReference.kind === SyntaxKind.ExternalModuleReference)) {
                 // do not emit ES6 imports and exports since they are illegal inside a namespace
                 return undefined;
-           }
-           else if (node.transformFlags & TransformFlags.TypeScript || hasModifier(node, ModifierFlags.Export)) {
+            }
+            else if (node.transformFlags & TransformFlags.TypeScript || hasModifier(node, ModifierFlags.Export)) {
                 // This node is explicitly marked as TypeScript, or is exported at the namespace
                 // level, so we should transform the node.
                 return visitTypeScript(node);
@@ -306,7 +307,7 @@ namespace ts {
                 case SyntaxKind.ConstKeyword:
                 case SyntaxKind.DeclareKeyword:
                 case SyntaxKind.ReadonlyKeyword:
-                    // TypeScript accessibility and readonly modifiers are elided.
+                // TypeScript accessibility and readonly modifiers are elided.
 
                 case SyntaxKind.ArrayType:
                 case SyntaxKind.TupleType:
@@ -332,16 +333,16 @@ namespace ts {
                 case SyntaxKind.IndexedAccessType:
                 case SyntaxKind.MappedType:
                 case SyntaxKind.LiteralType:
-                    // TypeScript type nodes are elided.
+                // TypeScript type nodes are elided.
 
                 case SyntaxKind.IndexSignature:
-                    // TypeScript index signatures are elided.
+                // TypeScript index signatures are elided.
 
                 case SyntaxKind.Decorator:
-                    // TypeScript decorators are elided. They will be emitted as part of visitClassDeclaration.
+                // TypeScript decorators are elided. They will be emitted as part of visitClassDeclaration.
 
                 case SyntaxKind.TypeAliasDeclaration:
-                    // TypeScript type-only declarations are elided.
+                // TypeScript type-only declarations are elided.
 
                 case SyntaxKind.PropertyDeclaration:
                     // TypeScript property declarations are elided.
@@ -551,6 +552,9 @@ namespace ts {
             // declaration or export default for the class.
             if (isNamespaceExport(node)) {
                 addExportMemberAssignment(statements, node);
+                if (compilerOptions.emitReflection) {
+                    addClassReflectionStatement(statements, node);
+                }
             }
             else if (isDecoratedClass) {
                 if (isDefaultExternalModuleExport(node)) {
@@ -1746,7 +1750,7 @@ namespace ts {
                             return serializedUnion;
                         }
                     }
-                    // Fallthrough
+                // Fallthrough
                 case SyntaxKind.TypeQuery:
                 case SyntaxKind.TypeOperator:
                 case SyntaxKind.IndexedAccessType:
@@ -3040,6 +3044,69 @@ namespace ts {
             statements.push(statement);
         }
 
+        function addClassReflectionStatement(statements: Statement[], node: ClassLikeDeclaration) {
+            let interfaceMap: any = {};
+            getImplementedInterfaces(node, interfaceMap);
+            let allInterfaces: string[] = Object.keys(interfaceMap);
+            let interfaces: string[];
+            let superTypes = getSuperClassTypes(node);
+            if (superTypes) {
+                interfaces = [];
+                for (let type of allInterfaces) {
+                    if (superTypes.indexOf(type) === -1) {
+                        interfaces.push(type);
+                    }
+                }
+            }
+            else {
+                interfaces = allInterfaces;
+            }
+            node.typeNames = interfaces;
+            let fullClassName = typeChecker.getFullyQualifiedName(node.symbol);
+            const expression = createReflectHelper(context, node.name, fullClassName, interfaces);
+            setSourceMapRange(expression, createRange(node.name.pos, node.end));
+
+            const statement = createStatement(expression);
+            setSourceMapRange(statement, createRange(-1, node.end));
+            statements.push(statement);
+        }
+
+        function getImplementedInterfaces(node: Node, result: any) {
+            let superInterfaces: any[] = null;
+            if (node.kind === SyntaxKind.ClassDeclaration) {
+                superInterfaces = getClassImplementsHeritageClauseElements(<ClassLikeDeclaration>node);
+            }
+            else {
+                superInterfaces = getInterfaceBaseTypeNodes(<InterfaceDeclaration>node);
+            }
+            if (superInterfaces) {
+                superInterfaces.forEach(superInterface => {
+                    var type = typeChecker.getTypeAtLocation(superInterface)
+                    if (type && type.symbol && type.symbol.flags & SymbolFlags.Interface) {
+                        var fullName = typeChecker.getFullyQualifiedName(type.symbol);
+                        result[fullName] = true;
+                        let declaration = type.symbol.valueDeclaration;
+                        if (declaration) {
+                            getImplementedInterfaces(type.symbol.valueDeclaration, result);
+                        }
+                    }
+                });
+            }
+        }
+
+        function getSuperClassTypes(node: ClassLikeDeclaration): string[] {
+            let superClass = getClassExtendsHeritageClauseElement(node);
+            if (!superClass) {
+                return null;
+            }
+            let type = typeChecker.getTypeAtLocation(superClass);
+            if (!type || !type.symbol) {
+                return;
+            }
+            let declaration = <ClassLikeDeclaration>type.symbol.valueDeclaration;
+            return declaration ? declaration.typeNames : null;
+        }
+
         function createNamespaceExport(exportName: Identifier, exportValue: Expression, location?: TextRange) {
             return createStatement(
                 createAssignment(
@@ -3372,5 +3439,35 @@ namespace ts {
         }
 
         return createCall(getHelperName("__decorate"), /*typeArguments*/ undefined, argumentsArray, location);
+    }
+
+    const reflectHelper: EmitHelper = {
+        name: "typescript:extends",
+        scoped: false,
+        priority: 0,
+        text: `
+            var __reflect = (this && this.__reflect) || function (p, c, t) {
+                p.__class__ = c, t ? t.push(c) : t = [c], p.__types__ = p.__types__ ? t.concat(p.__types__) : t;
+            };`
+    };
+
+    function createReflectHelper(context: TransformationContext, name: Identifier, fullClassName: string, interfaces: string[]) {
+        context.requestEmitHelper(reflectHelper);
+        let argumentsArray: Expression[] = [
+            createPropertyAccess(name, createIdentifier("prototype")),
+            createLiteral(fullClassName)
+        ];
+        if (interfaces.length) {
+            let elements: Expression[] = [];
+            for (let value of interfaces) {
+                elements.push(createLiteral(value));
+            }
+            argumentsArray.push(createArrayLiteral(elements));
+        }
+        return createCall(
+            getHelperName("__reflect"),
+            /*typeArguments*/ undefined,
+            argumentsArray
+        );
     }
 }
