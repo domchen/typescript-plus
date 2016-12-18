@@ -39,6 +39,8 @@
         "transformers/module/system.ts",
         "transformers/module/es2015.ts",
         "transformer.ts",
+        "../plus/transformers/defines.ts",
+        "../plus/sorting.ts",
         "comments.ts",
         "sourcemap.ts",
         "declarationEmitter.ts",

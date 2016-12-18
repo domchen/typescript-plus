@@ -136,12 +136,12 @@ namespace ts {
             }
 
             output += sys.newLine;
-            output += `${ relativeFileName }(${ firstLine + 1 },${ firstLineChar + 1 }): `;
+            output += `${relativeFileName}(${firstLine + 1},${firstLineChar + 1}): `;
         }
 
         const categoryColor = categoryFormatMap[diagnostic.category];
         const category = DiagnosticCategory[diagnostic.category].toLowerCase();
-        output += `${ formatAndReset(category, categoryColor) } TS${ diagnostic.code }: ${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }`;
+        output += `${formatAndReset(category, categoryColor)} TS${diagnostic.code}: ${flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine)}`;
         output += sys.newLine + sys.newLine;
 
         sys.write(output);
@@ -152,10 +152,10 @@ namespace ts {
 
         if (diagnostic.file) {
             const loc = getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
-            output += `${ diagnostic.file.fileName }(${ loc.line + 1 },${ loc.character + 1 }): `;
+            output += `${diagnostic.file.fileName}(${loc.line + 1},${loc.character + 1}): `;
         }
 
-        output += `${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }${ sys.newLine }`;
+        output += `${flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine)}${sys.newLine}`;
 
         sys.write(output);
     }
@@ -494,8 +494,22 @@ namespace ts {
             statistics = [];
         }
 
+        let exitStatus: number = ExitStatus.Success;
         const program = createProgram(fileNames, compilerOptions, compilerHost);
-        const exitStatus = compileProgram();
+        if (compilerOptions.reorderFiles) {
+            let sortResult = ts.reorderSourceFiles(program);
+            if (sortResult.circularReferences.length > 0) {
+                let errorText: string = "";
+                errorText += "error: Find circular dependencies when reordering file :" + ts.sys.newLine;
+                errorText += "    at " + sortResult.circularReferences.join(ts.sys.newLine + "    at ") + ts.sys.newLine + "    at ...";
+                sys.write(errorText + sys.newLine);
+                exitStatus = ExitStatus.DiagnosticsPresent_OutputsGenerated;
+            }
+        }
+        const exitCode = compileProgram();
+        if (exitCode != ExitStatus.Success) {
+            exitStatus = exitCode;
+        }
 
         if (compilerOptions.listFiles) {
             forEach(program.getSourceFiles(), file => {
