@@ -1,5 +1,6 @@
 /// <reference path="visitor.ts" />
 /// <reference path="transformers/ts.ts" />
+/// <reference path="../plus/transformers/defines.ts" />
 /// <reference path="transformers/jsx.ts" />
 /// <reference path="transformers/esnext.ts" />
 /// <reference path="transformers/es2017.ts" />
@@ -33,6 +34,10 @@ namespace ts {
         const moduleKind = getEmitModuleKind(compilerOptions);
         const transformers: Transformer[] = [];
 
+        if(compilerOptions.defines){
+            transformers.push(transformDefines);
+        }
+        
         transformers.push(transformTypeScript);
 
         if (jsx === JsxEmit.React) {
