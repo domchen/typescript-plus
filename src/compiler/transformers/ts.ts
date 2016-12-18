@@ -3442,7 +3442,7 @@ namespace ts {
     }
 
     const reflectHelper: EmitHelper = {
-        name: "typescript:extends",
+        name: "typescript:reflect",
         scoped: false,
         priority: 0,
         text: `
