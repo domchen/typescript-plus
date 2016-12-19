@@ -1,6 +1,6 @@
 /// <reference path="visitor.ts" />
 /// <reference path="transformers/ts.ts" />
-/// <reference path="../plus/transformers/defines.ts" />
+/// <reference path="transformers/defines.ts" />
 /// <reference path="transformers/jsx.ts" />
 /// <reference path="transformers/esnext.ts" />
 /// <reference path="transformers/es2017.ts" />

@@ -81,6 +81,8 @@ var compilerSources = [
     "transformers/module/system.ts",
     "transformers/module/module.ts",
     "transformer.ts",
+    "transformers/defines.ts",
+    "sorting.ts",
     "sourcemap.ts",
     "comments.ts",
     "declarationEmitter.ts",

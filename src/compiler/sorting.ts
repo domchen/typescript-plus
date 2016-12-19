@@ -245,6 +245,12 @@ namespace ts {
             case SyntaxKind.PropertyAccessExpression:
                 checkDependencyAtLocation(expression);
                 break;
+            case SyntaxKind.ObjectLiteralExpression:
+                checkObjectLiteralExpression(<ObjectLiteralExpression>expression);
+                break;
+            case SyntaxKind.ElementAccessExpression:
+                checkDependencyAtLocation((<ElementAccessExpression>expression).expression);
+                break;
             case SyntaxKind.ArrayLiteralExpression:
                 let arrayLiteral = <ArrayLiteralExpression>expression;
                 arrayLiteral.elements.forEach(checkExpression);
@@ -273,8 +279,6 @@ namespace ts {
 
         }
 
-        // ObjectLiteralExpression
-        // ElementAccessExpression
         // TaggedTemplateExpression
         // TypeAssertionExpression
         // FunctionExpression
@@ -290,6 +294,22 @@ namespace ts {
         // ExpressionWithTypeArguments
         // AsExpression
         // NonNullExpression
+    }
+
+    function checkObjectLiteralExpression(objectLiteral: ObjectLiteralExpression): void {
+        objectLiteral.properties.forEach(element => {
+            switch (element.kind) {
+                case SyntaxKind.PropertyAssignment:
+                    checkExpression((<PropertyAssignment>element).initializer);
+                    break;
+                case SyntaxKind.ShorthandPropertyAssignment:
+                    checkExpression((<ShorthandPropertyAssignment>element).objectAssignmentInitializer);
+                    break;
+                case SyntaxKind.SpreadAssignment:
+                    checkExpression((<SpreadAssignment>element).expression);
+                    break;
+            }
+        });
     }
 
     function checkCallExpression(callExpression: CallExpression): void {
