@@ -2,7 +2,7 @@
     "name": "typescript-plus",
     "author": "Dom Chen",
     "homepage": "http://www.idom.me/",
-    "version": "2.1.1",
+    "version": "2.1.2-dev.20161219",
     "license": "Apache-2.0",
     "description": "An enhanced version of the original typescript compiler.",
     "keywords": [
