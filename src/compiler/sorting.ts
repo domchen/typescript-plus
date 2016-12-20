@@ -415,7 +415,7 @@ namespace ts {
             rootFileNames.length = 0;
             sourceFiles.forEach(sourceFile => {
                 rootFileNames.push(sourceFile.fileName);
-                if (!sourceFile.isDeclarationFile) {
+                if (!sourceFile.hasNoDefaultLib) { // It is a default d.ts file.
                     result.sortedFileNames.push(sourceFile.fileName);
                 }
             });
