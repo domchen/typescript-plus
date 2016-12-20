@@ -114,6 +114,24 @@ namespace ts {
             case SyntaxKind.ModuleDeclaration:
                 visitModule(<ModuleDeclaration>statement, hasDecorators);
                 break;
+            case SyntaxKind.Block:
+            case SyntaxKind.IfStatement:
+            case SyntaxKind.DoStatement:
+            case SyntaxKind.WhileStatement:
+            case SyntaxKind.ForStatement:
+            case SyntaxKind.ForInStatement:
+            case SyntaxKind.ForOfStatement:
+            case SyntaxKind.ContinueStatement:
+            case SyntaxKind.BreakStatement:
+            case SyntaxKind.ReturnStatement:
+            case SyntaxKind.WithStatement:
+            case SyntaxKind.SwitchStatement:
+            case SyntaxKind.LabeledStatement:
+            case SyntaxKind.ThrowStatement:
+            case SyntaxKind.TryStatement:
+            case SyntaxKind.DebuggerStatement:
+                checkCodeBlock(statement);
+                break;
         }
     }
 
@@ -320,7 +338,7 @@ namespace ts {
         switch (expression.kind) {
             case SyntaxKind.FunctionExpression:
                 let functionExpression = <FunctionExpression>expression;
-                checkFunctionBody(functionExpression.body);
+                checkCodeBlock(functionExpression.body);
                 break;
             case SyntaxKind.PropertyAccessExpression:
             case SyntaxKind.Identifier:
@@ -339,7 +357,7 @@ namespace ts {
                 addDependency(getSourceFileOfNode(expression).fileName, sourceFile.fileName);
                 if (declaration.kind === SyntaxKind.FunctionDeclaration ||
                     declaration.kind === SyntaxKind.MethodDeclaration) {
-                    checkFunctionBody((<FunctionDeclaration>declaration).body);
+                    checkCodeBlock((<FunctionDeclaration>declaration).body);
                 }
                 else if (declaration.kind === SyntaxKind.ClassDeclaration) {
                     checkClassInstantiation(<ClassDeclaration>declaration);
@@ -364,13 +382,13 @@ namespace ts {
             }
             else if (member.kind === SyntaxKind.Constructor) {
                 let constructor = <ConstructorDeclaration>member;
-                checkFunctionBody(constructor.body);
+                checkCodeBlock(constructor.body);
             }
         }
     }
 
-    function checkFunctionBody(body: FunctionBody): void {
-        forEachChild(body, visit);
+    function checkCodeBlock(block: Node): void {
+        forEachChild(block, visit);
         function visit(node: Node) {
             if (node.kind === SyntaxKind.VariableStatement) {
                 let variable = <VariableStatement>node;
