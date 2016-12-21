@@ -39,7 +39,7 @@
         "transformers/module/system.ts",
         "transformers/module/es2015.ts",
         "transformer.ts",
-        "transformers/defines.ts",
+        "transformers/tsPlus.ts",
         "sorting.ts",
         "comments.ts",
         "sourcemap.ts",

@@ -189,19 +189,19 @@ namespace ts {
     }
 
     function visitModule(node: ModuleDeclaration, hasDecorators?: boolean): void {
-        if (node.body.kind == SyntaxKind.ModuleDeclaration) {
+        if (node.body.kind === SyntaxKind.ModuleDeclaration) {
             visitModule(<ModuleDeclaration>node.body);
             return;
         }
-        let statements = (<ModuleBlock>node.body).statements;
-        let length = statements.length;
-        for (let i = 0; i < length; i++) {
-            let statement = statements[i];
-            if (hasModifier(statement, ModifierFlags.Ambient)) { // has the 'declare' keyword
-                continue;
+        if (node.body.kind === SyntaxKind.ModuleBlock) {
+            for (let statement of (<ModuleBlock>node.body).statements) {
+                if (hasModifier(statement, ModifierFlags.Ambient)) { // has the 'declare' keyword
+                    continue;
+                }
+                visitStatement(statement, hasDecorators);
             }
-            visitStatement(statement, hasDecorators);
         }
+
     }
 
     function checkDependencyAtLocation(node: Node): void {
