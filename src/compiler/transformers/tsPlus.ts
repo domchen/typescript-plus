@@ -139,8 +139,9 @@ namespace ts {
                         let symbol = type.symbol;
                         let fullName = typeChecker.getFullyQualifiedName(symbol);
                         result[fullName] = true;
-                        if (symbol.valueDeclaration) {
-                            getImplementedInterfaces(symbol.valueDeclaration, result);
+                        const declaration = ts.getDeclarationOfKind(symbol, SyntaxKind.InterfaceDeclaration);
+                        if (declaration) {
+                            getImplementedInterfaces(declaration, result);
                         }
                     }
                 });
@@ -156,7 +157,7 @@ namespace ts {
             if (!type || !type.symbol) {
                 return;
             }
-            let declaration = <ClassLikeDeclaration>type.symbol.valueDeclaration;
+            let declaration = <ClassLikeDeclaration>ts.getDeclarationOfKind(type.symbol, SyntaxKind.ClassDeclaration);
             return declaration ? declaration.typeNames : null;
         }
 

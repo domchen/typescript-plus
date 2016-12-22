@@ -206,10 +206,10 @@ namespace ts {
 
     function checkDependencyAtLocation(node: Node): void {
         let symbol = checker.getSymbolAtLocation(node);
-        if (!symbol || !symbol.valueDeclaration) {
+        if (!symbol || !symbol.declarations) {
             return;
         }
-        let sourceFile = getSourceFileOfNode(symbol.valueDeclaration);
+        let sourceFile = getSourceFileOfNode(symbol.declarations[0]);
         if (!sourceFile || sourceFile.isDeclarationFile) {
             return;
         }
@@ -397,10 +397,10 @@ namespace ts {
             case SyntaxKind.PropertyAccessExpression:
             case SyntaxKind.Identifier:
                 let symbol = checker.getSymbolAtLocation(expression);
-                if (!symbol) {
+                if (!symbol || !symbol.declarations) {
                     return;
                 }
-                let declaration = symbol.valueDeclaration;
+                let declaration = symbol.declarations[0];
                 if (!declaration) {
                     return;
                 }

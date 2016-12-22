@@ -1613,14 +1613,10 @@ namespace ts {
                 return null;
             }
             let symbol = typeChecker.getSymbolAtLocation(propertyExpression.name);
-            if (!symbol || !symbol.valueDeclaration) {
+            if (!symbol) {
                 return;
             }
-            let declaration = symbol.valueDeclaration;
-            if (declaration.kind === SyntaxKind.MethodDeclaration) {
-                return <MethodDeclaration>declaration;
-            }
-            return null;
+            return <MethodDeclaration>getDeclarationOfKind(symbol, SyntaxKind.MethodDeclaration);
         }
 
         /**
