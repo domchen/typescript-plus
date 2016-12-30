@@ -206,7 +206,7 @@ ts.is(student, "ts.IPersion"); // true
 
 Pass `--reorderFiles` to the command-line tool or add `"reorderFiles": true` to the `compilerOptions` in tsconfig.json file to enable this feature.
 
-Normally when you pass the `--outFile` option, the compiler will concatenate and emit output to a single file. But the order of concatenation is determined by the list of files passed to the compiler on the command line (or in the tsconfig.json file) along with triple-slash references and imports. That forces you to sort the input files in the correct order manually. It is ok with only a few source files, but it becomes a disaster when you have coutless source files.
+Normally when you pass the `--outFile` option, the compiler will concatenate and emit output to a single file. But the order of concatenation is determined by the list of files passed to the compiler on the command line (or in the tsconfig.json file) along with triple-slash references and imports. That forces you to sort the input files in the correct order manually. It is ok with only a few source files, but it becomes a disaster when you have countless source files.
 
 With the `reorderFiles` swith on, the compiler will automatically reorder the source files by analyzing their denpendencies in code. Then you can get the correct concatination order in the generated file without doing any extra effort. I have tested this feature in many real-world projects, it works very well. If it does not work in you project, please feel free to open an issue and send me the test case.
 
