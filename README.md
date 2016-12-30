@@ -6,7 +6,7 @@
 
 TypeScript is a language for application-scale JavaScript, For more information, please visit : [TypeScript](https://github.com/Microsoft/TypeScript).
 
-The typescript-plus compiler provides extra features to the original typescript compiler, such as accessors optimization, class reflection, conditional compilation and the most useful one : automatically reordering the source files by analyzing their denpendencies in code. 
+The typescript-plus compiler provides extra features to the original typescript compiler, such as accessors optimization, class reflection, conditional compilation and the most useful one : automatically reordering the source files by analyzing their dependencies in code. 
 
 This project will try to stay up to date with the new release of the original TypeScript project.
 
@@ -50,7 +50,7 @@ To learn how to use the original typescript compiler, please visit the following
 | accessorOptimization | boolean | false  | If an accessor contains only one call to another method, use that method to define the accessor directly.|
 | emitReflection       | boolean | false  | Emit the reflection data of class.                 |
 | noEmitJs             | boolean | false  | Do not generate javascript files.                  |
-| reorderFiles         | boolean | false  | Automatically reordering the source files by denpendencies.|
+| reorderFiles         | boolean | false  | Automatically reordering the source files by dependencies.|
 | defines              | Object  |        | Replace the global variables with the constants defined in the "defines"" object. |
 
 
@@ -208,7 +208,7 @@ Pass `--reorderFiles` to the command-line tool or add `"reorderFiles": true` to 
 
 Normally when you pass the `--outFile` option, the compiler will concatenate and emit output to a single file. But the order of concatenation is determined by the list of files passed to the compiler on the command line (or in the tsconfig.json file) along with triple-slash references and imports. That forces you to sort the input files in the correct order manually. It is ok with only a few source files, but it becomes a disaster when you have countless source files.
 
-With the `reorderFiles` swith on, the compiler will automatically reorder the source files by analyzing their dependencies in code. Then you can get the correct concatination order in the generated file without doing any extra effort. I have tested this feature in many real-world projects, it works very well. If it does not work in you project, please feel free to open an issue and send me the test case.
+With the `reorderFiles` swith on, the compiler will automatically reorder the source files by analyzing their dependencies in code. Then you can get the correct concatenation order in the generated file without doing any extra effort. I have tested this feature in many real-world projects, it works very well. If it does not work in you project, please feel free to open an issue and send me the test case.
 
 ## Conditional Compilation
 
