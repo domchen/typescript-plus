@@ -2042,7 +2042,7 @@ declare namespace ts {
 }
 declare namespace ts {
     const version = "2.1.4";
-    const version_plus = "2.1.9";
+    const version_plus = "2.1.10";
 }
 declare namespace ts {
     type FileWatcherCallback = (fileName: string, removed?: boolean) => void;
