@@ -337,9 +337,7 @@ namespace ts {
                 visitExpression(parenthesized.expression);
                 break;
             case SyntaxKind.BinaryExpression:
-                let binary = <BinaryExpression>expression;
-                visitExpression(binary.left);
-                visitExpression(binary.right);
+                visitBinaryExpression(<BinaryExpression>expression);
                 break;
             case SyntaxKind.PostfixUnaryExpression:
             case SyntaxKind.PrefixUnaryExpression:
@@ -368,6 +366,38 @@ namespace ts {
         // NonNullExpression
     }
 
+    function visitBinaryExpression(binary: BinaryExpression): void {
+        let left = binary.left;
+        let right = binary.right;
+        visitExpression(left);
+        visitExpression(right);
+        if (binary.operatorToken.kind === SyntaxKind.EqualsToken &&
+            (left.kind === SyntaxKind.Identifier || left.kind === SyntaxKind.PropertyAccessExpression) &&
+            (right.kind === SyntaxKind.Identifier || right.kind === SyntaxKind.PropertyAccessExpression)) {
+            let symbol = checker.getSymbolAtLocation(left);
+            if (!symbol || !symbol.declarations) {
+                return;
+            }
+            for (let declaration of symbol.declarations) {
+                if (declaration.kind === SyntaxKind.VariableDeclaration) {
+                    let variable = <VariableDeclaration>declaration;
+                    if (variable.initializer) {
+                        continue;
+                    }
+                    if (!variable.delayInitializerList) {
+                        variable.delayInitializerList = [];
+                    }
+                    variable.delayInitializerList.push(right);
+                    if (variable.callerList) {
+                        for (let callerFileName of variable.callerList) {
+                            checkCallTarget(callerFileName, right);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     function visitObjectLiteralExpression(objectLiteral: ObjectLiteralExpression): void {
         objectLiteral.properties.forEach(element => {
             switch (element.kind) {
@@ -394,29 +424,110 @@ namespace ts {
                 let functionExpression = <FunctionExpression>expression;
                 visitBlock(functionExpression.body);
                 break;
+            case SyntaxKind.ElementAccessExpression:
+                checkDependencyAtLocation((<ElementAccessExpression>expression).expression);
+                break;
             case SyntaxKind.PropertyAccessExpression:
             case SyntaxKind.Identifier:
-                let symbol = checker.getSymbolAtLocation(expression);
-                if (!symbol || !symbol.declarations) {
-                    return;
-                }
-                let declaration = symbol.declarations[0];
-                if (!declaration) {
-                    return;
-                }
-                let sourceFile = getSourceFileOfNode(declaration);
-                if (!sourceFile || sourceFile.isDeclarationFile) {
-                    return;
-                }
-                addDependency(getSourceFileOfNode(expression).fileName, sourceFile.fileName);
-                if (declaration.kind === SyntaxKind.FunctionDeclaration ||
-                    declaration.kind === SyntaxKind.MethodDeclaration) {
-                    visitBlock((<FunctionDeclaration>declaration).body);
-                }
-                else if (declaration.kind === SyntaxKind.ClassDeclaration) {
-                    checkClassInstantiation(<ClassDeclaration>declaration);
-                }
+                checkDependencyAtLocation(expression);
+                let callerFileName = getSourceFileOfNode(callExpression).fileName;
+                checkCallTarget(callerFileName, expression);
                 break;
+        }
+
+    }
+
+    function checkCallTarget(callerFileName: string, target: Node): void {
+        let declarations: Declaration[] = [];
+        getForwardDeclarations(target, declarations, callerFileName);
+        for (let declaration of declarations) {
+            let sourceFile = getSourceFileOfNode(declaration);
+            if (!sourceFile || sourceFile.isDeclarationFile) {
+                return;
+            }
+            addDependency(callerFileName, sourceFile.fileName);
+            if (declaration.kind === SyntaxKind.FunctionDeclaration ||
+                declaration.kind === SyntaxKind.MethodDeclaration) {
+                visitBlock((<FunctionDeclaration>declaration).body);
+            }
+            else if (declaration.kind === SyntaxKind.ClassDeclaration) {
+                checkClassInstantiation(<ClassDeclaration>declaration);
+            }
+        }
+    }
+
+    function getForwardDeclarations(reference: Node, declarations: Declaration[], callerFileName: string): void {
+        let symbol = checker.getSymbolAtLocation(reference);
+        if (!symbol || !symbol.declarations) {
+            return;
+        }
+        for (let declaration of symbol.declarations) {
+            switch (declaration.kind) {
+                case SyntaxKind.FunctionDeclaration:
+                case SyntaxKind.MethodDeclaration:
+                case SyntaxKind.ClassDeclaration:
+                    if (declarations.indexOf(declaration) == -1) {
+                        declarations.push(declaration);
+                    }
+                    break;
+                case SyntaxKind.ImportEqualsDeclaration:
+                    getForwardDeclarations((<ImportEqualsDeclaration>declaration).moduleReference, declarations, callerFileName);
+                    break;
+                case SyntaxKind.VariableDeclaration:
+                    const variable = <VariableDeclaration>declaration;
+                    const initializer = variable.initializer;
+                    if (initializer) {
+                        if (initializer.kind === SyntaxKind.Identifier || initializer.kind === SyntaxKind.PropertyAccessExpression) {
+                            getForwardDeclarations(initializer, declarations, callerFileName);
+                        }
+                    }
+                    else {
+                        if (variable.delayInitializerList) {
+                            for (let expression of variable.delayInitializerList) {
+                                getForwardDeclarations(expression, declarations, callerFileName);
+                            }
+                        }
+                        if (variable.callerList) {
+                            if (variable.callerList.indexOf(callerFileName) == -1) {
+                                variable.callerList.push(callerFileName);
+                            }
+                        }
+                        else {
+                            variable.callerList = [callerFileName];
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    function checkReferenceOfCallExpression(reference: Node): void {
+        let symbol = checker.getSymbolAtLocation(reference);
+        if (!symbol || !symbol.declarations) {
+            return;
+        }
+        let fileName = getSourceFileOfNode(reference).fileName;
+        for (let declaration of symbol.declarations) {
+            let sourceFile = getSourceFileOfNode(declaration);
+            if (!sourceFile) {
+                continue;
+            }
+            addDependency(fileName, sourceFile.fileName);
+            switch (declaration.kind) {
+                case SyntaxKind.FunctionDeclaration:
+                case SyntaxKind.MethodDeclaration:
+                    visitBlock((<FunctionDeclaration>declaration).body);
+                    break;
+                case SyntaxKind.ClassDeclaration:
+                    checkClassInstantiation(<ClassDeclaration>declaration);
+                    break;
+                case SyntaxKind.ImportEqualsDeclaration:
+                    checkReferenceOfCallExpression((<ImportEqualsDeclaration>declaration).moduleReference);
+                    break;
+                case SyntaxKind.VariableDeclaration:
+
+                    break;
+            }
         }
 
     }
