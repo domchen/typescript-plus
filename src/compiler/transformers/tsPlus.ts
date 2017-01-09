@@ -28,10 +28,9 @@
 namespace ts {
 
     export function transformTypeScriptPlus(context: TransformationContext) {
-        const resolver = context.getEmitResolver();
         const compilerOptions = context.getCompilerOptions();
-        const typeChecker = compilerOptions.emitReflection ? context.getEmitHost().getTypeChecker() : null;
         const compilerDefines = getCompilerDefines(compilerOptions.defines);
+        const typeChecker = compilerOptions.emitReflection || compilerDefines ? context.getEmitHost().getTypeChecker() : null;
         const previousOnSubstituteNode = context.onSubstituteNode;
         if (compilerDefines) {
             context.onSubstituteNode = onSubstituteNode;
@@ -191,13 +190,20 @@ namespace ts {
             if (compilerDefines[node.text] === undefined) {
                 return false;
             }
+            if (node.parent.kind === SyntaxKind.VariableDeclaration) {
+                return false;
+            }
             if (node.parent.kind === SyntaxKind.BinaryExpression) {
                 let parent = <BinaryExpression>node.parent;
                 if (parent.left === node && parent.operatorToken.kind === SyntaxKind.EqualsToken) {
                     return false;
                 }
             }
-            let declaration = resolver.getReferencedValueDeclaration(node);
+            let symbol = typeChecker.getSymbolAtLocation(node);
+            if (!symbol || !symbol.declarations) {
+                return false;
+            }
+            let declaration = symbol.declarations[0];
             if (!declaration) {
                 return false;
             }
