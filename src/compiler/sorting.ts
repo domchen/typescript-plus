@@ -575,11 +575,13 @@ namespace ts {
         result.sortedFileNames = [];
         result.circularReferences = [];
         pathWeightMap = createMap<number>();
-        for (let i = 0; i < sourceFiles.length; i++) {
-            let sourceFile = sourceFiles[i];
+        let dtsFiles: SourceFile[] = [];
+        let tsFiles: SourceFile[] = [];
+        for (let sourceFile of sourceFiles) {
             let path = sourceFile.fileName;
             if (sourceFile.isDeclarationFile) {
                 pathWeightMap[path] = 10000;
+                dtsFiles.push(sourceFile);
                 continue;
             }
             let references = updatePathWeight(path, 0, [path]);
@@ -587,13 +589,16 @@ namespace ts {
                 result.circularReferences = references;
                 break;
             }
+            tsFiles.push(sourceFile);
         }
         if (result.circularReferences.length === 0) {
-            sourceFiles.sort(function (a: SourceFile, b: SourceFile): number {
+            tsFiles.sort(function (a: SourceFile, b: SourceFile): number {
                 return pathWeightMap[b.fileName] - pathWeightMap[a.fileName];
             });
+            sourceFiles.length = 0;
             rootFileNames.length = 0;
-            sourceFiles.forEach(sourceFile => {
+            dtsFiles.concat(tsFiles).forEach(sourceFile => {
+                sourceFiles.push(sourceFile);
                 rootFileNames.push(sourceFile.fileName);
                 result.sortedFileNames.push(sourceFile.fileName);
             });
