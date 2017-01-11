@@ -415,9 +415,12 @@ namespace ts {
     }
 
     function visitCallExpression(callExpression: CallExpression): void {
-        callExpression.arguments.forEach(argument => {
-            visitExpression(argument);
-        });
+        if (callExpression.arguments) {
+            callExpression.arguments.forEach(argument => {
+                visitExpression(argument);
+            });
+        }
+
         let expression = callExpression.expression;
         switch (expression.kind) {
             case SyntaxKind.FunctionExpression:
