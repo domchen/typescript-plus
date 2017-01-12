@@ -673,6 +673,10 @@ namespace ts {
         name: PropertyName;
         type?: TypeNode;
         initializer?: Expression;           // Optional initializer
+        /* @internal */
+        callerList?: string[];
+        /* @internal */
+        delayInitializerList?: Expression[];
     }
 
     export interface ObjectLiteralElement extends Declaration {

@@ -313,14 +313,15 @@ namespace ts {
                 visitCallExpression(<CallExpression>expression);
                 break;
             case SyntaxKind.Identifier:
+                checkDependencyAtLocation(expression);
+                break;
             case SyntaxKind.PropertyAccessExpression:
                 checkDependencyAtLocation(expression);
+            case SyntaxKind.ElementAccessExpression:
+                visitExpression((<PropertyAccessExpression>expression).expression);
                 break;
             case SyntaxKind.ObjectLiteralExpression:
                 visitObjectLiteralExpression(<ObjectLiteralExpression>expression);
-                break;
-            case SyntaxKind.ElementAccessExpression:
-                checkDependencyAtLocation((<ElementAccessExpression>expression).expression);
                 break;
             case SyntaxKind.ArrayLiteralExpression:
                 let arrayLiteral = <ArrayLiteralExpression>expression;
@@ -379,7 +380,7 @@ namespace ts {
                 return;
             }
             for (let declaration of symbol.declarations) {
-                if (declaration.kind === SyntaxKind.VariableDeclaration) {
+                if (declaration.kind === SyntaxKind.VariableDeclaration || declaration.kind === SyntaxKind.PropertyDeclaration) {
                     let variable = <VariableDeclaration>declaration;
                     if (variable.initializer) {
                         continue;
@@ -422,17 +423,14 @@ namespace ts {
         }
 
         let expression = callExpression.expression;
+        visitExpression(expression);
         switch (expression.kind) {
             case SyntaxKind.FunctionExpression:
                 let functionExpression = <FunctionExpression>expression;
                 visitBlock(functionExpression.body);
                 break;
-            case SyntaxKind.ElementAccessExpression:
-                checkDependencyAtLocation((<ElementAccessExpression>expression).expression);
-                break;
             case SyntaxKind.PropertyAccessExpression:
             case SyntaxKind.Identifier:
-                checkDependencyAtLocation(expression);
                 let callerFileName = getSourceFileOfNode(callExpression).fileName;
                 checkCallTarget(callerFileName, expression);
                 break;
@@ -477,6 +475,7 @@ namespace ts {
                     getForwardDeclarations((<ImportEqualsDeclaration>declaration).moduleReference, declarations, callerFileName);
                     break;
                 case SyntaxKind.VariableDeclaration:
+                case SyntaxKind.PropertyDeclaration:
                     const variable = <VariableDeclaration>declaration;
                     const initializer = variable.initializer;
                     if (initializer) {
