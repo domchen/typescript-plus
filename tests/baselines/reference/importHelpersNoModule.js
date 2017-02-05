@@ -37,7 +37,7 @@ exports.A = A;
 var B = (function (_super) {
     tslib_1.__extends(B, _super);
     function B() {
-        return _super.apply(this, arguments) || this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     return B;
 }(A));
@@ -56,8 +56,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], C.prototype, "method", null);
 C = tslib_1.__decorate([
-    dec,
-    tslib_1.__metadata("design:paramtypes", [])
+    dec
 ], C);
 //// [script.js]
 var __extends = (this && this.__extends) || function (d, b) {
@@ -85,7 +84,7 @@ var A = (function () {
 var B = (function (_super) {
     __extends(B, _super);
     function B() {
-        return _super.apply(this, arguments) || this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     return B;
 }(A));
@@ -103,6 +102,5 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], C.prototype, "method", null);
 C = __decorate([
-    dec,
-    __metadata("design:paramtypes", [])
+    dec
 ], C);

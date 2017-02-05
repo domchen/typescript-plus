@@ -25,7 +25,7 @@
         "tsc-plus": "./bin/tsc"
     },
     "engines": {
-        "node": ">=0.8.0"
+        "node": ">=4.2.0"
     },
     "devDependencies": {
         "@types/browserify": "latest",
@@ -74,8 +74,8 @@
         "through2": "latest",
         "travis-fold": "latest",
         "ts-node": "latest",
-        "tslint": "3.15.1",
-        "typescript": "2.0.*"
+        "tslint": "4.0.0-dev.3",
+        "typescript": "^2.1"
     },
     "scripts": {
         "pretest": "jake tests",

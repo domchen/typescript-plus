@@ -1,6 +1,5 @@
 /// <reference path="program.ts"/>
 /// <reference path="commandLineParser.ts"/>
-/// <reference path="sorting.ts"/>
 
 namespace ts {
     export interface SourceFile {
@@ -137,12 +136,12 @@ namespace ts {
             }
 
             output += sys.newLine;
-            output += `${relativeFileName}(${firstLine + 1},${firstLineChar + 1}): `;
+            output += `${ relativeFileName }(${ firstLine + 1 },${ firstLineChar + 1 }): `;
         }
 
         const categoryColor = categoryFormatMap[diagnostic.category];
         const category = DiagnosticCategory[diagnostic.category].toLowerCase();
-        output += `${formatAndReset(category, categoryColor)} TS${diagnostic.code}: ${flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine)}`;
+        output += `${ formatAndReset(category, categoryColor) } TS${ diagnostic.code }: ${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }`;
         output += sys.newLine + sys.newLine;
 
         sys.write(output);
@@ -153,10 +152,10 @@ namespace ts {
 
         if (diagnostic.file) {
             const loc = getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
-            output += `${diagnostic.file.fileName}(${loc.line + 1},${loc.character + 1}): `;
+            output += `${ diagnostic.file.fileName }(${ loc.line + 1 },${ loc.character + 1 }): `;
         }
 
-        output += `${flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine)}${sys.newLine}`;
+        output += `${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }${ sys.newLine }`;
 
         sys.write(output);
     }
@@ -495,22 +494,8 @@ namespace ts {
             statistics = [];
         }
 
-        let exitStatus: number = ExitStatus.Success;
         const program = createProgram(fileNames, compilerOptions, compilerHost);
-        if (compilerOptions.reorderFiles) {
-            let sortResult = ts.reorderSourceFiles(program);
-            if (sortResult.circularReferences.length > 0) {
-                let errorText: string = "";
-                errorText += "error: Find circular dependencies when reordering file :" + ts.sys.newLine;
-                errorText += "    at " + sortResult.circularReferences.join(ts.sys.newLine + "    at ") + ts.sys.newLine + "    at ...";
-                sys.write(errorText + sys.newLine);
-                exitStatus = ExitStatus.DiagnosticsPresent_OutputsGenerated;
-            }
-        }
-        const exitCode = compileProgram();
-        if (exitCode != ExitStatus.Success) {
-            exitStatus = exitCode;
-        }
+        const exitStatus = compileProgram();
 
         if (compilerOptions.listFiles) {
             forEach(program.getSourceFiles(), file => {
@@ -575,9 +560,7 @@ namespace ts {
             }
 
             // Otherwise, emit and report any errors we ran into.
-            let emitOnlyDtsFiles = !compilerOptions.noEmit && compilerOptions.declaration && compilerOptions.noEmitJs;
-            const emitOutput = program.emit(undefined, undefined, undefined, emitOnlyDtsFiles);
-
+            const emitOutput = program.emit();
             diagnostics = diagnostics.concat(emitOutput.diagnostics);
 
             reportDiagnostics(sortAndDeduplicateDiagnostics(diagnostics), compilerHost);
@@ -628,8 +611,7 @@ namespace ts {
     }
 
     function printVersion() {
-        sys.write("Version : " + ts.version_plus + sys.newLine);
-        sys.write("typescript-version : " + ts.version + sys.newLine);
+        sys.write(getDiagnosticText(Diagnostics.Version_0, ts.version) + sys.newLine);
     }
 
     function printHelp() {

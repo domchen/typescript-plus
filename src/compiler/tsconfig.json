@@ -11,7 +11,8 @@
         "stripInternal": true,
         "target": "es5",
         "noUnusedLocals": true,
-        "noUnusedParameters": true
+        "noUnusedParameters": true,
+        "types": [ ]
     },
     "files": [
         "core.ts",
@@ -39,8 +40,6 @@
         "transformers/module/system.ts",
         "transformers/module/es2015.ts",
         "transformer.ts",
-        "transformers/tsPlus.ts",
-        "sorting.ts",
         "comments.ts",
         "sourcemap.ts",
         "declarationEmitter.ts",

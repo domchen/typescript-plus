@@ -1,4 +1,4 @@
-/* @internal */
+﻿/* @internal */
 namespace ts.JsDoc {
     const jsDocTagNames = [
         "augments",
@@ -23,6 +23,7 @@ namespace ts.JsDoc {
         "lends",
         "link",
         "memberOf",
+        "method",
         "name",
         "namespace",
         "param",
@@ -66,6 +67,28 @@ namespace ts.JsDoc {
             }
         });
         return documentationComment;
+    }
+
+    export function getJsDocTagsFromDeclarations(declarations: Declaration[]) {
+        // Only collect doc comments from duplicate declarations once.
+        const tags: JSDocTagInfo[] = [];
+        forEachUnique(declarations, declaration => {
+            const jsDocs = getJSDocs(declaration);
+            if (!jsDocs) {
+                return;
+            }
+            for (const doc of jsDocs) {
+                const tagsForDoc = (doc as JSDoc).tags;
+                if (tagsForDoc) {
+                    tags.push(...tagsForDoc.filter(tag => tag.kind === SyntaxKind.JSDocTag).map(jsDocTag => {
+                        return {
+                            name: jsDocTag.tagName.text,
+                            text: jsDocTag.comment
+                        } }));
+                }
+            }
+        });
+        return tags;
     }
 
     /**
@@ -166,6 +189,7 @@ namespace ts.JsDoc {
         const lineStart = sourceFile.getLineStarts()[posLineAndChar.line];
 
         const indentationStr = sourceFile.text.substr(lineStart, posLineAndChar.character);
+        const isJavaScriptFile = hasJavaScriptFileExtension(sourceFile.fileName);
 
         let docParams = "";
         for (let i = 0, numParams = parameters.length; i < numParams; i++) {
@@ -173,8 +197,12 @@ namespace ts.JsDoc {
             const paramName = currentName.kind === SyntaxKind.Identifier ?
                 (<Identifier>currentName).text :
                 "param" + i;
-
-            docParams += `${indentationStr} * @param ${paramName}${newLine}`;
+            if (isJavaScriptFile) {
+                docParams += `${indentationStr} * @param {any} ${paramName}${newLine}`;
+            }
+            else {
+                docParams += `${indentationStr} * @param ${paramName}${newLine}`;
+            }
         }
 
         // A doc comment consists of the following

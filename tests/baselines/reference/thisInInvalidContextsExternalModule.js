@@ -71,7 +71,8 @@ var ClassWithNoInitializer = (function (_super) {
     __extends(ClassWithNoInitializer, _super);
     //'this' in optional super call
     function ClassWithNoInitializer() {
-        return _super.call(this, _this) || this;
+        var _this = _super.call(this, _this) || this;
+        return _this;
     }
     return ClassWithNoInitializer;
 }(BaseErrClass));
@@ -98,7 +99,7 @@ genericFunc(undefined); // Should be an error
 var ErrClass3 = (function (_super) {
     __extends(ErrClass3, _super);
     function ErrClass3() {
-        return _super.apply(this, arguments) || this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     return ErrClass3;
 }(this));

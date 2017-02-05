@@ -341,6 +341,7 @@ namespace FourSlash {
                 insertSpaceAfterCommaDelimiter: true,
                 insertSpaceAfterSemicolonInForStatements: true,
                 insertSpaceBeforeAndAfterBinaryOperators: true,
+                insertSpaceAfterConstructor: false,
                 insertSpaceAfterKeywordsInControlFlowStatements: true,
                 insertSpaceAfterFunctionKeywordForAnonymousFunctions: false,
                 insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,
@@ -607,23 +608,13 @@ namespace FourSlash {
             });
         }
 
-        public verifyMemberListContains(symbol: string, text?: string, documentation?: string, kind?: string) {
-            const members = this.getMemberListAtCaret();
-            if (members) {
-                this.assertItemInCompletionList(members.entries, symbol, text, documentation, kind);
-            }
-            else {
-                this.raiseError("Expected a member list, but none was provided");
-            }
-        }
-
-        public verifyMemberListCount(expectedCount: number, negative: boolean) {
+        public verifyCompletionListCount(expectedCount: number, negative: boolean) {
             if (expectedCount === 0 && negative) {
-                this.verifyMemberListIsEmpty(/*negative*/ false);
+                this.verifyCompletionListIsEmpty(/*negative*/ false);
                 return;
             }
 
-            const members = this.getMemberListAtCaret();
+            const members = this.getCompletionListAtCaret();
 
             if (members) {
                 const match = members.entries.length === expectedCount;
@@ -634,13 +625,6 @@ namespace FourSlash {
             }
             else if (expectedCount) {
                 this.raiseError("Member list count was 0. Expected " + expectedCount);
-            }
-        }
-
-        public verifyMemberListDoesNotContain(symbol: string) {
-            const members = this.getMemberListAtCaret();
-            if (members && members.entries.filter(e => e.name === symbol).length !== 0) {
-                this.raiseError(`Member list did contain ${symbol}`);
             }
         }
 
@@ -682,16 +666,6 @@ namespace FourSlash {
                 else {
                     assert.equal(item.kind, uniqueItems[item.name], `Items should have the same kind, got ${item.kind} and ${uniqueItems[item.name]}`);
                 }
-            }
-        }
-
-        public verifyMemberListIsEmpty(negative: boolean) {
-            const members = this.getMemberListAtCaret();
-            if ((!members || members.entries.length === 0) && negative) {
-                this.raiseError("Member list is empty at Caret");
-            }
-            else if ((members && members.entries.length !== 0) && !negative) {
-                this.raiseError(`Member list is not empty at Caret:\nMember List contains: ${stringify(members.entries.map(e => e.name))}`);
             }
         }
 
@@ -801,7 +775,7 @@ namespace FourSlash {
             }
         }
 
-        public verifyCompletionEntryDetails(entryName: string, expectedText: string, expectedDocumentation?: string, kind?: string) {
+        public verifyCompletionEntryDetails(entryName: string, expectedText: string, expectedDocumentation?: string, kind?: string, tags?: ts.JSDocTagInfo[]) {
             const details = this.getCompletionEntryDetails(entryName);
 
             assert(details, "no completion entry available");
@@ -814,6 +788,14 @@ namespace FourSlash {
 
             if (kind !== undefined) {
                 assert.equal(details.kind, kind, this.assertionMessageAtLastKnownMarker("completion entry kind"));
+            }
+
+            if (tags !== undefined) {
+                assert.equal(details.tags.length, tags.length, this.messageAtLastKnownMarker("QuickInfo tags"));
+                ts.zipWith(tags, details.tags, (expectedTag, actualTag) => {
+                    assert.equal(expectedTag.name, actualTag.name);
+                    assert.equal(expectedTag.text, actualTag.text, this.messageAtLastKnownMarker("QuickInfo tag " + actualTag.name));
+                });
             }
         }
 
@@ -892,10 +874,6 @@ namespace FourSlash {
             this.raiseError(`verifyReferencesAtPositionListContains failed - could not find the item: ${stringify(missingItem)} in the returned list: (${stringify(references)})`);
         }
 
-        private getMemberListAtCaret() {
-            return this.languageService.getCompletionsAtPosition(this.activeFile.fileName, this.currentCaretPosition);
-        }
-
         private getCompletionListAtCaret() {
             return this.languageService.getCompletionsAtPosition(this.activeFile.fileName, this.currentCaretPosition);
         }
@@ -961,7 +939,9 @@ namespace FourSlash {
 
         public verifyQuickInfoDisplayParts(kind: string, kindModifiers: string, textSpan: { start: number; length: number; },
             displayParts: ts.SymbolDisplayPart[],
-            documentation: ts.SymbolDisplayPart[]) {
+            documentation: ts.SymbolDisplayPart[],
+            tags: ts.JSDocTagInfo[]
+            ) {
 
             const actualQuickInfo = this.languageService.getQuickInfoAtPosition(this.activeFile.fileName, this.currentCaretPosition);
             assert.equal(actualQuickInfo.kind, kind, this.messageAtLastKnownMarker("QuickInfo kind"));
@@ -969,6 +949,11 @@ namespace FourSlash {
             assert.equal(JSON.stringify(actualQuickInfo.textSpan), JSON.stringify(textSpan), this.messageAtLastKnownMarker("QuickInfo textSpan"));
             assert.equal(TestState.getDisplayPartsJson(actualQuickInfo.displayParts), TestState.getDisplayPartsJson(displayParts), this.messageAtLastKnownMarker("QuickInfo displayParts"));
             assert.equal(TestState.getDisplayPartsJson(actualQuickInfo.documentation), TestState.getDisplayPartsJson(documentation), this.messageAtLastKnownMarker("QuickInfo documentation"));
+            assert.equal(actualQuickInfo.tags.length, tags.length, this.messageAtLastKnownMarker("QuickInfo tags"));
+            ts.zipWith(tags, actualQuickInfo.tags, (expectedTag, actualTag) => {
+                assert.equal(expectedTag.name, actualTag.name);
+                assert.equal(expectedTag.text, actualTag.text, this.messageAtLastKnownMarker("QuickInfo tag " + actualTag.name));
+            });
         }
 
         public verifyRenameLocations(findInStrings: boolean, findInComments: boolean, ranges?: Range[]) {
@@ -1060,6 +1045,16 @@ namespace FourSlash {
         public verifyCurrentSignatureHelpDocComment(docComment: string) {
             const actualDocComment = this.getActiveSignatureHelpItem().documentation;
             assert.equal(ts.displayPartsToString(actualDocComment), docComment, this.assertionMessageAtLastKnownMarker("current signature help doc comment"));
+        }
+
+        public verifyCurrentSignatureHelpTags(tags: ts.JSDocTagInfo[]) {
+            const actualTags = this.getActiveSignatureHelpItem().tags;
+
+            assert.equal(actualTags.length, tags.length, this.assertionMessageAtLastKnownMarker("signature help tags"));
+            ts.zipWith(tags, actualTags, (expectedTag, actualTag) => {
+                assert.equal(expectedTag.name, actualTag.name);
+                assert.equal(expectedTag.text, actualTag.text, this.assertionMessageAtLastKnownMarker("signature help tag " + actualTag.name));
+            });
         }
 
         public verifySignatureHelpCount(expected: number) {
@@ -1351,11 +1346,6 @@ namespace FourSlash {
         public printCurrentSignatureHelp() {
             const sigHelp = this.getActiveSignatureHelpItem();
             Harness.IO.log(stringify(sigHelp));
-        }
-
-        public printMemberListMembers() {
-            const members = this.getMemberListAtCaret();
-            this.printMembersOrCompletions(members);
         }
 
         public printCompletionListMembers() {
@@ -3061,19 +3051,8 @@ namespace FourSlashInterface {
             }
         }
 
-        // Verifies the member list contains the specified symbol. The
-        // member list is brought up if necessary
-        public memberListContains(symbol: string, text?: string, documentation?: string, kind?: string) {
-            if (this.negative) {
-                this.state.verifyMemberListDoesNotContain(symbol);
-            }
-            else {
-                this.state.verifyMemberListContains(symbol, text, documentation, kind);
-            }
-        }
-
-        public memberListCount(expectedCount: number) {
-            this.state.verifyMemberListCount(expectedCount, this.negative);
+        public completionListCount(expectedCount: number) {
+            this.state.verifyCompletionListCount(expectedCount, this.negative);
         }
 
         // Verifies the completion list contains the specified symbol. The
@@ -3107,10 +3086,6 @@ namespace FourSlashInterface {
 
         public completionListAllowsNewIdentifier() {
             this.state.verifyCompletionListAllowsNewIdentifier(this.negative);
-        }
-
-        public memberListIsEmpty() {
-            this.state.verifyMemberListIsEmpty(this.negative);
         }
 
         public signatureHelpPresent() {
@@ -3263,6 +3238,10 @@ namespace FourSlashInterface {
             this.state.verifyCurrentSignatureHelpDocComment(docComment);
         }
 
+        public currentSignatureHelpTagsAre(tags: ts.JSDocTagInfo[]) {
+            this.state.verifyCurrentSignatureHelpTags(tags);
+        }
+
         public signatureHelpCountIs(expected: number) {
             this.state.verifySignatureHelpCount(expected);
         }
@@ -3383,8 +3362,8 @@ namespace FourSlashInterface {
             this.state.verifyDocumentHighlightsAtPositionListCount(expectedCount, fileNamesToSearch);
         }
 
-        public completionEntryDetailIs(entryName: string, text: string, documentation?: string, kind?: string) {
-            this.state.verifyCompletionEntryDetails(entryName, text, documentation, kind);
+        public completionEntryDetailIs(entryName: string, text: string, documentation?: string, kind?: string, tags?: ts.JSDocTagInfo[]) {
+            this.state.verifyCompletionEntryDetails(entryName, text, documentation, kind, tags);
         }
 
         /**
@@ -3414,8 +3393,8 @@ namespace FourSlashInterface {
         }
 
         public verifyQuickInfoDisplayParts(kind: string, kindModifiers: string, textSpan: { start: number; length: number; },
-            displayParts: ts.SymbolDisplayPart[], documentation: ts.SymbolDisplayPart[]) {
-            this.state.verifyQuickInfoDisplayParts(kind, kindModifiers, textSpan, displayParts, documentation);
+            displayParts: ts.SymbolDisplayPart[], documentation: ts.SymbolDisplayPart[], tags: ts.JSDocTagInfo[]) {
+            this.state.verifyQuickInfoDisplayParts(kind, kindModifiers, textSpan, displayParts, documentation, tags);
         }
 
         public getSyntacticDiagnostics(expected: string) {
@@ -3512,10 +3491,6 @@ namespace FourSlashInterface {
 
         public printCurrentSignatureHelp() {
             this.state.printCurrentSignatureHelp();
-        }
-
-        public printMemberListMembers() {
-            this.state.printMemberListMembers();
         }
 
         public printCompletionListMembers() {

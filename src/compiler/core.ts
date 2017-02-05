@@ -1,10 +1,9 @@
-/// <reference path="types.ts"/>
+﻿/// <reference path="types.ts"/>
 /// <reference path="performance.ts" />
 
 namespace ts {
     /** The version of the TypeScript compiler release */
-    export const version = "2.1.4";
-    export const version_plus = "2.1.14";
+    export const version = "2.1.5";
 }
 
 /* @internal */
@@ -865,24 +864,6 @@ namespace ts {
     }
 
     /**
-     * Reduce the properties defined on a map-like (but not from its prototype chain).
-     *
-     * NOTE: This is intended for use with MapLike<T> objects. For Map<T> objects, use
-     *       reduceProperties instead as it offers better performance.
-     *
-     * @param map The map-like to reduce
-     * @param callback An aggregation function that is called for each entry in the map
-     * @param initial The initial value for the reduction.
-     */
-    export function reduceOwnProperties<T, U>(map: MapLike<T>, callback: (aggregate: U, value: T, key: string) => U, initial: U): U {
-        let result = initial;
-        for (const key in map) if (hasOwnProperty.call(map, key)) {
-            result = callback(result, map[key], String(key));
-        }
-        return result;
-    }
-
-    /**
      * Performs a shallow equality comparison of the contents of two map-likes.
      *
      * @param left A map-like whose properties should be compared.
@@ -1202,7 +1183,7 @@ namespace ts {
         if (b === undefined) return Comparison.GreaterThan;
         if (ignoreCase) {
             if (collator && String.prototype.localeCompare) {
-                // accent means a ≠ b, a ≠ á, a = A
+                // accent means a ? b, a ? a´, a = A
                 const result = a.localeCompare(b, /*locales*/ undefined, { usage: "sort", sensitivity: "accent" });
                 return result < 0 ? Comparison.LessThan : result > 0 ? Comparison.GreaterThan : Comparison.EqualTo;
             }
@@ -1943,8 +1924,18 @@ namespace ts {
     export const supportedJavascriptExtensions = [".js", ".jsx"];
     const allSupportedExtensions = supportedTypeScriptExtensions.concat(supportedJavascriptExtensions);
 
-    export function getSupportedExtensions(options?: CompilerOptions): string[] {
-        return options && options.allowJs ? allSupportedExtensions : supportedTypeScriptExtensions;
+    export function getSupportedExtensions(options?: CompilerOptions, extraFileExtensions?: FileExtensionInfo[]): string[] {
+        const needAllExtensions = options && options.allowJs;
+        if (!extraFileExtensions || extraFileExtensions.length === 0) {
+            return needAllExtensions ? allSupportedExtensions : supportedTypeScriptExtensions;
+        }
+        const extensions = (needAllExtensions ? allSupportedExtensions : supportedTypeScriptExtensions).slice(0);
+        for (const extInfo of extraFileExtensions) {
+            if (needAllExtensions || extInfo.scriptKind === ScriptKind.TS) {
+                extensions.push(extInfo.extension);
+            }
+        }
+        return extensions;
     }
 
     export function hasJavaScriptFileExtension(fileName: string) {
@@ -1955,10 +1946,10 @@ namespace ts {
         return forEach(supportedTypeScriptExtensions, extension => fileExtensionIs(fileName, extension));
     }
 
-    export function isSupportedSourceFileName(fileName: string, compilerOptions?: CompilerOptions) {
+    export function isSupportedSourceFileName(fileName: string, compilerOptions?: CompilerOptions, extraFileExtensions?: FileExtensionInfo[]) {
         if (!fileName) { return false; }
 
-        for (const extension of getSupportedExtensions(compilerOptions)) {
+        for (const extension of getSupportedExtensions(compilerOptions, extraFileExtensions)) {
             if (fileExtensionIs(fileName, extension)) {
                 return true;
             }
