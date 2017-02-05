@@ -3203,6 +3203,13 @@ namespace ts {
         /*@internal*/ version?: boolean;
         /*@internal*/ watch?: boolean;
 
+        /* extra options */
+        accessorOptimization?: boolean;
+        defines?: MapLike<any>;
+        emitReflection?: boolean;
+        noEmitJs?: boolean;
+        reorderFiles?: boolean;
+
         [option: string]: CompilerOptionsValue | undefined;
     }
 

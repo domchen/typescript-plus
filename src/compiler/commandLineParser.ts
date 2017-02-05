@@ -458,6 +458,31 @@ namespace ts {
             name: "alwaysStrict",
             type: "boolean",
             description: Diagnostics.Parse_in_strict_mode_and_emit_use_strict_for_each_source_file
+        },
+
+        // extra options
+        {
+            name: "accessorOptimization",
+            type: "boolean"
+        },
+        {
+            // this option can only be specified in tsconfig.json
+            // use type = object to copy the value as-is
+            name:           "defines",
+            type:           "object",
+            isTSConfigOnly: true
+        },
+        {
+            name: "emitReflection",
+            type: "boolean"
+        },
+        {
+            name: "noEmitJs",
+            type: "boolean"
+        },
+        {
+            name: "reorderFiles",
+            type: "boolean"
         }
     ];
 
