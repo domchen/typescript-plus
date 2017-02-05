@@ -555,9 +555,10 @@ namespace ts {
     }
 
     function visitBlock(block: Block): void {
-        if (!block) {
+        if (!block || block.visitedBySorting) {
             return;
         }
+        block.visitedBySorting = true;
         for (let statement of block.statements) {
             visitStatement(statement);
         }
