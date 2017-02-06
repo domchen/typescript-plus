@@ -190,15 +190,18 @@ namespace ts {
             if (compilerDefines[node.text] === undefined) {
                 return false;
             }
-            if (node.parent.kind === SyntaxKind.VariableDeclaration) {
-                return false;
-            }
-            if (node.parent.kind === SyntaxKind.BinaryExpression) {
-                let parent = <BinaryExpression>node.parent;
-                if (parent.left === node && parent.operatorToken.kind === SyntaxKind.EqualsToken) {
+            if (node.parent) {
+                if (node.parent.kind === SyntaxKind.VariableDeclaration) {
                     return false;
                 }
+                if (node.parent.kind === SyntaxKind.BinaryExpression) {
+                    let parent = <BinaryExpression>node.parent;
+                    if (parent.left === node && parent.operatorToken.kind === SyntaxKind.EqualsToken) {
+                        return false;
+                    }
+                }
             }
+
             let symbol = typeChecker.getSymbolAtLocation(node);
             if (!symbol || !symbol.declarations) {
                 return false;
