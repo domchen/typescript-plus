@@ -2048,7 +2048,7 @@ declare namespace ts {
 }
 declare namespace ts {
     const version = "2.1.5";
-    const version_plus = "2.1.16";
+    const version_plus = "2.1.17";
 }
 declare namespace ts {
     type FileWatcherCallback = (fileName: string, removed?: boolean) => void;
