@@ -422,7 +422,7 @@ namespace ts {
             });
         }
 
-        let expression = callExpression.expression;
+        let expression = escapeParenthesized(callExpression.expression);
         visitExpression(expression);
         switch (expression.kind) {
             case SyntaxKind.FunctionExpression:
@@ -436,6 +436,13 @@ namespace ts {
                 break;
         }
 
+    }
+
+    function escapeParenthesized(expression: Expression): Expression {
+        if (expression.kind === SyntaxKind.ParenthesizedExpression) {
+            return escapeParenthesized((<ParenthesizedExpression>expression).expression);
+        }
+        return expression;
     }
 
     function checkCallTarget(callerFileName: string, target: Node): void {
