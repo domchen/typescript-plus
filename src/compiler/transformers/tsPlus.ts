@@ -193,7 +193,7 @@ namespace ts {
             if (!node.parent) {
                 return false
             }
-            if (node.parent.kind === SyntaxKind.VariableDeclaration) {
+            if (node.parent.kind === SyntaxKind.VariableDeclaration && (<VariableDeclaration>node.parent).name === node) {
                 return false;
             }
             if (node.parent.kind === SyntaxKind.BinaryExpression) {
