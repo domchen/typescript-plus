@@ -317,6 +317,7 @@ namespace ts {
                 break;
             case SyntaxKind.PropertyAccessExpression:
                 checkDependencyAtLocation(expression);
+                break;
             case SyntaxKind.ElementAccessExpression:
                 visitExpression((<PropertyAccessExpression>expression).expression);
                 break;
