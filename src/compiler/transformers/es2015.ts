@@ -271,6 +271,7 @@ namespace ts {
 
         const compilerOptions = context.getCompilerOptions();
         const resolver = context.getEmitResolver();
+        const typeChecker = compilerOptions.accessorOptimization ? context.getEmitHost().getTypeChecker() : null;
         const previousOnSubstituteNode = context.onSubstituteNode;
         const previousOnEmitNode = context.onEmitNode;
         context.onEmitNode = onEmitNode;
@@ -1532,7 +1533,13 @@ namespace ts {
                         break;
 
                     case SyntaxKind.MethodDeclaration:
-                        statements.push(transformClassMethodDeclarationToStatement(getClassMemberPrefix(node, member), <MethodDeclaration>member, node));
+                        const method = <MethodDeclaration>member;
+                        if (method.isJumpTarget || (method.original && (<MethodDeclaration>method.original).isJumpTarget)) {
+                            transformJumpTarget(statements, getClassMemberPrefix(node, member), <MethodDeclaration>member);
+                        }
+                        else {
+                            statements.push(transformClassMethodDeclarationToStatement(getClassMemberPrefix(node, member), <MethodDeclaration>member, node));
+                        }
                         break;
 
                     case SyntaxKind.GetAccessor:
@@ -1553,6 +1560,44 @@ namespace ts {
                         break;
                 }
             }
+        }
+
+        function transformJumpTarget(statements: Statement[], receiver: LeftHandSideExpression, member: MethodDeclaration): void {
+            const memberName = createMemberAccessForPropertyName(receiver, visitNode(member.name, visitor, isPropertyName), /*location*/ member.name);
+            statements.push(createStatement(
+                createAssignment(memberName, <Identifier>member.name),
+            ));
+
+            const sourceMapRange = getSourceMapRange(member);
+            const memberFunction = transformMethodToFunctionDeclaration(member, /*location*/ member, /*name*/ <Identifier>member.name);
+            setEmitFlags(memberFunction, EmitFlags.NoComments);
+            setSourceMapRange(memberFunction, sourceMapRange);
+            statements.push(memberFunction);
+        }
+
+        function transformMethodToFunctionDeclaration(node: FunctionLikeDeclaration, location: TextRange, name: Identifier): FunctionDeclaration {
+            const savedConvertedLoopState = convertedLoopState;
+            convertedLoopState = undefined;
+            const ancestorFacts = enterSubtree(HierarchyFacts.FunctionExcludes, HierarchyFacts.FunctionIncludes);
+            const parameters = visitParameterList(node.parameters, visitor, context);
+            const body = transformFunctionBody(node);
+            exitSubtree(ancestorFacts, HierarchyFacts.PropagateNewTargetMask, HierarchyFacts.None);
+            convertedLoopState = savedConvertedLoopState;
+            return setOriginalNode(
+                setTextRange(
+                    createFunctionDeclaration(
+                        /*decorators*/ undefined,
+                        /*modifiers*/ undefined,
+                        node.asteriskToken,
+                        name,
+                        /*typeParameters*/ undefined,
+                        parameters,
+                        /*type*/ undefined,
+                        body),
+                    location
+                ),
+                /*original*/ node
+            );
         }
 
         /**
@@ -1635,19 +1680,15 @@ namespace ts {
 
             const properties: ObjectLiteralElementLike[] = [];
             if (getAccessor) {
-                const getterFunction = transformFunctionLikeToExpression(getAccessor, /*location*/ undefined, /*name*/ undefined, container);
-                setSourceMapRange(getterFunction, getSourceMapRange(getAccessor));
-                setEmitFlags(getterFunction, EmitFlags.NoLeadingComments);
-                const getter = createPropertyAssignment("get", getterFunction);
+                const getterExpression = createAccessorExpression(getAccessor, firstAccessor, receiver, container);
+                const getter = createPropertyAssignment("get", getterExpression);
                 setCommentRange(getter, getCommentRange(getAccessor));
                 properties.push(getter);
             }
 
             if (setAccessor) {
-                const setterFunction = transformFunctionLikeToExpression(setAccessor, /*location*/ undefined, /*name*/ undefined, container);
-                setSourceMapRange(setterFunction, getSourceMapRange(setAccessor));
-                setEmitFlags(setterFunction, EmitFlags.NoLeadingComments);
-                const setter = createPropertyAssignment("set", setterFunction);
+                const setterExpression = createAccessorExpression(setAccessor, firstAccessor, receiver, container);
+                const setter = createPropertyAssignment("set", setterExpression);
                 setCommentRange(setter, getCommentRange(setAccessor));
                 properties.push(setter);
             }
@@ -1672,6 +1713,78 @@ namespace ts {
 
             exitSubtree(ancestorFacts, HierarchyFacts.PropagateNewTargetMask, hierarchyFacts & HierarchyFacts.PropagateNewTargetMask ? HierarchyFacts.NewTarget : HierarchyFacts.None);
             return call;
+        }
+
+        /**
+         * If the accessor method contains only one call to another method, use that method to define the accessor directly.
+         */
+        function createAccessorExpression(accessor: AccessorDeclaration, firstAccessor: AccessorDeclaration, receiver: LeftHandSideExpression, container: Node): Expression {
+            let expression: Expression;
+            let method = compilerOptions.accessorOptimization ? getJumpTargetOfAccessor(accessor) : null;
+            if (method) {
+                const methodName = <Identifier>getMutableClone(method.name);
+                setEmitFlags(methodName, EmitFlags.NoComments | EmitFlags.NoTrailingSourceMap);
+                setSourceMapRange(methodName, method.name);
+                if (firstAccessor.pos > method.pos) { // the target method has been already emitted.
+                    const target = getMutableClone(receiver);
+                    setEmitFlags(target, EmitFlags.NoComments | EmitFlags.NoTrailingSourceMap);
+                    setSourceMapRange(target, firstAccessor.name);
+                    expression = createPropertyAccess(target, methodName);
+                }
+                else {
+                    expression = methodName;
+                    method.isJumpTarget = true;
+                }
+            }
+            else {
+                expression = transformFunctionLikeToExpression(accessor, /*location*/ undefined, /*name*/ undefined, container);
+            }
+            setSourceMapRange(expression, getSourceMapRange(accessor));
+            setEmitFlags(expression, EmitFlags.NoLeadingComments);
+            return expression;
+        }
+
+        function getJumpTargetOfAccessor(accessor: AccessorDeclaration): MethodDeclaration {
+            if (accessor.body.statements.length != 1) {
+                return null;
+            }
+            let statement = accessor.body.statements[0];
+            if (statement.kind !== SyntaxKind.ExpressionStatement &&
+                statement.kind !== SyntaxKind.ReturnStatement) {
+                return null;
+            }
+            let expression = (<ReturnStatement>statement).expression;
+            if (expression.kind !== SyntaxKind.CallExpression) {
+                return null;
+            }
+            let callExpression = <CallExpression>expression;
+            if (accessor.kind === SyntaxKind.SetAccessor) {
+                if (callExpression.arguments.length != 1) {
+                    return null;
+                }
+                let argument = callExpression.arguments[0];
+                if (argument.kind !== SyntaxKind.Identifier) {
+                    return null;
+                }
+            }
+            else {
+                if (callExpression.arguments.length != 0) {
+                    return null;
+                }
+            }
+
+            if (callExpression.expression.kind !== SyntaxKind.PropertyAccessExpression) {
+                return null;
+            }
+            let propertyExpression = <PropertyAccessExpression>callExpression.expression;
+            if (propertyExpression.expression.kind !== SyntaxKind.ThisKeyword) {
+                return null;
+            }
+            let symbol = typeChecker.getSymbolAtLocation(propertyExpression.name);
+            if (!symbol) {
+                return;
+            }
+            return <MethodDeclaration>getDeclarationOfKind(symbol, SyntaxKind.MethodDeclaration);
         }
 
         /**
