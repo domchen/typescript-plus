@@ -76,7 +76,6 @@ namespace ts {
     }
 
     function visitFile(sourceFile: SourceFile): void {
-        let hasDecorators = !!(sourceFile.transformFlags & TransformFlags.ContainsDecorators);
         let statements = sourceFile.statements;
         let length = statements.length;
         for (let i = 0; i < length; i++) {
@@ -84,11 +83,11 @@ namespace ts {
             if (hasModifier(statement, ModifierFlags.Ambient)) { // has the 'declare' keyword
                 continue;
             }
-            visitStatement(statements[i], hasDecorators);
+            visitStatement(statements[i]);
         }
     }
 
-    function visitStatement(statement: Statement, hasDecorators?: boolean): void {
+    function visitStatement(statement: Statement): void {
         if (!statement) {
             return;
         }
@@ -100,7 +99,7 @@ namespace ts {
             case SyntaxKind.ClassDeclaration:
                 checkInheriting(<ClassDeclaration>statement);
                 visitStaticMember(<ClassDeclaration>statement);
-                if (hasDecorators) {
+                if (statement.transformFlags & TransformFlags.ContainsDecorators) {
                     visitClassDecorators(<ClassDeclaration>statement);
                 }
                 break;
@@ -112,7 +111,7 @@ namespace ts {
                 checkDependencyAtLocation(importDeclaration.moduleReference);
                 break;
             case SyntaxKind.ModuleDeclaration:
-                visitModule(<ModuleDeclaration>statement, hasDecorators);
+                visitModule(<ModuleDeclaration>statement);
                 break;
             case SyntaxKind.Block:
                 visitBlock(<Block>statement);
@@ -188,7 +187,7 @@ namespace ts {
         }
     }
 
-    function visitModule(node: ModuleDeclaration, hasDecorators?: boolean): void {
+    function visitModule(node: ModuleDeclaration): void {
         if (node.body.kind === SyntaxKind.ModuleDeclaration) {
             visitModule(<ModuleDeclaration>node.body);
             return;
@@ -198,7 +197,7 @@ namespace ts {
                 if (hasModifier(statement, ModifierFlags.Ambient)) { // has the 'declare' keyword
                     continue;
                 }
-                visitStatement(statement, hasDecorators);
+                visitStatement(statement);
             }
         }
 
