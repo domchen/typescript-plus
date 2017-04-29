@@ -4,6 +4,7 @@
 namespace ts {
     /** The version of the TypeScript compiler release */
     export const version = "2.3.2";
+    export const version_plus = "2.3.2";
 }
 
 /* @internal */
