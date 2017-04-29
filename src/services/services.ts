@@ -659,7 +659,7 @@ namespace ts {
                         if (!hasModifier(node, ModifierFlags.ParameterPropertyModifier)) {
                             break;
                         }
-                        // falls through
+                    // falls through
                     case SyntaxKind.VariableDeclaration:
                     case SyntaxKind.BindingElement: {
                         const decl = <VariableDeclaration>node;
@@ -670,7 +670,7 @@ namespace ts {
                         if (decl.initializer)
                             visit(decl.initializer);
                     }
-                        // falls through
+                    // falls through
                     case SyntaxKind.EnumMember:
                     case SyntaxKind.PropertyDeclaration:
                     case SyntaxKind.PropertySignature:
@@ -1119,14 +1119,14 @@ namespace ts {
             const newSettings = hostCache.compilationSettings();
             const shouldCreateNewSourceFiles = oldSettings &&
                 (oldSettings.target !== newSettings.target ||
-                 oldSettings.module !== newSettings.module ||
-                 oldSettings.moduleResolution !== newSettings.moduleResolution ||
-                 oldSettings.noResolve !== newSettings.noResolve ||
-                 oldSettings.jsx !== newSettings.jsx ||
-                 oldSettings.allowJs !== newSettings.allowJs ||
-                 oldSettings.disableSizeLimit !== oldSettings.disableSizeLimit ||
-                 oldSettings.baseUrl !== newSettings.baseUrl ||
-                 !equalOwnProperties(oldSettings.paths, newSettings.paths));
+                    oldSettings.module !== newSettings.module ||
+                    oldSettings.moduleResolution !== newSettings.moduleResolution ||
+                    oldSettings.noResolve !== newSettings.noResolve ||
+                    oldSettings.jsx !== newSettings.jsx ||
+                    oldSettings.allowJs !== newSettings.allowJs ||
+                    oldSettings.disableSizeLimit !== oldSettings.disableSizeLimit ||
+                    oldSettings.baseUrl !== newSettings.baseUrl ||
+                    !equalOwnProperties(oldSettings.paths, newSettings.paths));
 
             // Now create a new compiler
             const compilerHost: CompilerHost = {
@@ -1305,7 +1305,12 @@ namespace ts {
         function getSyntacticDiagnostics(fileName: string) {
             synchronizeHostData();
 
-            return program.getSyntacticDiagnostics(getValidSourceFile(fileName), cancellationToken);
+            let targetSourceFile: SourceFile;
+            if (fileName) {
+                targetSourceFile = getValidSourceFile(fileName);
+            }
+
+            return program.getSyntacticDiagnostics(targetSourceFile, cancellationToken);
         }
 
         /**
@@ -1315,7 +1320,11 @@ namespace ts {
         function getSemanticDiagnostics(fileName: string): Diagnostic[] {
             synchronizeHostData();
 
-            const targetSourceFile = getValidSourceFile(fileName);
+            let targetSourceFile: SourceFile;
+            if (fileName) {
+                targetSourceFile = getValidSourceFile(fileName);
+            }
+
 
             // Only perform the action per file regardless of '-out' flag as LanguageServiceHost is expected to call this function per file.
             // Therefore only get diagnostics for given file.
@@ -1333,7 +1342,7 @@ namespace ts {
         function getCompilerOptionsDiagnostics() {
             synchronizeHostData();
             return program.getOptionsDiagnostics(cancellationToken).concat(
-                   program.getGlobalDiagnostics(cancellationToken));
+                program.getGlobalDiagnostics(cancellationToken));
         }
 
         function getCompletionsAtPosition(fileName: string, position: number): CompletionInfo {
@@ -1497,7 +1506,11 @@ namespace ts {
         function getEmitOutput(fileName: string, emitOnlyDtsFiles?: boolean): EmitOutput {
             synchronizeHostData();
 
-            const sourceFile = getValidSourceFile(fileName);
+            let sourceFile: SourceFile;
+            if (fileName) {
+                sourceFile = getValidSourceFile(fileName);
+            }
+
             const outputFiles: OutputFile[] = [];
 
             function writeFile(fileName: string, data: string, writeByteOrderMark: boolean) {
@@ -2055,7 +2068,7 @@ namespace ts {
         }
     }
 
-    function isObjectLiteralElement(node: Node): node is ObjectLiteralElement  {
+    function isObjectLiteralElement(node: Node): node is ObjectLiteralElement {
         switch (node.kind) {
             case SyntaxKind.JsxAttribute:
             case SyntaxKind.JsxSpreadAttribute:
@@ -2080,7 +2093,7 @@ namespace ts {
                 if (node.parent.kind === SyntaxKind.ComputedPropertyName) {
                     return isObjectLiteralElement(node.parent.parent) ? node.parent.parent : undefined;
                 }
-                // falls through
+            // falls through
             case SyntaxKind.Identifier:
                 return isObjectLiteralElement(node.parent) &&
                     (node.parent.parent.kind === SyntaxKind.ObjectLiteralExpression || node.parent.parent.kind === SyntaxKind.JsxAttributes) &&
