@@ -628,6 +628,32 @@ namespace ts {
                 type: "object"
             },
             description: Diagnostics.List_of_language_service_plugins
+        },
+
+        // extra options
+        {
+            name: "accessorOptimization",
+            type: "boolean"
+        },
+        {
+            // this option can only be specified in tsconfig.json
+            // use type = object to copy the value as-is
+            name: "defines",
+            type: "object",
+            isTSConfigOnly: true
+        },
+        {
+            name: "emitReflection",
+            type: "boolean"
+        },
+        {
+            name: "noEmitJs",
+            type: "boolean"
+        },
+        {
+            name: "reorderFiles",
+            type: "boolean"
+
         }
     ];
 
