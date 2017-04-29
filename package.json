@@ -59,7 +59,7 @@
         "gulp-insert": "latest",
         "gulp-newer": "latest",
         "gulp-sourcemaps": "latest",
-        "gulp-typescript": "latest",
+        "gulp-typescript": "3.1.5",
         "into-stream": "latest",
         "istanbul": "latest",
         "jake": "latest",
@@ -74,8 +74,8 @@
         "through2": "latest",
         "travis-fold": "latest",
         "ts-node": "latest",
-        "tslint": "4.0.0-dev.3",
-        "typescript": "^2.1"
+        "tslint": "next",
+        "typescript": "next"
     },
     "scripts": {
         "pretest": "jake tests",

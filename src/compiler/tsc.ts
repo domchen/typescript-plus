@@ -30,7 +30,7 @@ namespace ts {
     }
 
     function reportEmittedFiles(files: string[]): void {
-        if (!files || files.length == 0) {
+        if (!files || files.length === 0) {
             return;
         }
 
@@ -67,11 +67,13 @@ namespace ts {
     const gutterSeparator = " ";
     const resetEscapeSequence = "\u001b[0m";
     const ellipsis = "...";
-    const categoryFormatMap = createMap<string>({
-        [DiagnosticCategory.Warning]: yellowForegroundEscapeSequence,
-        [DiagnosticCategory.Error]: redForegroundEscapeSequence,
-        [DiagnosticCategory.Message]: blueForegroundEscapeSequence,
-    });
+    function getCategoryFormat(category: DiagnosticCategory): string {
+        switch (category) {
+            case DiagnosticCategory.Warning: return yellowForegroundEscapeSequence;
+            case DiagnosticCategory.Error: return redForegroundEscapeSequence;
+            case DiagnosticCategory.Message: return blueForegroundEscapeSequence;
+        }
+    }
 
     function formatAndReset(text: string, formatStyle: string) {
         return formatStyle + text + resetEscapeSequence;
@@ -139,7 +141,7 @@ namespace ts {
             output += `${ relativeFileName }(${ firstLine + 1 },${ firstLineChar + 1 }): `;
         }
 
-        const categoryColor = categoryFormatMap[diagnostic.category];
+        const categoryColor = getCategoryFormat(diagnostic.category);
         const category = DiagnosticCategory[diagnostic.category].toLowerCase();
         output += `${ formatAndReset(category, categoryColor) } TS${ diagnostic.code }: ${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }`;
         output += sys.newLine + sys.newLine;
@@ -155,7 +157,7 @@ namespace ts {
             output += `${ diagnostic.file.fileName }(${ loc.line + 1 },${ loc.character + 1 }): `;
         }
 
-        output += `${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }${ sys.newLine }`;
+        output += `${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }${ sys.newLine + sys.newLine + sys.newLine }`;
 
         sys.write(output);
     }
@@ -223,9 +225,9 @@ namespace ts {
             return sys.exit(ExitStatus.Success);
         }
 
-        if (commandLine.options.help) {
+        if (commandLine.options.help || commandLine.options.all) {
             printVersion();
-            printHelp();
+            printHelp(commandLine.options.all);
             return sys.exit(ExitStatus.Success);
         }
 
@@ -262,7 +264,7 @@ namespace ts {
 
         if (commandLine.fileNames.length === 0 && !configFileName) {
             printVersion();
-            printHelp();
+            printHelp(commandLine.options.all);
             return sys.exit(ExitStatus.Success);
         }
 
@@ -280,7 +282,7 @@ namespace ts {
                     // When the configFileName is just "tsconfig.json", the watched directory should be
                     // the current directory; if there is a given "project" parameter, then the configFileName
                     // is an absolute file name.
-                    directory == "" ? "." : directory,
+                    directory === "" ? "." : directory,
                     watchedDirectoryChanged, /*recursive*/ true);
             }
         }
@@ -332,9 +334,9 @@ namespace ts {
                         // When the configFileName is just "tsconfig.json", the watched directory should be
                         // the current directory; if there is a given "project" parameter, then the configFileName
                         // is an absolute file name.
-                        directory == "" ? "." : directory,
+                        directory === "" ? "." : directory,
                         watchedDirectoryChanged, /*recursive*/ true);
-                };
+                }
             }
             return configParseResult;
         }
@@ -378,9 +380,11 @@ namespace ts {
         }
 
         function cachedFileExists(fileName: string): boolean {
-            return fileName in cachedExistingFiles
-                ? cachedExistingFiles[fileName]
-                : cachedExistingFiles[fileName] = hostFileExists(fileName);
+            let fileExists = cachedExistingFiles.get(fileName);
+            if (fileExists === undefined) {
+                cachedExistingFiles.set(fileName, fileExists = hostFileExists(fileName));
+            }
+            return fileExists;
         }
 
         function getSourceFile(fileName: string, languageVersion: ScriptTarget, onError?: (message: string) => void) {
@@ -494,22 +498,8 @@ namespace ts {
             statistics = [];
         }
 
-        let exitStatus: number = ExitStatus.Success;
         const program = createProgram(fileNames, compilerOptions, compilerHost);
-        if (compilerOptions.reorderFiles) {
-            let sortResult = ts.reorderSourceFiles(program);
-            if (sortResult.circularReferences.length > 0) {
-                let errorText: string = "";
-                errorText += "error: Find circular dependencies when reordering file :" + ts.sys.newLine;
-                errorText += "    at " + sortResult.circularReferences.join(ts.sys.newLine + "    at ") + ts.sys.newLine + "    at ...";
-                sys.write(errorText + sys.newLine);
-                exitStatus = ExitStatus.DiagnosticsPresent_OutputsGenerated;
-            }
-        }
-        const exitCode = compileProgram();
-        if (exitCode != ExitStatus.Success) {
-            exitStatus = exitCode;
-        }
+        const exitStatus = compileProgram();
 
         if (compilerOptions.listFiles) {
             forEach(program.getSourceFiles(), file => {
@@ -574,9 +564,7 @@ namespace ts {
             }
 
             // Otherwise, emit and report any errors we ran into.
-            let emitOnlyDtsFiles = !compilerOptions.noEmit && compilerOptions.declaration && compilerOptions.noEmitJs;
-            const emitOutput = program.emit(undefined, undefined, undefined, emitOnlyDtsFiles);
-
+            const emitOutput = program.emit();
             diagnostics = diagnostics.concat(emitOutput.diagnostics);
 
             reportDiagnostics(sortAndDeduplicateDiagnostics(diagnostics), compilerHost);
@@ -627,11 +615,10 @@ namespace ts {
     }
 
     function printVersion() {
-        sys.write("Version : " + ts.version_plus + sys.newLine);
-        sys.write("typescript-version : " + ts.version + sys.newLine);
+        sys.write(getDiagnosticText(Diagnostics.Version_0, ts.version) + sys.newLine);
     }
 
-    function printHelp() {
+    function printHelp(showAllOptions: boolean) {
         const output: string[] = [];
 
         // We want to align our "syntax" and "examples" commands to a certain margin.
@@ -656,8 +643,9 @@ namespace ts {
         output.push(getDiagnosticText(Diagnostics.Options_Colon) + sys.newLine);
 
         // Sort our options by their names, (e.g. "--noImplicitAny" comes before "--watch")
-        const optsList = filter(optionDeclarations.slice(), v => !v.experimental);
-        optsList.sort((a, b) => compareValues<string>(a.name.toLowerCase(), b.name.toLowerCase()));
+        const optsList = showAllOptions ?
+            optionDeclarations.slice().sort((a, b) => compareValues<string>(a.name.toLowerCase(), b.name.toLowerCase())) :
+            filter(optionDeclarations.slice(), v => v.showInSimplifiedHelpView);
 
         // We want our descriptions to align at the same column in our output,
         // so we keep track of the longest option usage string.
@@ -691,13 +679,9 @@ namespace ts {
 
             if (option.name === "lib") {
                 description = getDiagnosticText(option.description);
-                const options: string[] = [];
                 const element = (<CommandLineOptionOfListType>option).element;
                 const typeMap = <Map<number | string>>element.type;
-                for (const key in typeMap) {
-                    options.push(`'${key}'`);
-                }
-                optionsDescriptionMap[description] = options;
+                optionsDescriptionMap.set(description, arrayFrom(typeMap.keys()).map(key => `'${key}'`));
             }
             else {
                 description = getDiagnosticText(option.description);
@@ -719,7 +703,7 @@ namespace ts {
         for (let i = 0; i < usageColumn.length; i++) {
             const usage = usageColumn[i];
             const description = descriptionColumn[i];
-            const kindsList = optionsDescriptionMap[description];
+            const kindsList = optionsDescriptionMap.get(description);
             output.push(usage + makePadding(marginLength - usage.length + 2) + description + sys.newLine);
 
             if (kindsList) {
@@ -755,7 +739,7 @@ namespace ts {
             reportDiagnostic(createCompilerDiagnostic(Diagnostics.A_tsconfig_json_file_is_already_defined_at_Colon_0, file), /* host */ undefined);
         }
         else {
-            sys.writeFile(file, JSON.stringify(generateTSConfig(options, fileNames), undefined, 4));
+            sys.writeFile(file, generateTSConfig(options, fileNames, sys.newLine));
             reportDiagnostic(createCompilerDiagnostic(Diagnostics.Successfully_created_a_tsconfig_json_file), /* host */ undefined);
         }
 

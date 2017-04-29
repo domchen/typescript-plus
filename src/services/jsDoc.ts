@@ -1,4 +1,4 @@
-﻿/* @internal */
+/* @internal */
 namespace ts.JsDoc {
     const jsDocTagNames = [
         "augments",
@@ -42,7 +42,8 @@ namespace ts.JsDoc {
         "prop",
         "version"
     ];
-    let jsDocCompletionEntries: CompletionEntry[];
+    let jsDocTagNameCompletionEntries: CompletionEntry[];
+    let jsDocTagCompletionEntries: CompletionEntry[];
 
     export function getJsDocCommentsFromDeclarations(declarations: Declaration[]) {
         // Only collect doc comments from duplicate declarations once:
@@ -84,7 +85,7 @@ namespace ts.JsDoc {
                         return {
                             name: jsDocTag.tagName.text,
                             text: jsDocTag.comment
-                        } }));
+                        }; }));
                 }
             }
         });
@@ -98,7 +99,7 @@ namespace ts.JsDoc {
      */
     function forEachUnique<T, U>(array: T[], callback: (element: T, index: number) => U): U {
         if (array) {
-            for (let i = 0, len = array.length; i < len; i++) {
+            for (let i = 0; i < array.length; i++) {
                 if (indexOf(array, array[i]) === i) {
                     const result = callback(array[i], i);
                     if (result) {
@@ -110,13 +111,24 @@ namespace ts.JsDoc {
         return undefined;
     }
 
-    export function getAllJsDocCompletionEntries(): CompletionEntry[] {
-        return jsDocCompletionEntries || (jsDocCompletionEntries = ts.map(jsDocTagNames, tagName => {
+    export function getJSDocTagNameCompletions(): CompletionEntry[] {
+        return jsDocTagNameCompletionEntries || (jsDocTagNameCompletionEntries = ts.map(jsDocTagNames, tagName => {
             return {
                 name: tagName,
                 kind: ScriptElementKind.keyword,
                 kindModifiers: "",
                 sortText: "0",
+            };
+        }));
+    }
+
+    export function getJSDocTagCompletions(): CompletionEntry[] {
+        return jsDocTagCompletionEntries || (jsDocTagCompletionEntries = ts.map(jsDocTagNames, tagName => {
+            return {
+                name: `@${tagName}`,
+                kind: ScriptElementKind.keyword,
+                kindModifiers: "",
+                sortText: "0"
             };
         }));
     }
@@ -188,11 +200,12 @@ namespace ts.JsDoc {
         const posLineAndChar = sourceFile.getLineAndCharacterOfPosition(position);
         const lineStart = sourceFile.getLineStarts()[posLineAndChar.line];
 
-        const indentationStr = sourceFile.text.substr(lineStart, posLineAndChar.character);
+        // replace non-whitespace characters in prefix with spaces.
+        const indentationStr = sourceFile.text.substr(lineStart, posLineAndChar.character).replace(/\S/i, () => " ");
         const isJavaScriptFile = hasJavaScriptFileExtension(sourceFile.fileName);
 
         let docParams = "";
-        for (let i = 0, numParams = parameters.length; i < numParams; i++) {
+        for (let i = 0; i < parameters.length; i++) {
             const currentName = parameters[i].name;
             const paramName = currentName.kind === SyntaxKind.Identifier ?
                 (<Identifier>currentName).text :

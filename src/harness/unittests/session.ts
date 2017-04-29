@@ -27,7 +27,7 @@ namespace ts.server {
         clearImmediate: noop,
         createHash: s => s
     };
-    const nullCancellationToken: HostCancellationToken = { isCancellationRequested: () => false };
+
     const mockLogger: Logger = {
         close: noop,
         hasLevel(): boolean { return false; },
@@ -50,8 +50,22 @@ namespace ts.server {
         let session: TestSession;
         let lastSent: protocol.Message;
 
+        function createSession(): TestSession {
+            const opts: server.SessionOptions = {
+                host: mockHost,
+                cancellationToken: nullCancellationToken,
+                useSingleInferredProject: false,
+                typingsInstaller: undefined,
+                byteLength: Utils.byteLength,
+                hrtime: process.hrtime,
+                logger: mockLogger,
+                canUseEvents: true
+            };
+            return new TestSession(opts);
+        }
+
         beforeEach(() => {
-            session = new TestSession(mockHost, nullCancellationToken, /*useOneInferredProject*/ false, /*typingsInstaller*/ undefined, Utils.byteLength, process.hrtime, mockLogger, /*canUseEvents*/ true);
+            session = createSession();
             session.send = (msg: protocol.Message) => {
                 lastSent = msg;
             };
@@ -318,7 +332,16 @@ namespace ts.server {
             lastSent: protocol.Message;
             customHandler = "testhandler";
             constructor() {
-                super(mockHost, nullCancellationToken, /*useOneInferredProject*/ false, /*typingsInstaller*/ undefined, Utils.byteLength, process.hrtime, mockLogger, /*canUseEvents*/ true);
+                super({
+                    host: mockHost,
+                    cancellationToken: nullCancellationToken,
+                    useSingleInferredProject: false,
+                    typingsInstaller: undefined,
+                    byteLength: Utils.byteLength,
+                    hrtime: process.hrtime,
+                    logger: mockLogger,
+                    canUseEvents: true
+                });
                 this.addProtocolHandler(this.customHandler, () => {
                     return { response: undefined, responseRequired: true };
                 });
@@ -326,7 +349,7 @@ namespace ts.server {
             send(msg: protocol.Message) {
                 this.lastSent = msg;
             }
-        };
+        }
 
         it("can override methods such as send", () => {
             const session = new TestSession();
@@ -367,7 +390,7 @@ namespace ts.server {
                     assert(this.projectService);
                     expect(this.projectService).to.be.instanceOf(ProjectService);
                 }
-            };
+            }
             new ServiceSession();
         });
     });
@@ -376,7 +399,16 @@ namespace ts.server {
         class InProcSession extends Session {
             private queue: protocol.Request[] = [];
             constructor(private client: InProcClient) {
-                super(mockHost, nullCancellationToken, /*useOneInferredProject*/ false, /*typingsInstaller*/ undefined, Utils.byteLength, process.hrtime, mockLogger, /*canUseEvents*/ true);
+                super({
+                    host: mockHost,
+                    cancellationToken: nullCancellationToken,
+                    useSingleInferredProject: false,
+                    typingsInstaller: undefined,
+                    byteLength: Utils.byteLength,
+                    hrtime: process.hrtime,
+                    logger: mockLogger,
+                    canUseEvents: true
+                });
                 this.addProtocolHandler("echo", (req: protocol.Request) => ({
                     response: req.arguments,
                     responseRequired: true
@@ -416,14 +448,15 @@ namespace ts.server {
         class InProcClient {
             private server: InProcSession;
             private seq = 0;
-            private callbacks = createMap<(resp: protocol.Response) => void>();
+            private callbacks: Array<(resp: protocol.Response) => void> = [];
             private eventHandlers = createMap<(args: any) => void>();
 
             handle(msg: protocol.Message): void {
                 if (msg.type === "response") {
                     const response = <protocol.Response>msg;
-                    if (response.request_seq in this.callbacks) {
-                        this.callbacks[response.request_seq](response);
+                    const handler = this.callbacks[response.request_seq];
+                    if (handler) {
+                        handler(response);
                         delete this.callbacks[response.request_seq];
                     }
                 }
@@ -434,13 +467,14 @@ namespace ts.server {
             }
 
             emit(name: string, args: any): void {
-                if (name in this.eventHandlers) {
-                    this.eventHandlers[name](args);
+                const handler = this.eventHandlers.get(name);
+                if (handler) {
+                    handler(args);
                 }
             }
 
             on(name: string, handler: (args: any) => void): void {
-                this.eventHandlers[name] = handler;
+                this.eventHandlers.set(name, handler);
             }
 
             connect(session: InProcSession): void {
@@ -460,7 +494,7 @@ namespace ts.server {
                 });
                 this.callbacks[this.seq] = callback;
             }
-        };
+        }
 
         it("can be constructed and respond to commands", (done) => {
             const cli = new InProcClient();

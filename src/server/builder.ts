@@ -1,7 +1,6 @@
-﻿/// <reference path="..\compiler\commandLineParser.ts" />
+/// <reference path="..\compiler\commandLineParser.ts" />
 /// <reference path="..\services\services.ts" />
 /// <reference path="session.ts" />
-/// <reference types="node" />
 
 namespace ts.server {
 
@@ -192,7 +191,7 @@ namespace ts.server {
             const l = lf.scriptInfo.fileName;
             const r = rf.scriptInfo.fileName;
             return (l < r ? -1 : (l > r ? 1 : 0));
-        };
+        }
 
         static addToReferenceList(array: ModuleBuilderFileInfo[], fileInfo: ModuleBuilderFileInfo) {
             if (array.length === 0) {
@@ -356,24 +355,24 @@ namespace ts.server {
             // Use slice to clone the array to avoid manipulating in place
             const queue = fileInfo.referencedBy.slice(0);
             const fileNameSet = createMap<ScriptInfo>();
-            fileNameSet[scriptInfo.fileName] = scriptInfo;
+            fileNameSet.set(scriptInfo.fileName, scriptInfo);
             while (queue.length > 0) {
                 const processingFileInfo = queue.pop();
                 if (processingFileInfo.updateShapeSignature() && processingFileInfo.referencedBy.length > 0) {
                     for (const potentialFileInfo of processingFileInfo.referencedBy) {
-                        if (!fileNameSet[potentialFileInfo.scriptInfo.fileName]) {
+                        if (!fileNameSet.has(potentialFileInfo.scriptInfo.fileName)) {
                             queue.push(potentialFileInfo);
                         }
                     }
                 }
-                fileNameSet[processingFileInfo.scriptInfo.fileName] = processingFileInfo.scriptInfo;
+                fileNameSet.set(processingFileInfo.scriptInfo.fileName, processingFileInfo.scriptInfo);
             }
             const result: string[] = [];
-            for (const fileName in fileNameSet) {
-                if (shouldEmitFile(fileNameSet[fileName])) {
+            fileNameSet.forEach((scriptInfo, fileName) => {
+                if (shouldEmitFile(scriptInfo)) {
                     result.push(fileName);
                 }
-            }
+            });
             return result;
         }
     }

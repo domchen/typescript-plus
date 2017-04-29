@@ -1,18 +1,9 @@
 {
+    "extends": "../tsconfig-base",
     "compilerOptions": {
-        "noImplicitAny": true,
-        "noImplicitThis": true,
         "removeComments": true,
-        "preserveConstEnums": true,
-        "pretty": true,
         "outFile": "../../built/local/tsc.js",
-        "sourceMap": true,
-        "declaration": true,
-        "stripInternal": true,
-        "target": "es5",
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "types": [ ]
+        "declaration": true
     },
     "files": [
         "core.ts",
@@ -40,8 +31,6 @@
         "transformers/module/system.ts",
         "transformers/module/es2015.ts",
         "transformer.ts",
-        "transformers/tsPlus.ts",
-        "sorting.ts",
         "comments.ts",
         "sourcemap.ts",
         "declarationEmitter.ts",

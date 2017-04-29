@@ -3,6 +3,36 @@
 /* @internal */
 namespace ts.NavigationBar {
     /**
+     * Matches all whitespace characters in a string. Eg:
+     *
+     * "app.
+     *
+     * onactivated"
+     *
+     * matches because of the newline, whereas
+     *
+     * "app.onactivated"
+     *
+     * does not match.
+     */
+    const whiteSpaceRegex = /\s+/g;
+
+    // Keep sourceFile handy so we don't have to search for it every time we need to call `getText`.
+    let curCancellationToken: CancellationToken;
+    let curSourceFile: SourceFile;
+
+    /**
+     * For performance, we keep navigation bar parents on a stack rather than passing them through each recursion.
+     * `parent` is the current parent and is *not* stored in parentsStack.
+     * `startNode` sets a new parent and `endNode` returns to the previous parent.
+     */
+    let parentsStack: NavigationBarNode[] = [];
+    let parent: NavigationBarNode;
+
+    // NavigationBarItem requires an array, but will not mutate it, so just give it this for performance.
+    let emptyChildItemArray: NavigationBarItem[] = [];
+
+    /**
      * Represents a navigation bar item and its children.
      * The returned NavigationBarItem is more complicated and doesn't include 'parent', so we use these to do work before converting.
      */
@@ -14,22 +44,36 @@ namespace ts.NavigationBar {
         indent: number; // # of parents
     }
 
-    export function getNavigationBarItems(sourceFile: SourceFile): NavigationBarItem[] {
+    export function getNavigationBarItems(sourceFile: SourceFile, cancellationToken: CancellationToken): NavigationBarItem[] {
+        curCancellationToken = cancellationToken;
         curSourceFile = sourceFile;
-        const result = map(topLevelItems(rootNavigationBarNode(sourceFile)), convertToTopLevelItem);
-        curSourceFile = undefined;
-        return result;
+        try {
+            return map(topLevelItems(rootNavigationBarNode(sourceFile)), convertToTopLevelItem);
+        }
+        finally {
+            reset();
+        }
     }
 
-    export function getNavigationTree(sourceFile: SourceFile): NavigationTree {
+    export function getNavigationTree(sourceFile: SourceFile, cancellationToken: CancellationToken): NavigationTree {
+        curCancellationToken = cancellationToken;
         curSourceFile = sourceFile;
-        const result = convertToTree(rootNavigationBarNode(sourceFile));
-        curSourceFile = undefined;
-        return result;
+        try {
+            return convertToTree(rootNavigationBarNode(sourceFile));
+        }
+        finally {
+            reset();
+        }
     }
 
-    // Keep sourceFile handy so we don't have to search for it every time we need to call `getText`.
-    let curSourceFile: SourceFile;
+    function reset() {
+        curSourceFile = undefined;
+        curCancellationToken = undefined;
+        parentsStack = [];
+        parent = undefined;
+        emptyChildItemArray = [];
+    }
+
     function nodeText(node: Node): string {
         return node.getText(curSourceFile);
     }
@@ -46,14 +90,6 @@ namespace ts.NavigationBar {
             parent.children = [child];
         }
     }
-
-    /*
-    For performance, we keep navigation bar parents on a stack rather than passing them through each recursion.
-    `parent` is the current parent and is *not* stored in parentsStack.
-    `startNode` sets a new parent and `endNode` returns to the previous parent.
-    */
-    const parentsStack: NavigationBarNode[] = [];
-    let parent: NavigationBarNode;
 
     function rootNavigationBarNode(sourceFile: SourceFile): NavigationBarNode {
         Debug.assert(!parentsStack.length);
@@ -111,6 +147,8 @@ namespace ts.NavigationBar {
 
     /** Look for navigation bar items in node's subtree, adding them to the current `parent`. */
     function addChildrenRecursively(node: Node): void {
+        curCancellationToken.throwIfCancellationRequested();
+
         if (!node || isToken(node)) {
             return;
         }
@@ -146,7 +184,7 @@ namespace ts.NavigationBar {
                 break;
 
             case SyntaxKind.ImportClause:
-                let importClause = <ImportClause>node;
+                const importClause = <ImportClause>node;
                 // Handle default import case e.g.:
                 //    import d from "mod";
                 if (importClause.name) {
@@ -248,9 +286,9 @@ namespace ts.NavigationBar {
                 return true;
             }
 
-            const itemsWithSameName = nameToItems[name];
+            const itemsWithSameName = nameToItems.get(name);
             if (!itemsWithSameName) {
-                nameToItems[name] = child;
+                nameToItems.set(name, child);
                 return true;
             }
 
@@ -268,7 +306,7 @@ namespace ts.NavigationBar {
                 if (tryMerge(itemWithSameName, child)) {
                     return false;
                 }
-                nameToItems[name] = [itemWithSameName, child];
+                nameToItems.set(name, [itemWithSameName, child]);
                 return true;
             }
 
@@ -322,33 +360,13 @@ namespace ts.NavigationBar {
     function compareChildren(child1: NavigationBarNode, child2: NavigationBarNode): number {
         const name1 = tryGetName(child1.node), name2 = tryGetName(child2.node);
         if (name1 && name2) {
-            const cmp = localeCompareFix(name1, name2);
+            const cmp = ts.compareStringsCaseInsensitive(name1, name2);
             return cmp !== 0 ? cmp : navigationBarNodeKind(child1) - navigationBarNodeKind(child2);
         }
         else {
             return name1 ? 1 : name2 ? -1 : navigationBarNodeKind(child1) - navigationBarNodeKind(child2);
         }
     }
-
-    // Intl is missing in Safari, and node 0.10 treats "a" as greater than "B".
-    const localeCompareIsCorrect = ts.collator && ts.collator.compare("a", "B") < 0;
-    const localeCompareFix: (a: string, b: string) => number = localeCompareIsCorrect ? collator.compare : function(a, b) {
-        // This isn't perfect, but it passes all of our tests.
-        for (let i = 0; i < Math.min(a.length, b.length); i++) {
-            const chA = a.charAt(i), chB = b.charAt(i);
-            if (chA === "\"" && chB === "'") {
-                return 1;
-            }
-            if (chA === "'" && chB === "\"") {
-                return -1;
-            }
-            const cmp = ts.compareStrings(chA.toLocaleLowerCase(), chB.toLocaleLowerCase());
-            if (cmp !== 0) {
-                return cmp;
-            }
-        }
-        return a.length - b.length;
-    };
 
     /**
      * This differs from getItemName because this is just used for sorting.
@@ -507,14 +525,11 @@ namespace ts.NavigationBar {
         }
     }
 
-    // NavigationBarItem requires an array, but will not mutate it, so just give it this for performance.
-    const emptyChildItemArray: NavigationBarItem[] = [];
-
     function convertToTree(n: NavigationBarNode): NavigationTree {
         return {
             text: getItemName(n.node),
             kind: getNodeKind(n.node),
-            kindModifiers: getNodeModifiers(n.node),
+            kindModifiers: getModifiers(n.node),
             spans: getSpans(n),
             childItems: map(n.children, convertToTree)
         };
@@ -524,7 +539,7 @@ namespace ts.NavigationBar {
         return {
             text: getItemName(n.node),
             kind: getNodeKind(n.node),
-            kindModifiers: getNodeModifiers(n.node),
+            kindModifiers: getModifiers(n.node),
             spans: getSpans(n),
             childItems: map(n.children, convertToChildItem) || emptyChildItemArray,
             indent: n.indent,
@@ -591,7 +606,14 @@ namespace ts.NavigationBar {
     function getNodeSpan(node: Node): TextSpan {
         return node.kind === SyntaxKind.SourceFile
             ? createTextSpanFromBounds(node.getFullStart(), node.getEnd())
-            : createTextSpanFromBounds(node.getStart(curSourceFile), node.getEnd());
+            : createTextSpanFromNode(node, curSourceFile);
+    }
+
+    function getModifiers(node: ts.Node): string {
+        if (node.parent && node.parent.kind === SyntaxKind.VariableDeclaration) {
+            node = node.parent;
+        }
+        return getNodeModifiers(node);
     }
 
     function getFunctionOrClassName(node: FunctionExpression | FunctionDeclaration | ArrowFunction | ClassLikeDeclaration): string {
@@ -623,19 +645,4 @@ namespace ts.NavigationBar {
     function isFunctionOrClassExpression(node: Node): boolean {
         return node.kind === SyntaxKind.FunctionExpression || node.kind === SyntaxKind.ArrowFunction || node.kind === SyntaxKind.ClassExpression;
     }
-
-    /**
-     * Matches all whitespace characters in a string. Eg:
-     * 
-     * "app.
-     * 
-     * onactivated"
-     * 
-     * matches because of the newline, whereas
-     * 
-     * "app.onactivated"
-     * 
-     * does not match.
-     */
-    const whiteSpaceRegex = /\s+/g;
 }
