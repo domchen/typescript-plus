@@ -735,6 +735,7 @@ namespace ts {
                 getSourceFile: program.getSourceFile,
                 getSourceFileByPath: program.getSourceFileByPath,
                 getSourceFiles: program.getSourceFiles,
+                getTypeChecker: program.getTypeChecker,
                 isSourceFileFromExternalLibrary,
                 writeFile: writeFileCallback || (
                     (fileName, data, writeByteOrderMark, onError, sourceFiles) => host.writeFile(fileName, data, writeByteOrderMark, onError, sourceFiles)),
