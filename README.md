@@ -1,5 +1,7 @@
 [![npm version](https://badge.fury.io/js/typescript-plus.svg)](https://www.npmjs.com/package/typescript-plus)
 
+[中文版](http://www.idom.me/articles/849.html)
+
 # typescript-plus
 
 
