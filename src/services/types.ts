@@ -19,34 +19,34 @@ namespace ts {
         getFirstToken(sourceFile?: SourceFile): Node;
         getLastToken(sourceFile?: SourceFile): Node;
         // See ts.forEachChild for documentation.
-        forEachChild<T>(cbNode: (node: Node) => T, cbNodeArray?: (nodes: Node[]) => T): T;
+        forEachChild<T>(cbNode: (node: Node) => T | undefined, cbNodeArray?: (nodes: NodeArray<Node>) => T | undefined): T | undefined;
     }
 
     export interface Symbol {
         getFlags(): SymbolFlags;
         getName(): string;
-        getDeclarations(): Declaration[];
+        getDeclarations(): Declaration[] | undefined;
         getDocumentationComment(): SymbolDisplayPart[];
         getJsDocTags(): JSDocTagInfo[];
     }
 
     export interface Type {
         getFlags(): TypeFlags;
-        getSymbol(): Symbol;
+        getSymbol(): Symbol | undefined;
         getProperties(): Symbol[];
-        getProperty(propertyName: string): Symbol;
+        getProperty(propertyName: string): Symbol | undefined;
         getApparentProperties(): Symbol[];
         getCallSignatures(): Signature[];
         getConstructSignatures(): Signature[];
-        getStringIndexType(): Type;
-        getNumberIndexType(): Type;
-        getBaseTypes(): BaseType[];
+        getStringIndexType(): Type | undefined;
+        getNumberIndexType(): Type | undefined;
+        getBaseTypes(): BaseType[] | undefined;
         getNonNullableType(): Type;
     }
 
     export interface Signature {
         getDeclaration(): SignatureDeclaration;
-        getTypeParameters(): TypeParameter[];
+        getTypeParameters(): TypeParameter[] | undefined;
         getParameters(): Symbol[];
         getReturnType(): Type;
         getDocumentationComment(): SymbolDisplayPart[];
@@ -68,6 +68,10 @@ namespace ts {
     }
 
     export interface SourceFileLike {
+        getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
+    }
+
+    export interface SourceMapSource {
         getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
     }
 
@@ -262,6 +266,9 @@ namespace ts {
 
         getCodeFixesAtPosition(fileName: string, start: number, end: number, errorCodes: number[], formatOptions: FormatCodeSettings): CodeAction[];
 
+        getApplicableRefactors(fileName: string, positionOrRaneg: number | TextRange): ApplicableRefactorInfo[];
+        getEditsForRefactor(fileName: string, formatOptions: FormatCodeSettings, positionOrRange: number | TextRange, refactorName: string, actionName: string): RefactorEditInfo | undefined;
+
         getEmitOutput(fileName: string, emitOnlyDtsFiles?: boolean): EmitOutput;
 
         getProgram(): Program;
@@ -351,6 +358,60 @@ namespace ts {
         /** Text changes to apply to each file as part of the code action */
         changes: FileTextChanges[];
     }
+
+    /**
+     * A set of one or more available refactoring actions, grouped under a parent refactoring.
+     */
+    export interface ApplicableRefactorInfo {
+        /**
+         * The programmatic name of the refactoring
+         */
+        name: string;
+        /**
+         * A description of this refactoring category to show to the user.
+         * If the refactoring gets inlined (see below), this text will not be visible.
+         */
+        description: string;
+        /**
+         * Inlineable refactorings can have their actions hoisted out to the top level
+         * of a context menu. Non-inlineanable refactorings should always be shown inside
+         * their parent grouping.
+         *
+         * If not specified, this value is assumed to be 'true'
+         */
+        inlineable?: boolean;
+
+        actions: RefactorActionInfo[];
+    }
+
+    /**
+     * Represents a single refactoring action - for example, the "Extract Method..." refactor might
+     * offer several actions, each corresponding to a surround class or closure to extract into.
+     */
+    export type RefactorActionInfo = {
+        /**
+         * The programmatic name of the refactoring action
+         */
+        name: string;
+
+        /**
+         * A description of this refactoring action to show to the user.
+         * If the parent refactoring is inlined away, this will be the only text shown,
+         * so this description should make sense by itself if the parent is inlineable=true
+         */
+        description: string;
+    };
+
+    /**
+     * A set of edits to make in response to a refactor action, plus an optional
+     * location where renaming should be invoked from
+     */
+    export type RefactorEditInfo = {
+        edits: FileTextChanges[];
+        renameFilename?: string;
+        renameLocation?: number;
+    };
+
 
     export interface TextInsertion {
         newText: string;

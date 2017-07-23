@@ -12,7 +12,7 @@ The typescript-plus compiler provides extra features to the original typescript 
 
 This project will try to stay up to date with the new release of the original TypeScript project.
 
-Current TypeScript Version: 2.3.2
+Current TypeScript Version: 2.4.2
 
 
 ## Installing

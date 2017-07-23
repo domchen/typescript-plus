@@ -60,93 +60,8 @@ namespace ts {
         sys.write(ts.formatDiagnostics([diagnostic], host));
     }
 
-    const redForegroundEscapeSequence = "\u001b[91m";
-    const yellowForegroundEscapeSequence = "\u001b[93m";
-    const blueForegroundEscapeSequence = "\u001b[93m";
-    const gutterStyleSequence = "\u001b[100;30m";
-    const gutterSeparator = " ";
-    const resetEscapeSequence = "\u001b[0m";
-    const ellipsis = "...";
-    function getCategoryFormat(category: DiagnosticCategory): string {
-        switch (category) {
-            case DiagnosticCategory.Warning: return yellowForegroundEscapeSequence;
-            case DiagnosticCategory.Error: return redForegroundEscapeSequence;
-            case DiagnosticCategory.Message: return blueForegroundEscapeSequence;
-        }
-    }
-
-    function formatAndReset(text: string, formatStyle: string) {
-        return formatStyle + text + resetEscapeSequence;
-    }
-
     function reportDiagnosticWithColorAndContext(diagnostic: Diagnostic, host: FormatDiagnosticsHost): void {
-        let output = "";
-
-        if (diagnostic.file) {
-            const { start, length, file } = diagnostic;
-            const { line: firstLine, character: firstLineChar } = getLineAndCharacterOfPosition(file, start);
-            const { line: lastLine, character: lastLineChar } = getLineAndCharacterOfPosition(file, start + length);
-            const lastLineInFile = getLineAndCharacterOfPosition(file, file.text.length).line;
-            const relativeFileName = host ? convertToRelativePath(file.fileName, host.getCurrentDirectory(), fileName => host.getCanonicalFileName(fileName)) : file.fileName;
-
-            const hasMoreThanFiveLines = (lastLine - firstLine) >= 4;
-            let gutterWidth = (lastLine + 1 + "").length;
-            if (hasMoreThanFiveLines) {
-                gutterWidth = Math.max(ellipsis.length, gutterWidth);
-            }
-
-            output += sys.newLine;
-            for (let i = firstLine; i <= lastLine; i++) {
-                // If the error spans over 5 lines, we'll only show the first 2 and last 2 lines,
-                // so we'll skip ahead to the second-to-last line.
-                if (hasMoreThanFiveLines && firstLine + 1 < i && i < lastLine - 1) {
-                    output += formatAndReset(padLeft(ellipsis, gutterWidth), gutterStyleSequence) + gutterSeparator + sys.newLine;
-                    i = lastLine - 1;
-                }
-
-                const lineStart = getPositionOfLineAndCharacter(file, i, 0);
-                const lineEnd = i < lastLineInFile ? getPositionOfLineAndCharacter(file, i + 1, 0) : file.text.length;
-                let lineContent = file.text.slice(lineStart, lineEnd);
-                lineContent = lineContent.replace(/\s+$/g, "");  // trim from end
-                lineContent = lineContent.replace("\t", " ");    // convert tabs to single spaces
-
-                // Output the gutter and the actual contents of the line.
-                output += formatAndReset(padLeft(i + 1 + "", gutterWidth), gutterStyleSequence) + gutterSeparator;
-                output += lineContent + sys.newLine;
-
-                // Output the gutter and the error span for the line using tildes.
-                output += formatAndReset(padLeft("", gutterWidth), gutterStyleSequence) + gutterSeparator;
-                output += redForegroundEscapeSequence;
-                if (i === firstLine) {
-                    // If we're on the last line, then limit it to the last character of the last line.
-                    // Otherwise, we'll just squiggle the rest of the line, giving 'slice' no end position.
-                    const lastCharForLine = i === lastLine ? lastLineChar : undefined;
-
-                    output += lineContent.slice(0, firstLineChar).replace(/\S/g, " ");
-                    output += lineContent.slice(firstLineChar, lastCharForLine).replace(/./g, "~");
-                }
-                else if (i === lastLine) {
-                    output += lineContent.slice(0, lastLineChar).replace(/./g, "~");
-                }
-                else {
-                    // Squiggle the entire line.
-                    output += lineContent.replace(/./g, "~");
-                }
-                output += resetEscapeSequence;
-
-                output += sys.newLine;
-            }
-
-            output += sys.newLine;
-            output += `${ relativeFileName }(${ firstLine + 1 },${ firstLineChar + 1 }): `;
-        }
-
-        const categoryColor = getCategoryFormat(diagnostic.category);
-        const category = DiagnosticCategory[diagnostic.category].toLowerCase();
-        output += `${ formatAndReset(category, categoryColor) } TS${ diagnostic.code }: ${ flattenDiagnosticMessageText(diagnostic.messageText, sys.newLine) }`;
-        output += sys.newLine + sys.newLine;
-
-        sys.write(output);
+        sys.write(ts.formatDiagnosticsWithColorAndContext([diagnostic], host) + sys.newLine + sys.newLine);
     }
 
     function reportWatchDiagnostic(diagnostic: Diagnostic) {
@@ -498,23 +413,8 @@ namespace ts {
             statistics = [];
         }
 
-        let exitStatus: number = ExitStatus.Success;
         const program = createProgram(fileNames, compilerOptions, compilerHost);
-        if (compilerOptions.reorderFiles) {
-            let sortResult = ts.reorderSourceFiles(program);
-            if (sortResult.circularReferences.length > 0) {
-                let errorText: string = "";
-                errorText += "error: Find circular dependencies when reordering file :" + ts.sys.newLine;
-                errorText += "    at " + sortResult.circularReferences.join(ts.sys.newLine + "    at ") + ts.sys.newLine + "    at ...";
-                sys.write(errorText + sys.newLine);
-                exitStatus = ExitStatus.DiagnosticsPresent_OutputsGenerated;
-            }
-        }
-        const exitCode = compileProgram();
-        if (exitCode != ExitStatus.Success) {
-            exitStatus = exitCode;
-        }
-
+        const exitStatus = compileProgram();
 
         if (compilerOptions.listFiles) {
             forEach(program.getSourceFiles(), file => {
@@ -579,9 +479,7 @@ namespace ts {
             }
 
             // Otherwise, emit and report any errors we ran into.
-            let emitOnlyDtsFiles = !compilerOptions.noEmit && compilerOptions.declaration && compilerOptions.noEmitJs;
-            const emitOutput = program.emit(undefined, undefined, undefined, emitOnlyDtsFiles);
-
+            const emitOutput = program.emit();
             diagnostics = diagnostics.concat(emitOutput.diagnostics);
 
             reportDiagnostics(sortAndDeduplicateDiagnostics(diagnostics), compilerHost);
@@ -632,8 +530,7 @@ namespace ts {
     }
 
     function printVersion() {
-        sys.write("Version : " + ts.version_plus + sys.newLine);
-        sys.write("typescript-version : " + ts.version + sys.newLine);
+        sys.write(getDiagnosticText(Diagnostics.Version_0, ts.version) + sys.newLine);
     }
 
     function printHelp(showAllOptions: boolean) {
@@ -763,6 +660,10 @@ namespace ts {
 
         return;
     }
+}
+
+if (ts.Debug.isDebugging) {
+    ts.Debug.enableDebugInfo();
 }
 
 if (ts.sys.tryEnableSourceMapsForHost && /^development$/i.test(ts.sys.getEnvironmentVariable("NODE_ENV"))) {

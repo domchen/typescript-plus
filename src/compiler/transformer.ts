@@ -1,6 +1,5 @@
 /// <reference path="visitor.ts" />
 /// <reference path="transformers/ts.ts" />
-/// <reference path="transformers/tsPlus.ts" />
 /// <reference path="transformers/jsx.ts" />
 /// <reference path="transformers/esnext.ts" />
 /// <reference path="transformers/es2017.ts" />
@@ -16,6 +15,7 @@
 namespace ts {
     function getModuleTransformer(moduleKind: ModuleKind): TransformerFactory<SourceFile> {
         switch (moduleKind) {
+            case ModuleKind.ESNext:
             case ModuleKind.ES2015:
                 return transformES2015Module;
             case ModuleKind.System:
@@ -44,10 +44,6 @@ namespace ts {
         const transformers: TransformerFactory<SourceFile>[] = [];
 
         addRange(transformers, customTransformers && customTransformers.before);
-
-        if(compilerOptions.defines || compilerOptions.emitReflection){
-            transformers.push(transformTypeScriptPlus);
-        }
 
         transformers.push(transformTypeScript);
 
@@ -170,7 +166,7 @@ namespace ts {
         };
 
         function transformRoot(node: T) {
-            return node && (!isSourceFile(node) || !isDeclarationFile(node)) ? transformation(node) : node;
+            return node && (!isSourceFile(node) || !node.isDeclarationFile) ? transformation(node) : node;
         }
 
         /**
@@ -243,7 +239,7 @@ namespace ts {
         function hoistVariableDeclaration(name: Identifier): void {
             Debug.assert(state > TransformationState.Uninitialized, "Cannot modify the lexical environment during initialization.");
             Debug.assert(state < TransformationState.Completed, "Cannot modify the lexical environment after transformation has completed.");
-            const decl = createVariableDeclaration(name);
+            const decl = setEmitFlags(createVariableDeclaration(name), EmitFlags.NoNestedSourceMaps);
             if (!lexicalEnvironmentVariableDeclarations) {
                 lexicalEnvironmentVariableDeclarations = [decl];
             }

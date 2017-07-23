@@ -362,7 +362,7 @@ namespace ts.formatting {
         sourceFile: SourceFileLike): TextChange[] {
 
         // formatting context is used by rules provider
-        const formattingContext = new FormattingContext(sourceFile, requestKind);
+        const formattingContext = new FormattingContext(sourceFile, requestKind, options);
         let previousRangeHasError: boolean;
         let previousRange: TextRangeWithKind;
         let previousParent: Node;
@@ -487,7 +487,7 @@ namespace ts.formatting {
                     // falls through
                 case SyntaxKind.PropertyDeclaration:
                 case SyntaxKind.Parameter:
-                    return (<Declaration>node).name.kind;
+                    return getNameOfDeclaration(<Declaration>node).kind;
             }
         }
 
@@ -599,7 +599,7 @@ namespace ts.formatting {
                 child => {
                     processChildNode(child, /*inheritedIndentation*/ Constants.Unknown, node, nodeDynamicIndentation, nodeStartLine, undecoratedNodeStartLine, /*isListItem*/ false);
                 },
-                (nodes: NodeArray<Node>) => {
+                nodes => {
                     processChildNodes(nodes, node, nodeStartLine, nodeDynamicIndentation);
                 });
 

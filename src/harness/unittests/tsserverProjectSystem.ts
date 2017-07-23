@@ -13,7 +13,8 @@ namespace ts.projectSystem {
             express: "express",
             jquery: "jquery",
             lodash: "lodash",
-            moment: "moment"
+            moment: "moment",
+            chroma: "chroma-js"
         })
     };
 
@@ -61,7 +62,6 @@ namespace ts.projectSystem {
             super(installTypingHost, globalTypingsCacheLocation, safeList.path, throttleLimit, log);
         }
 
-        safeFileList = safeList.path;
         protected postExecActions: PostExecAction[] = [];
 
         executePendingCommands() {
@@ -337,6 +337,7 @@ namespace ts.projectSystem {
             this.map[timeoutId] = cb.bind(/*this*/ undefined, ...args);
             return timeoutId;
         }
+
         unregister(id: any) {
             if (typeof id === "number") {
                 delete this.map[id];
@@ -352,10 +353,13 @@ namespace ts.projectSystem {
         }
 
         invoke() {
+            // Note: invoking a callback may result in new callbacks been queued,
+            // so do not clear the entire callback list regardless. Only remove the
+            // ones we have invoked.
             for (const key in this.map) {
                 this.map[key]();
+                delete this.map[key];
             }
-            this.map = [];
         }
     }
 
@@ -468,7 +472,7 @@ namespace ts.projectSystem {
         }
 
         createHash(s: string): string {
-            return s;
+            return Harness.LanguageService.mockHash(s);
         }
 
         triggerDirectoryWatcherCallback(directoryName: string, fileName: string): void {
@@ -2200,7 +2204,8 @@ namespace ts.projectSystem {
             projectService.closeClientFile(f1.path);
             projectService.checkNumberOfProjects({});
 
-            for (const f of [f2, f3]) {
+            for (const f of [f1, f2, f3]) {
+                // There shouldnt be any script info as we closed the file that resulted in creation of it
                 const scriptInfo = projectService.getScriptInfoForNormalizedPath(server.toNormalizedPath(f.path));
                 assert.equal(scriptInfo.containingProjects.length, 0, `expect 0 containing projects for '${f.path}'`);
             }
@@ -2230,7 +2235,7 @@ namespace ts.projectSystem {
 
             let lastEvent: server.ProjectLanguageServiceStateEvent;
             const session = createSession(host, /*typingsInstaller*/ undefined, e => {
-                if (e.eventName === server.ConfigFileDiagEvent || e.eventName === server.ContextEvent) {
+                if (e.eventName === server.ConfigFileDiagEvent || e.eventName === server.ContextEvent || e.eventName === server.ProjectInfoTelemetryEvent) {
                     return;
                 }
                 assert.equal(e.eventName, server.ProjectLanguageServiceStateEvent);
@@ -2280,7 +2285,7 @@ namespace ts.projectSystem {
                 filePath === f2.path ? server.maxProgramSizeForNonTsFiles + 1 : originalGetFileSize.call(host, filePath);
             let lastEvent: server.ProjectLanguageServiceStateEvent;
             const session = createSession(host, /*typingsInstaller*/ undefined, e => {
-                if (e.eventName === server.ConfigFileDiagEvent) {
+                if (e.eventName === server.ConfigFileDiagEvent || e.eventName === server.ProjectInfoTelemetryEvent) {
                     return;
                 }
                 assert.equal(e.eventName, server.ProjectLanguageServiceStateEvent);
@@ -3743,7 +3748,7 @@ namespace ts.projectSystem {
 
                 // run first step
                 host.runQueuedTimeoutCallbacks();
-                assert.equal(host.getOutput().length, 1, "expect 1 messages");
+                assert.equal(host.getOutput().length, 1, "expect 1 message");
                 const e1 = <protocol.Event>getMessage(0);
                 assert.equal(e1.event, "syntaxDiag");
                 host.clearOutput();
@@ -3765,11 +3770,12 @@ namespace ts.projectSystem {
 
                 // run first step
                 host.runQueuedTimeoutCallbacks();
-                assert.equal(host.getOutput().length, 1, "expect 1 messages");
+                assert.equal(host.getOutput().length, 1, "expect 1 message");
                 const e1 = <protocol.Event>getMessage(0);
                 assert.equal(e1.event, "syntaxDiag");
                 host.clearOutput();
 
+                // the semanticDiag message
                 host.runQueuedImmediateCallbacks();
                 assert.equal(host.getOutput().length, 2, "expect 2 messages");
                 const e2 = <protocol.Event>getMessage(0);
@@ -3787,7 +3793,7 @@ namespace ts.projectSystem {
                 assert.equal(host.getOutput().length, 0, "expect 0 messages");
                 // run first step
                 host.runQueuedTimeoutCallbacks();
-                assert.equal(host.getOutput().length, 1, "expect 1 messages");
+                assert.equal(host.getOutput().length, 1, "expect 1 message");
                 const e1 = <protocol.Event>getMessage(0);
                 assert.equal(e1.event, "syntaxDiag");
                 host.clearOutput();

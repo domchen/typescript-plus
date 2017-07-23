@@ -13,14 +13,8 @@ namespace ts.server {
         External
     }
 
-    function remove<T>(items: T[], item: T) {
-        const index = items.indexOf(item);
-        if (index >= 0) {
-            items.splice(index, 1);
-        }
-    }
-
-    function countEachFileTypes(infos: ScriptInfo[]): { js: number, jsx: number, ts: number, tsx: number, dts: number } {
+    /* @internal */
+    export function countEachFileTypes(infos: ScriptInfo[]): FileStats {
         const result = { js: 0, jsx: 0, ts: 0, tsx: 0, dts: 0 };
         for (const info of infos) {
             switch (info.scriptKind) {
@@ -112,6 +106,7 @@ namespace ts.server {
         private rootFiles: ScriptInfo[] = [];
         private rootFilesMap: FileMap<ScriptInfo> = createFileMap<ScriptInfo>();
         private program: ts.Program;
+        private externalFiles: SortedReadonlyArray<string>;
 
         private cachedUnresolvedImportsPerFile = new UnresolvedImportsMap();
         private lastCachedUnresolvedImportsList: SortedReadonlyArray<string>;
@@ -121,7 +116,7 @@ namespace ts.server {
 
         public languageServiceEnabled = true;
 
-        protected readonly lsHost: LSHost;
+        protected lsHost: LSHost;
 
         builder: Builder;
         /**
@@ -267,8 +262,8 @@ namespace ts.server {
         abstract getProjectRootPath(): string | undefined;
         abstract getTypeAcquisition(): TypeAcquisition;
 
-        getExternalFiles(): string[] {
-            return [];
+        getExternalFiles(): SortedReadonlyArray<string> {
+            return emptyArray as SortedReadonlyArray<string>;
         }
 
         getSourceFile(path: Path) {
@@ -302,9 +297,15 @@ namespace ts.server {
             this.rootFiles = undefined;
             this.rootFilesMap = undefined;
             this.program = undefined;
+            this.builder = undefined;
+            this.cachedUnresolvedImportsPerFile = undefined;
+            this.projectErrors = undefined;
+            this.lsHost.dispose();
+            this.lsHost = undefined;
 
             // signal language service to release source files acquired from document registry
             this.languageService.dispose();
+            this.languageService = undefined;
         }
 
         getCompilerOptions() {
@@ -552,7 +553,7 @@ namespace ts.server {
             // bump up the version if
             // - oldProgram is not set - this is a first time updateGraph is called
             // - newProgram is different from the old program and structure of the old program was not reused.
-            if (!oldProgram || (this.program !== oldProgram && !oldProgram.structureIsReused)) {
+            if (!oldProgram || (this.program !== oldProgram && !(oldProgram.structureIsReused & StructureIsReused.Completely))) {
                 hasChanges = true;
                 if (oldProgram) {
                     for (const f of oldProgram.getSourceFiles()) {
@@ -567,6 +568,24 @@ namespace ts.server {
                     }
                 }
             }
+
+            const oldExternalFiles = this.externalFiles || emptyArray as SortedReadonlyArray<string>;
+            this.externalFiles = this.getExternalFiles();
+            enumerateInsertsAndDeletes(this.externalFiles, oldExternalFiles,
+                // Ensure a ScriptInfo is created for new external files. This is performed indirectly
+                // by the LSHost for files in the program when the program is retrieved above but
+                // the program doesn't contain external files so this must be done explicitly.
+                inserted => {
+                    const scriptInfo = this.projectService.getOrCreateScriptInfo(inserted, /*openedByClient*/ false);
+                    scriptInfo.attachToProject(this);
+                },
+                removed => {
+                    const scriptInfoToDetach = this.projectService.getScriptInfo(removed);
+                    if (scriptInfoToDetach) {
+                        scriptInfoToDetach.detachFromProject(this);
+                    }
+                });
+
             return hasChanges;
         }
 
@@ -652,7 +671,7 @@ namespace ts.server {
 
                 const added: string[] = [];
                 const removed: string[] = [];
-                const updated: string[] = arrayFrom(updatedFileNames.keys());
+                const updated: string[] = updatedFileNames ? arrayFrom(updatedFileNames.keys()) : [];
 
                 forEachKey(currentFiles, id => {
                     if (!lastReportedFileNames.has(id)) {
@@ -732,11 +751,15 @@ namespace ts.server {
 
         // remove a root file from project
         protected removeRoot(info: ScriptInfo): void {
-            remove(this.rootFiles, info);
+            orderedRemoveItem(this.rootFiles, info);
             this.rootFilesMap.remove(info.path);
         }
     }
 
+    /**
+     * If a file is opened and no tsconfig (or jsconfig) is found,
+     * the file and its imports/references are put into an InferredProject.
+     */
     export class InferredProject extends Project {
 
         private static newName = (() => {
@@ -830,6 +853,11 @@ namespace ts.server {
         }
     }
 
+    /**
+     * If a file is opened, the server will look for a tsconfig (or jsconfig)
+     * and if successfull create a ConfiguredProject for it.
+     * Otherwise it will create an InferredProject.
+     */
     export class ConfiguredProject extends Project {
         private typeAcquisition: TypeAcquisition;
         private projectFileWatcher: FileWatcher;
@@ -872,6 +900,12 @@ namespace ts.server {
             // Search our peer node_modules, then any globally-specified probe paths
             // ../../.. to walk from X/node_modules/typescript/lib/tsserver.js to X/node_modules/
             const searchPaths = [combinePaths(host.getExecutingFilePath(), "../../.."), ...this.projectService.pluginProbeLocations];
+
+            if (this.projectService.allowLocalPluginLoads) {
+                const local = getDirectoryPath(this.canonicalConfigFilePath);
+                this.projectService.logger.info(`Local plugin loading enabled; adding ${local} to search paths`);
+                searchPaths.unshift(local);
+            }
 
             // Enable tsconfig-specified plugins
             if (options.plugins) {
@@ -947,19 +981,16 @@ namespace ts.server {
             return this.typeAcquisition;
         }
 
-        getExternalFiles(): string[] {
-            const items: string[] = [];
-            for (const plugin of this.plugins) {
-                if (typeof plugin.getExternalFiles === "function") {
-                    try {
-                        items.push(...plugin.getExternalFiles(this));
-                    }
-                    catch (e) {
-                        this.projectService.logger.info(`A plugin threw an exception in getExternalFiles: ${e}`);
-                    }
+        getExternalFiles(): SortedReadonlyArray<string> {
+            return toSortedReadonlyArray(flatMap(this.plugins, plugin => {
+                if (typeof plugin.getExternalFiles !== "function") return;
+                try {
+                    return plugin.getExternalFiles(this);
                 }
-            }
-            return items;
+                catch (e) {
+                    this.projectService.logger.info(`A plugin threw an exception in getExternalFiles: ${e}`);
+                }
+            }));
         }
 
         watchConfigFile(callback: (project: ConfiguredProject) => void) {
@@ -1018,6 +1049,7 @@ namespace ts.server {
 
             if (this.projectFileWatcher) {
                 this.projectFileWatcher.close();
+                this.projectFileWatcher = undefined;
             }
 
             if (this.typeRootsWatchers) {
@@ -1049,6 +1081,10 @@ namespace ts.server {
         }
     }
 
+    /**
+     * Project whose configuration is handled externally, such as in a '.csproj'.
+     * These are created only if a host explicitly calls `openExternalProject`.
+     */
     export class ExternalProject extends Project {
         private typeAcquisition: TypeAcquisition;
         constructor(public externalProjectName: string,

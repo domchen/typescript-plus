@@ -2,6 +2,7 @@
  * Declaration module describing the TypeScript Server protocol
  */
 namespace ts.server.protocol {
+
     export namespace CommandTypes {
         export type Brace = "brace";
         /* @internal */
@@ -95,6 +96,16 @@ namespace ts.server.protocol {
         /* @internal */
         export type GetCodeFixesFull = "getCodeFixes-full";
         export type GetSupportedCodeFixes = "getSupportedCodeFixes";
+
+        // NOTE: If updating this, be sure to also update `allCommandNames` in `harness/unittests/session.ts`.
+        export type GetApplicableRefactors = "getApplicableRefactors";
+        export type GetRefactorCodeActions = "getRefactorCodeActions";
+        /* @internal */
+        export type GetRefactorCodeActionsFull = "getRefactorCodeActions-full";
+
+        export type GetEditsForRefactor = "getEditsForRefactor";
+        /* @internal */
+        export type GetEditsForRefactorFull = "getEditsForRefactor-full";
     }
 
     /**
@@ -394,6 +405,100 @@ namespace ts.server.protocol {
         position?: number;
     }
 
+    export type FileLocationOrRangeRequestArgs = FileLocationRequestArgs | FileRangeRequestArgs;
+
+    /**
+     * Request refactorings at a given position or selection area.
+     */
+    export interface GetApplicableRefactorsRequest extends Request {
+        command: CommandTypes.GetApplicableRefactors;
+        arguments: GetApplicableRefactorsRequestArgs;
+    }
+    export type GetApplicableRefactorsRequestArgs = FileLocationOrRangeRequestArgs;
+
+    /**
+     * Response is a list of available refactorings.
+     * Each refactoring exposes one or more "Actions"; a user selects one action to invoke a refactoring
+     */
+    export interface GetApplicableRefactorsResponse extends Response {
+        body?: ApplicableRefactorInfo[];
+    }
+
+    /**
+     * A set of one or more available refactoring actions, grouped under a parent refactoring.
+     */
+    export interface ApplicableRefactorInfo {
+        /**
+         * The programmatic name of the refactoring
+         */
+        name: string;
+        /**
+         * A description of this refactoring category to show to the user.
+         * If the refactoring gets inlined (see below), this text will not be visible.
+         */
+        description: string;
+        /**
+         * Inlineable refactorings can have their actions hoisted out to the top level
+         * of a context menu. Non-inlineanable refactorings should always be shown inside
+         * their parent grouping.
+         *
+         * If not specified, this value is assumed to be 'true'
+         */
+        inlineable?: boolean;
+
+        actions: RefactorActionInfo[];
+    }
+
+    /**
+     * Represents a single refactoring action - for example, the "Extract Method..." refactor might
+     * offer several actions, each corresponding to a surround class or closure to extract into.
+     */
+    export type RefactorActionInfo = {
+        /**
+         * The programmatic name of the refactoring action
+         */
+        name: string;
+
+        /**
+         * A description of this refactoring action to show to the user.
+         * If the parent refactoring is inlined away, this will be the only text shown,
+         * so this description should make sense by itself if the parent is inlineable=true
+         */
+        description: string;
+    };
+
+    export interface GetEditsForRefactorRequest extends Request {
+        command: CommandTypes.GetEditsForRefactor;
+        arguments: GetEditsForRefactorRequestArgs;
+    }
+
+    /**
+     * Request the edits that a particular refactoring action produces.
+     * Callers must specify the name of the refactor and the name of the action.
+     */
+    export type GetEditsForRefactorRequestArgs = FileLocationOrRangeRequestArgs & {
+        /* The 'name' property from the refactoring that offered this action */
+        refactor: string;
+        /* The 'name' property from the refactoring action */
+        action: string;
+    };
+
+
+    export interface GetEditsForRefactorResponse extends Response {
+        body?: RefactorEditInfo;
+    }
+
+    export type RefactorEditInfo = {
+        edits: FileCodeEdits[];
+
+        /**
+         * An optional location where the editor should start a rename operation once
+         * the refactoring edits have been applied
+         */
+        renameLocation?: Location;
+        renameFilename?: string;
+    };
+
     /**
      * Request for the available codefixes at a specific position.
      */
@@ -402,10 +507,7 @@ namespace ts.server.protocol {
         arguments: CodeFixRequestArgs;
     }
 
-    /**
-     * Instances of this interface specify errorcodes on a specific location in a sourcefile.
-     */
-    export interface CodeFixRequestArgs extends FileRequestArgs {
+    export interface FileRangeRequestArgs extends FileRequestArgs {
         /**
          * The line number for the request (1-based).
          */
@@ -437,7 +539,12 @@ namespace ts.server.protocol {
          */
         /* @internal */
         endPosition?: number;
+    }
 
+    /**
+     * Instances of this interface specify errorcodes on a specific location in a sourcefile.
+     */
+    export interface CodeFixRequestArgs extends FileRangeRequestArgs {
         /**
          * Errorcodes we want to get the fixes for.
          */
@@ -2267,6 +2374,7 @@ namespace ts.server.protocol {
         insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces?: boolean;
         insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces?: boolean;
+        insertSpaceAfterTypeAssertion?: boolean;
         insertSpaceBeforeFunctionParenthesis?: boolean;
         placeOpenBraceOnNewLineForFunctions?: boolean;
         placeOpenBraceOnNewLineForControlBlocks?: boolean;

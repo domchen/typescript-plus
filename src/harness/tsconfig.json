@@ -38,8 +38,6 @@
         "../compiler/transformers/module/system.ts",
         "../compiler/transformers/module/es2015.ts",
         "../compiler/transformer.ts",
-        "../compiler/transformers/tsPlus.ts",
-        "../compiler/sorting.ts",
         "../compiler/comments.ts",
         "../compiler/sourcemap.ts",
         "../compiler/declarationEmitter.ts",
@@ -82,7 +80,7 @@
         "../services/codefixes/fixConstructorForDerivedNeedSuperCall.ts",
         "../services/codefixes/helpers.ts",
         "../services/codefixes/importFixes.ts",
-        "../services/codefixes/unusedIdentifierFixes.ts",
+        "../services/codefixes/fixUnusedIdentifier.ts",
         "../services/codefixes/disableJsDiagnostics.ts",
 
         "harness.ts",
@@ -129,6 +127,7 @@
         "./unittests/printer.ts",
         "./unittests/transform.ts",
         "./unittests/customTransforms.ts",
-        "./unittests/textChanges.ts"
+        "./unittests/textChanges.ts",
+        "./unittests/telemetry.ts"
     ]
 }

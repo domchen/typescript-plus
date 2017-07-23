@@ -489,6 +489,15 @@ namespace Harness.LanguageService {
         getCodeFixesAtPosition(): ts.CodeAction[] {
             throw new Error("Not supported on the shim.");
         }
+        getCodeFixDiagnostics(): ts.Diagnostic[] {
+            throw new Error("Not supported on the shim.");
+        }
+        getEditsForRefactor(): ts.RefactorEditInfo {
+            throw new Error("Not supported on the shim.");
+        }
+        getApplicableRefactors(): ts.ApplicableRefactorInfo[] {
+            throw new Error("Not supported on the shim.");
+        }
         getEmitOutput(fileName: string): ts.EmitOutput {
             return unwrapJSONCallResult(this.shim.getEmitOutput(fileName));
         }
@@ -722,7 +731,7 @@ namespace Harness.LanguageService {
         }
 
         createHash(s: string) {
-            return s;
+            return mockHash(s);
         }
 
         require(_initialDir: string, _moduleName: string): ts.server.RequireResult {
@@ -846,5 +855,9 @@ namespace Harness.LanguageService {
         getLanguageService(): ts.LanguageService { return this.client; }
         getClassifier(): ts.Classifier { throw new Error("getClassifier is not available using the server interface."); }
         getPreProcessedFileInfo(): ts.PreProcessedFileInfo { throw new Error("getPreProcessedFileInfo is not available using the server interface."); }
+    }
+
+    export function mockHash(s: string): string {
+        return `hash-${s}`;
     }
 }

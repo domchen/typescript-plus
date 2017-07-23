@@ -271,7 +271,6 @@ namespace ts {
 
         const compilerOptions = context.getCompilerOptions();
         const resolver = context.getEmitResolver();
-        const typeChecker = compilerOptions.accessorOptimization ? context.getEmitHost().getTypeChecker() : null;
         const previousOnSubstituteNode = context.onSubstituteNode;
         const previousOnEmitNode = context.onEmitNode;
         context.onEmitNode = onEmitNode;
@@ -296,7 +295,7 @@ namespace ts {
         return transformSourceFile;
 
         function transformSourceFile(node: SourceFile) {
-            if (isDeclarationFile(node)) {
+            if (node.isDeclarationFile) {
                 return node;
             }
 
@@ -340,11 +339,64 @@ namespace ts {
                 && !(<ReturnStatement>node).expression;
         }
 
+        function isClassLikeVariableStatement(node: Node) {
+            if (!isVariableStatement(node)) return false;
+            const variable = singleOrUndefined((<VariableStatement>node).declarationList.declarations);
+            return variable
+                && variable.initializer
+                && isIdentifier(variable.name)
+                && (isClassLike(variable.initializer)
+                    || (isAssignmentExpression(variable.initializer)
+                        && isIdentifier(variable.initializer.left)
+                        && isClassLike(variable.initializer.right)));
+        }
+
+        function isTypeScriptClassWrapper(node: Node) {
+            const call = tryCast(node, isCallExpression);
+            if (!call || isParseTreeNode(call) ||
+                some(call.typeArguments) ||
+                some(call.arguments)) {
+                return false;
+            }
+
+            const func = tryCast(skipOuterExpressions(call.expression), isFunctionExpression);
+            if (!func || isParseTreeNode(func) ||
+                some(func.typeParameters) ||
+                some(func.parameters) ||
+                func.type ||
+                !func.body) {
+                return false;
+            }
+
+            const statements = func.body.statements;
+            if (statements.length < 2) {
+                return false;
+            }
+
+            const firstStatement = statements[0];
+            if (isParseTreeNode(firstStatement) ||
+                !isClassLike(firstStatement) &&
+                !isClassLikeVariableStatement(firstStatement)) {
+                return false;
+            }
+
+            const lastStatement = elementAt(statements, -1);
+            const returnStatement = tryCast(isVariableStatement(lastStatement) ? elementAt(statements, -2) : lastStatement, isReturnStatement);
+            if (!returnStatement ||
+                !returnStatement.expression ||
+                !isIdentifier(skipOuterExpressions(returnStatement.expression))) {
+                return false;
+            }
+
+            return true;
+        }
+
         function shouldVisitNode(node: Node): boolean {
             return (node.transformFlags & TransformFlags.ContainsES2015) !== 0
                 || convertedLoopState !== undefined
                 || (hierarchyFacts & HierarchyFacts.ConstructorWithCapturedSuper && isStatement(node))
-                || (isIterationStatement(node, /*lookInLabeledStatements*/ false) && shouldConvertIterationStatementBody(node));
+                || (isIterationStatement(node, /*lookInLabeledStatements*/ false) && shouldConvertIterationStatementBody(node))
+                || isTypeScriptClassWrapper(node);
         }
 
         function visitor(node: Node): VisitResult<Node> {
@@ -814,7 +866,7 @@ namespace ts {
 
             // Create a synthetic text range for the return statement.
             const closingBraceLocation = createTokenRange(skipTrivia(currentText, node.members.end), SyntaxKind.CloseBraceToken);
-            const localName = getLocalName(node);
+            const localName = getInternalName(node);
 
             // The following partially-emitted expression exists purely to align our sourcemap
             // emit with the original emitter.
@@ -871,7 +923,7 @@ namespace ts {
                 /*decorators*/ undefined,
                 /*modifiers*/ undefined,
                 /*asteriskToken*/ undefined,
-                getDeclarationName(node),
+                getInternalName(node),
                 /*typeParameters*/ undefined,
                 transformConstructorParameters(constructor, hasSynthesizedSuper),
                 /*type*/ undefined,
@@ -1533,13 +1585,7 @@ namespace ts {
                         break;
 
                     case SyntaxKind.MethodDeclaration:
-                        const method = <MethodDeclaration>member;
-                        if (method.isJumpTarget || (method.original && (<MethodDeclaration>method.original).isJumpTarget)) {
-                            transformJumpTarget(statements, getClassMemberPrefix(node, member), <MethodDeclaration>member);
-                        }
-                        else {
-                            statements.push(transformClassMethodDeclarationToStatement(getClassMemberPrefix(node, member), <MethodDeclaration>member, node));
-                        }
+                        statements.push(transformClassMethodDeclarationToStatement(getClassMemberPrefix(node, member), <MethodDeclaration>member, node));
                         break;
 
                     case SyntaxKind.GetAccessor:
@@ -1560,44 +1606,6 @@ namespace ts {
                         break;
                 }
             }
-        }
-
-        function transformJumpTarget(statements: Statement[], receiver: LeftHandSideExpression, member: MethodDeclaration): void {
-            const memberName = createMemberAccessForPropertyName(receiver, visitNode(member.name, visitor, isPropertyName), /*location*/ member.name);
-            statements.push(createStatement(
-                createAssignment(memberName, <Identifier>member.name),
-            ));
-
-            const sourceMapRange = getSourceMapRange(member);
-            const memberFunction = transformMethodToFunctionDeclaration(member, /*location*/ member, /*name*/ <Identifier>member.name);
-            setEmitFlags(memberFunction, EmitFlags.NoComments);
-            setSourceMapRange(memberFunction, sourceMapRange);
-            statements.push(memberFunction);
-        }
-
-        function transformMethodToFunctionDeclaration(node: FunctionLikeDeclaration, location: TextRange, name: Identifier): FunctionDeclaration {
-            const savedConvertedLoopState = convertedLoopState;
-            convertedLoopState = undefined;
-            const ancestorFacts = enterSubtree(HierarchyFacts.FunctionExcludes, HierarchyFacts.FunctionIncludes);
-            const parameters = visitParameterList(node.parameters, visitor, context);
-            const body = transformFunctionBody(node);
-            exitSubtree(ancestorFacts, HierarchyFacts.PropagateNewTargetMask, HierarchyFacts.None);
-            convertedLoopState = savedConvertedLoopState;
-            return setOriginalNode(
-                setTextRange(
-                    createFunctionDeclaration(
-                        /*decorators*/ undefined,
-                        /*modifiers*/ undefined,
-                        node.asteriskToken,
-                        name,
-                        /*typeParameters*/ undefined,
-                        parameters,
-                        /*type*/ undefined,
-                        body),
-                    location
-                ),
-                /*original*/ node
-            );
         }
 
         /**
@@ -1680,15 +1688,19 @@ namespace ts {
 
             const properties: ObjectLiteralElementLike[] = [];
             if (getAccessor) {
-                const getterExpression = createAccessorExpression(getAccessor, firstAccessor, receiver, container);
-                const getter = createPropertyAssignment("get", getterExpression);
+                const getterFunction = transformFunctionLikeToExpression(getAccessor, /*location*/ undefined, /*name*/ undefined, container);
+                setSourceMapRange(getterFunction, getSourceMapRange(getAccessor));
+                setEmitFlags(getterFunction, EmitFlags.NoLeadingComments);
+                const getter = createPropertyAssignment("get", getterFunction);
                 setCommentRange(getter, getCommentRange(getAccessor));
                 properties.push(getter);
             }
 
             if (setAccessor) {
-                const setterExpression = createAccessorExpression(setAccessor, firstAccessor, receiver, container);
-                const setter = createPropertyAssignment("set", setterExpression);
+                const setterFunction = transformFunctionLikeToExpression(setAccessor, /*location*/ undefined, /*name*/ undefined, container);
+                setSourceMapRange(setterFunction, getSourceMapRange(setAccessor));
+                setEmitFlags(setterFunction, EmitFlags.NoLeadingComments);
+                const setter = createPropertyAssignment("set", setterFunction);
                 setCommentRange(setter, getCommentRange(setAccessor));
                 properties.push(setter);
             }
@@ -1713,78 +1725,6 @@ namespace ts {
 
             exitSubtree(ancestorFacts, HierarchyFacts.PropagateNewTargetMask, hierarchyFacts & HierarchyFacts.PropagateNewTargetMask ? HierarchyFacts.NewTarget : HierarchyFacts.None);
             return call;
-        }
-
-        /**
-         * If the accessor method contains only one call to another method, use that method to define the accessor directly.
-         */
-        function createAccessorExpression(accessor: AccessorDeclaration, firstAccessor: AccessorDeclaration, receiver: LeftHandSideExpression, container: Node): Expression {
-            let expression: Expression;
-            let method = compilerOptions.accessorOptimization ? getJumpTargetOfAccessor(accessor) : null;
-            if (method) {
-                const methodName = <Identifier>getMutableClone(method.name);
-                setEmitFlags(methodName, EmitFlags.NoComments | EmitFlags.NoTrailingSourceMap);
-                setSourceMapRange(methodName, method.name);
-                if (firstAccessor.pos > method.pos) { // the target method has been already emitted.
-                    const target = getMutableClone(receiver);
-                    setEmitFlags(target, EmitFlags.NoComments | EmitFlags.NoTrailingSourceMap);
-                    setSourceMapRange(target, firstAccessor.name);
-                    expression = createPropertyAccess(target, methodName);
-                }
-                else {
-                    expression = methodName;
-                    method.isJumpTarget = true;
-                }
-            }
-            else {
-                expression = transformFunctionLikeToExpression(accessor, /*location*/ undefined, /*name*/ undefined, container);
-            }
-            setSourceMapRange(expression, getSourceMapRange(accessor));
-            setEmitFlags(expression, EmitFlags.NoLeadingComments);
-            return expression;
-        }
-
-        function getJumpTargetOfAccessor(accessor: AccessorDeclaration): MethodDeclaration {
-            if (accessor.body.statements.length != 1) {
-                return null;
-            }
-            let statement = accessor.body.statements[0];
-            if (statement.kind !== SyntaxKind.ExpressionStatement &&
-                statement.kind !== SyntaxKind.ReturnStatement) {
-                return null;
-            }
-            let expression = (<ReturnStatement>statement).expression;
-            if (expression.kind !== SyntaxKind.CallExpression) {
-                return null;
-            }
-            let callExpression = <CallExpression>expression;
-            if (accessor.kind === SyntaxKind.SetAccessor) {
-                if (callExpression.arguments.length != 1) {
-                    return null;
-                }
-                let argument = callExpression.arguments[0];
-                if (argument.kind !== SyntaxKind.Identifier) {
-                    return null;
-                }
-            }
-            else {
-                if (callExpression.arguments.length != 0) {
-                    return null;
-                }
-            }
-
-            if (callExpression.expression.kind !== SyntaxKind.PropertyAccessExpression) {
-                return null;
-            }
-            let propertyExpression = <PropertyAccessExpression>callExpression.expression;
-            if (propertyExpression.expression.kind !== SyntaxKind.ThisKeyword) {
-                return null;
-            }
-            let symbol = typeChecker.getSymbolAtLocation(propertyExpression.name);
-            if (!symbol) {
-                return;
-            }
-            return <MethodDeclaration>getDeclarationOfKind(symbol, SyntaxKind.MethodDeclaration);
         }
 
         /**
@@ -2122,13 +2062,14 @@ namespace ts {
                         }
                         else {
                             assignment = createBinary(<Identifier>decl.name, SyntaxKind.EqualsToken, visitNode(decl.initializer, visitor, isExpression));
+                            setTextRange(assignment, decl);
                         }
 
                         assignments = append(assignments, assignment);
                     }
                 }
                 if (assignments) {
-                    updated = setTextRange(createStatement(reduceLeft(assignments, (acc, v) => createBinary(v, SyntaxKind.CommaToken, acc))), node);
+                    updated = setTextRange(createStatement(inlineExpressions(assignments)), node);
                 }
                 else {
                     // none of declarations has initializer - the entire variable statement can be deleted
@@ -2154,9 +2095,9 @@ namespace ts {
                     enableSubstitutionsForBlockScopedBindings();
                 }
 
-                const declarations = flatten(map(node.declarations, node.flags & NodeFlags.Let
+                const declarations = flatMap(node.declarations, node.flags & NodeFlags.Let
                     ? visitVariableDeclarationInLetDeclarationList
-                    : visitVariableDeclaration));
+                    : visitVariableDeclaration);
 
                 const declarationList = createVariableDeclarationList(declarations);
                 setOriginalNode(declarationList, node);
@@ -3293,7 +3234,20 @@ namespace ts {
             const savedConvertedLoopState = convertedLoopState;
             convertedLoopState = undefined;
             const ancestorFacts = enterSubtree(HierarchyFacts.FunctionExcludes, HierarchyFacts.FunctionIncludes);
-            const updated = visitEachChild(node, visitor, context);
+            let updated: AccessorDeclaration;
+            if (node.transformFlags & TransformFlags.ContainsCapturedLexicalThis) {
+                const parameters = visitParameterList(node.parameters, visitor, context);
+                const body = transformFunctionBody(node);
+                if (node.kind === SyntaxKind.GetAccessor) {
+                    updated = updateGetAccessor(node, node.decorators, node.modifiers, node.name, parameters, node.type, body);
+                }
+                else {
+                    updated = updateSetAccessor(node, node.decorators, node.modifiers, node.name, parameters, body);
+                }
+            }
+            else {
+                updated = visitEachChild(node, visitor, context);
+            }
             exitSubtree(ancestorFacts, HierarchyFacts.PropagateNewTargetMask, HierarchyFacts.None);
             convertedLoopState = savedConvertedLoopState;
             return updated;
@@ -3350,6 +3304,10 @@ namespace ts {
          * @param node a CallExpression.
          */
         function visitCallExpression(node: CallExpression) {
+            if (isTypeScriptClassWrapper(node)) {
+                return visitTypeScriptClassWrapper(node);
+            }
+
             if (node.transformFlags & TransformFlags.ES2015) {
                 return visitCallExpressionWithPotentialCapturedThisAssignment(node, /*assignToCapturedThis*/ true);
             }
@@ -3358,6 +3316,154 @@ namespace ts {
                 visitNode(node.expression, callExpressionVisitor, isExpression),
                 /*typeArguments*/ undefined,
                 visitNodes(node.arguments, visitor, isExpression)
+            );
+        }
+
+        function visitTypeScriptClassWrapper(node: CallExpression) {
+            // This is a call to a class wrapper function (an IIFE) created by the 'ts' transformer.
+            // The wrapper has a form similar to:
+            //
+            //  (function() {
+            //      class C { // 1
+            //      }
+            //      C.x = 1; // 2
+            //      return C;
+            //  }())
+            //
+            // When we transform the class, we end up with something like this:
+            //
+            //  (function () {
+            //      var C = (function () { // 3
+            //          function C() {
+            //          }
+            //          return C; // 4
+            //      }());
+            //      C.x = 1;
+            //      return C;
+            //  }())
+            //
+            // We want to simplify the two nested IIFEs to end up with something like this:
+            //
+            //  (function () {
+            //      function C() {
+            //      }
+            //      C.x = 1;
+            //      return C;
+            //  }())
+
+            // We skip any outer expressions in a number of places to get to the innermost
+            // expression, but we will restore them later to preserve comments and source maps.
+            const body = cast(skipOuterExpressions(node.expression), isFunctionExpression).body;
+
+            // The class statements are the statements generated by visiting the first statement of the
+            // body (1), while all other statements are added to remainingStatements (2)
+            const classStatements = visitNodes(body.statements, visitor, isStatement, 0, 1);
+            const remainingStatements = visitNodes(body.statements, visitor, isStatement, 1, body.statements.length - 1);
+            const varStatement = cast(firstOrUndefined(classStatements), isVariableStatement);
+
+            // We know there is only one variable declaration here as we verified this in an
+            // earlier call to isTypeScriptClassWrapper
+            const variable = varStatement.declarationList.declarations[0];
+            const initializer = skipOuterExpressions(variable.initializer);
+
+            // Under certain conditions, the 'ts' transformer may introduce a class alias, which
+            // we see as an assignment, for example:
+            //
+            //  (function () {
+            //      var C = C_1 = (function () {
+            //          function C() {
+            //          }
+            //          C.x = function () { return C_1; }
+            //          return C;
+            //      }());
+            //      C = C_1 = __decorate([dec], C);
+            //      return C;
+            //      var C_1;
+            //  }())
+            //
+            const aliasAssignment = tryCast(initializer, isAssignmentExpression);
+
+            // The underlying call (3) is another IIFE that may contain a '_super' argument.
+            const call = cast(aliasAssignment ? skipOuterExpressions(aliasAssignment.right) : initializer, isCallExpression);
+            const func = cast(skipOuterExpressions(call.expression), isFunctionExpression);
+
+            const funcStatements = func.body.statements;
+            let classBodyStart = 0;
+            let classBodyEnd = -1;
+
+            const statements: Statement[] = [];
+            if (aliasAssignment) {
+                // If we have a class alias assignment, we need to move it to the down-level constructor
+                // function we generated for the class.
+                const extendsCall = tryCast(funcStatements[classBodyStart], isExpressionStatement);
+                if (extendsCall) {
+                    statements.push(extendsCall);
+                    classBodyStart++;
+                }
+
+                // The next statement is the function declaration.
+                statements.push(funcStatements[classBodyStart]);
+                classBodyStart++;
+
+                // Add the class alias following the declaration.
+                statements.push(
+                    createStatement(
+                        createAssignment(
+                            aliasAssignment.left,
+                            cast(variable.name, isIdentifier)
+                        )
+                    )
+                );
+            }
+
+            // Find the trailing 'return' statement (4)
+            while (!isReturnStatement(elementAt(funcStatements, classBodyEnd))) {
+                classBodyEnd--;
+            }
+
+            // When we extract the statements of the inner IIFE, we exclude the 'return' statement (4)
+            // as we already have one that has been introduced by the 'ts' transformer.
+            addRange(statements, funcStatements, classBodyStart, classBodyEnd);
+
+            if (classBodyEnd < -1) {
+                // If there were any hoisted declarations following the return statement, we should
+                // append them.
+                addRange(statements, funcStatements, classBodyEnd + 1);
+            }
+
+            // Add the remaining statements of the outer wrapper.
+            addRange(statements, remainingStatements);
+
+            // The 'es2015' class transform may add an end-of-declaration marker. If so we will add it
+            // after the remaining statements from the 'ts' transformer.
+            addRange(statements, classStatements, /*start*/ 1);
+
+            // Recreate any outer parentheses or partially-emitted expressions to preserve source map
+            // and comment locations.
+            return recreateOuterExpressions(node.expression,
+                recreateOuterExpressions(variable.initializer,
+                    recreateOuterExpressions(aliasAssignment && aliasAssignment.right,
+                        updateCall(call,
+                            recreateOuterExpressions(call.expression,
+                                updateFunctionExpression(
+                                    func,
+                                    /*modifiers*/ undefined,
+                                    /*asteriskToken*/ undefined,
+                                    /*name*/ undefined,
+                                    /*typeParameters*/ undefined,
+                                    func.parameters,
+                                    /*type*/ undefined,
+                                    updateBlock(
+                                        func.body,
+                                        statements
+                                    )
+                                )
+                            ),
+                            /*typeArguments*/ undefined,
+                            call.arguments
+                        )
+                    )
+                )
             );
         }
 
@@ -3495,7 +3601,7 @@ namespace ts {
             else {
                 if (segments.length === 1) {
                     const firstElement = elements[0];
-                    return needsUniqueCopy && isSpreadExpression(firstElement) && firstElement.expression.kind !== SyntaxKind.ArrayLiteralExpression
+                    return needsUniqueCopy && isSpreadElement(firstElement) && firstElement.expression.kind !== SyntaxKind.ArrayLiteralExpression
                         ? createArraySlice(segments[0])
                         : segments[0];
                 }
@@ -3506,7 +3612,7 @@ namespace ts {
         }
 
         function partitionSpread(node: Expression) {
-            return isSpreadExpression(node)
+            return isSpreadElement(node)
                 ? visitSpanOfSpreads
                 : visitSpanOfNonSpreads;
         }
@@ -3825,7 +3931,7 @@ namespace ts {
         function substituteIdentifier(node: Identifier) {
             // Only substitute the identifier if we have enabled substitutions for block-scoped
             // bindings.
-            if (enabledSubstitutions & ES2015SubstitutionFlags.BlockScopedBindings) {
+            if (enabledSubstitutions & ES2015SubstitutionFlags.BlockScopedBindings && !isInternalName(node)) {
                 const original = getParseTreeNode(node, isIdentifier);
                 if (original && isNameOfDeclarationWithCollidingName(original)) {
                     return setTextRange(getGeneratedNameForNode(original), node);
@@ -3848,7 +3954,7 @@ namespace ts {
                 case SyntaxKind.ClassDeclaration:
                 case SyntaxKind.EnumDeclaration:
                 case SyntaxKind.VariableDeclaration:
-                    return (<Declaration>parent).name === node
+                    return (<NamedDeclaration>parent).name === node
                         && resolver.isDeclarationWithCollidingName(<Declaration>parent);
             }
 
@@ -3878,14 +3984,38 @@ namespace ts {
          * @param node An Identifier node.
          */
         function substituteExpressionIdentifier(node: Identifier): Identifier {
-            if (enabledSubstitutions & ES2015SubstitutionFlags.BlockScopedBindings) {
+            if (enabledSubstitutions & ES2015SubstitutionFlags.BlockScopedBindings && !isInternalName(node)) {
                 const declaration = resolver.getReferencedDeclarationWithCollidingName(node);
-                if (declaration) {
-                    return setTextRange(getGeneratedNameForNode(declaration.name), node);
+                if (declaration && !(isClassLike(declaration) && isPartOfClassBody(declaration, node))) {
+                    return setTextRange(getGeneratedNameForNode(getNameOfDeclaration(declaration)), node);
                 }
             }
 
             return node;
+        }
+
+        function isPartOfClassBody(declaration: ClassLikeDeclaration, node: Identifier) {
+            let currentNode = getParseTreeNode(node);
+            if (!currentNode || currentNode === declaration || currentNode.end <= declaration.pos || currentNode.pos >= declaration.end) {
+                // if the node has no correlation to a parse tree node, its definitely not
+                // part of the body.
+                // if the node is outside of the document range of the declaration, its
+                // definitely not part of the body.
+                return false;
+            }
+            const blockScope = getEnclosingBlockScopeContainer(declaration);
+            while (currentNode) {
+                if (currentNode === blockScope || currentNode === declaration) {
+                    // if we are in the enclosing block scope of the declaration, we are definitely
+                    // not inside the class body.
+                    return false;
+                }
+                if (isClassElement(currentNode) && currentNode.parent === declaration) {
+                    return true;
+                }
+                currentNode = currentNode.parent;
+            }
+            return false;
         }
 
         /**
@@ -3902,8 +4032,9 @@ namespace ts {
         }
 
         function getClassMemberPrefix(node: ClassExpression | ClassDeclaration, member: ClassElement) {
-            const expression = getLocalName(node);
-            return hasModifier(member, ModifierFlags.Static) ? expression : createPropertyAccess(expression, "prototype");
+            return hasModifier(member, ModifierFlags.Static)
+                ? getInternalName(node)
+                : createPropertyAccess(getInternalName(node), "prototype");
         }
 
         function hasSynthesizedDefaultSuperCall(constructor: ConstructorDeclaration, hasExtendsClause: boolean) {
