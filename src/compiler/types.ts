@@ -678,6 +678,10 @@ namespace ts {
         name: BindingName;                  // Declared variable name
         type?: TypeNode;                    // Optional type annotation
         initializer?: Expression;           // Optional initializer
+        /* @internal */
+        callerList?: string[];
+        /* @internal */
+        delayInitializerList?: Expression[];
     }
 
     export interface VariableDeclarationList extends Node {
@@ -719,6 +723,10 @@ namespace ts {
         name: PropertyName;
         type?: TypeNode;
         initializer?: Expression;           // Optional initializer
+        /* @internal */
+        callerList?: string[];
+        /* @internal */
+        delayInitializerList?: Expression[];
     }
 
     export interface ObjectLiteralElement extends NamedDeclaration {
@@ -834,6 +842,7 @@ namespace ts {
         kind: SyntaxKind.MethodDeclaration;
         name: PropertyName;
         body?: FunctionBody;
+        isJumpTarget?: boolean;
     }
 
     export interface ConstructorDeclaration extends FunctionLikeDeclaration, ClassElement {
@@ -1661,6 +1670,7 @@ namespace ts {
         kind: SyntaxKind.Block;
         statements: NodeArray<Statement>;
         /*@internal*/ multiLine?: boolean;
+        /*@internal*/ visitedBySorting?: boolean;
     }
 
     export interface VariableStatement extends Statement {
@@ -1806,6 +1816,7 @@ namespace ts {
         typeParameters?: NodeArray<TypeParameterDeclaration>;
         heritageClauses?: NodeArray<HeritageClause>;
         members: NodeArray<ClassElement>;
+        typeNames?: string[];
     }
 
     export interface ClassDeclaration extends ClassLikeDeclaration, DeclarationStatement {
@@ -3559,7 +3570,7 @@ namespace ts {
         typeRoots?: string[];
         /*@internal*/ version?: boolean;
         /*@internal*/ watch?: boolean;
-        
+
         /* extra options */
         accessorOptimization?: boolean;
         defines?: MapLike<any>;
@@ -4143,7 +4154,9 @@ namespace ts {
 
         /* @internal */
         isSourceFileFromExternalLibrary(file: SourceFile): boolean;
-
+        /* @internal */
+        getTypeChecker(): TypeChecker;
+        
         getCommonSourceDirectory(): string;
         getCanonicalFileName(fileName: string): string;
         getNewLine(): string;

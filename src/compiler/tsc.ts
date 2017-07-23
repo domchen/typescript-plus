@@ -414,7 +414,23 @@ namespace ts {
         }
 
         const program = createProgram(fileNames, compilerOptions, compilerHost);
-        const exitStatus = compileProgram();
+        
+        let exitStatus: number = ExitStatus.Success;
+        if (compilerOptions.reorderFiles) {
+            let sortResult = ts.reorderSourceFiles(program);
+            if (sortResult.circularReferences.length > 0) {
+                let errorText: string = "";
+                errorText += "error: Find circular dependencies when reordering file :" + ts.sys.newLine;
+                errorText += "    at " + sortResult.circularReferences.join(ts.sys.newLine + "    at ") + ts.sys.newLine + "    at ...";
+                sys.write(errorText + sys.newLine);
+                exitStatus = ExitStatus.DiagnosticsPresent_OutputsGenerated;
+            }
+        }
+        const exitCode = compileProgram();
+        if (exitCode != ExitStatus.Success) {
+            exitStatus = exitCode;
+        }
+
 
         if (compilerOptions.listFiles) {
             forEach(program.getSourceFiles(), file => {
