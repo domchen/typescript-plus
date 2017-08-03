@@ -8,7 +8,7 @@
 
 TypeScript is a language for application-scale JavaScript, For more information, please visit : [TypeScript](https://github.com/Microsoft/TypeScript).
 
-The typescript-plus compiler provides extra features to the original typescript compiler, such as accessors optimization, class reflection, conditional compilation and the most useful one : automatically reordering the source files by analyzing their dependencies in code. 
+The typescript-plus compiler provides extra features to the original typescript compiler, such as accessors optimization, class reflection, conditional compilation and the most useful one : automatically reordering the source files by analyzing their dependencies in code. This compiler is integrated in the [Egret Engine](https://github.com/egret-labs/egret-core), and has been heavily used by it.
 
 This project will try to stay up to date with the new release of the original TypeScript project.
 
