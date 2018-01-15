@@ -8,7 +8,7 @@
 
 TypeScript is a language for application-scale JavaScript, For more information, please visit : [TypeScript](https://github.com/Microsoft/TypeScript).
 
-The typescript-plus compiler provides extra features to the original typescript compiler, such as accessors optimization, class reflection, conditional compilation and the most useful one : automatically reordering the source files by analyzing their dependencies in code. This compiler is integrated in the [Egret Engine](https://github.com/egret-labs/egret-core), and has been heavily used by it.
+The typescript-plus compiler provides extra features to the original typescript compiler, such as accessors optimization, class reflection, conditional compilation and the most useful one: automatically reordering the source files by analyzing their dependencies in code. This compiler is integrated into the [Egret Engine](https://github.com/egret-labs/egret-core) and has been heavily used by it.
 
 This project will try to stay up to date with the new release of the original TypeScript project.
 
@@ -17,7 +17,7 @@ Current TypeScript Version: 2.4.2
 
 ## Installing
 
-First make sure you have installed the latest version of [node.js](http://nodejs.org/)
+First, make sure you have installed the latest version of [node.js](http://nodejs.org/)
 (You may need to restart your computer after this step).
 
 For use as a command line app:
@@ -50,10 +50,10 @@ To learn how to use the original typescript compiler, please visit the following
 | Option               | Type    | Default| Description                                        |
 |:-------------------- |:-------:|:------:| :------------------------------------------------- |
 | accessorOptimization | boolean | false  | If an accessor contains only one call to another method, use that method to define the accessor directly.|
-| emitReflection       | boolean | false  | Emit the reflection data of class.                 |
+| emitReflection       | boolean | false  | Emit the reflection data of the class.                 |
 | noEmitJs             | boolean | false  | Do not generate javascript files.                  |
 | reorderFiles         | boolean | false  | Automatically reordering the source files by dependencies.|
-| defines              | Object  |        | Replace the global variables with the constants defined in the "defines"" object. |
+| defines              | Object  |        | Replace the global variables with the constants defined in the "defines" object. |
 
 
 
@@ -110,7 +110,7 @@ class Student {
     }
 }
 ```
-It does solve the problem, but also brings a performance issue, that two functions have to be called each time we call a set accessor. With the `--accessorOptimization` switch on, if the accessor contains only one call to another method, the compiler use that method to define accessor directly.
+It does solve the problem, but also brings a performance issue, that two functions have to be called each time we call a set accessor. With the `--accessorOptimization` switch on, if the accessor contains only one call to another method, the compiler uses that method to define accessor directly.
 
 Javascript:
 
@@ -210,7 +210,7 @@ Pass `--reorderFiles` to the command-line tool or add `"reorderFiles": true` to 
 
 Normally when you pass the `--outFile` option, the compiler will concatenate and emit output to a single file. But the order of concatenation is determined by the list of files passed to the compiler on the command line (or in the tsconfig.json file) along with triple-slash references and imports. That forces you to sort the input files in the correct order manually. It is ok with only a few source files, but it becomes a disaster when you have countless source files.
 
-With the `reorderFiles` swith on, the compiler will automatically reorder the source files by analyzing their dependencies in code. Then you can get the correct concatenation order in the generated file without doing any extra effort. I have tested this feature in many real-world projects, it works very well. If it does not work in you project, please feel free to open an issue and send me the test case.
+With the `reorderFiles` switch on, the compiler will automatically reorder the source files by analyzing their dependencies in code. Then you can get the correct concatenation order in the generated file without doing any extra effort. I have tested this feature in many real-world projects, it works very well. If it does not work in your project, please feel free to open an issue and send me the test case.
 
 ## Conditional Compilation
 
@@ -269,10 +269,4 @@ function someFunction() {
 ```
 As you can see, the second `if(DEBUG)` in `someFunction` is not replaced because it is defined in scope.
 
-Note that the compiler does not dropping the unreachable code, because it is can be easily done by other tools like [UglifyJS](http://lisperator.net/uglifyjs/) or [Google Closure Compiler](https://developers.google.com/closure/compiler/).
-
-
-
-
-
-
+Note that the compiler does not drop the unreachable code because it is can be easily done by other tools like [UglifyJS](http://lisperator.net/uglifyjs/) or [Google Closure Compiler](https://developers.google.com/closure/compiler/).
