@@ -288,9 +288,12 @@ namespace ts {
                 break;
             case SyntaxKind.PropertyAccessExpression:
                 checkDependencyAtLocation(expression);
+                visitExpression((<PropertyAccessExpression>expression).expression);
                 break;
             case SyntaxKind.ElementAccessExpression:
-                visitExpression((<PropertyAccessExpression>expression).expression);
+                let elementAccess = <ElementAccessExpression>expression;
+                visitExpression(elementAccess.expression);
+                visitExpression(elementAccess.argumentExpression);
                 break;
             case SyntaxKind.ObjectLiteralExpression:
                 visitObjectLiteralExpression(<ObjectLiteralExpression>expression);
