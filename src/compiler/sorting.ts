@@ -33,12 +33,12 @@ namespace ts {
     let pathWeightMap: Map<number>;
 
     interface Map<T> {
-        [index:string]:T;
-        [index:number]:T;
+        [index: string]: T;
+        [index: number]: T;
     }
-    
-    function createMap<T>():Map<T> {
-        const map:Map<T> = Object.create(null);
+
+    function createMap<T>(): Map<T> {
+        const map: Map<T> = Object.create(null);
         // Using 'delete' on an object causes V8 to put the object in dictionary mode.
         // This disables creation of hidden classes, which are expensive when an object is
         // constantly changing shape.
@@ -113,11 +113,7 @@ namespace ts {
                 visitExpression(expression.expression);
                 break;
             case SyntaxKind.ClassDeclaration:
-                checkInheriting(<ClassDeclaration>statement);
-                visitStaticMember(<ClassDeclaration>statement);
-                if (statement.transformFlags & TransformFlags.ContainsDecorators) {
-                    visitClassDecorators(<ClassDeclaration>statement);
-                }
+                visitClassLike(<ClassDeclaration>statement);
                 break;
             case SyntaxKind.VariableStatement:
                 visitVariableList((<VariableStatement>statement).declarationList);
@@ -200,6 +196,11 @@ namespace ts {
                     visitBlock(tryStatement.catchClause.block);
                 }
                 break;
+            case ts.SyntaxKind.EnumDeclaration:
+                (<EnumDeclaration>statement).members.forEach(element => {
+                    visitExpression(element.initializer);
+                })
+                break;
         }
     }
 
@@ -231,82 +232,37 @@ namespace ts {
         addDependency(getSourceFileOfNode(node).fileName, sourceFile.fileName);
     }
 
-    function checkInheriting(node: ClassDeclaration): void {
-        if (!node.heritageClauses) {
-            return;
-        }
-        let heritageClause: HeritageClause = null;
-        for (const clause of node.heritageClauses) {
-            if (clause.token === SyntaxKind.ExtendsKeyword) {
-                heritageClause = clause;
-                break;
-            }
-        }
-        if (!heritageClause) {
-            return;
-        }
-        let superClasses = heritageClause.types;
-        if (!superClasses) {
-            return;
-        }
-        superClasses.forEach(superClass => {
-            checkDependencyAtLocation(superClass.expression);
-        });
-    }
+    function visitClassLike(node: ClassLikeDeclaration) {
+        if (node.heritageClauses) {
+            let heritage = node.heritageClauses.filter(clause => {
+                return clause.token == ts.SyntaxKind.ExtendsKeyword;
+            })[0];
 
-    function visitStaticMember(node: ClassDeclaration): void {
-        let members = node.members;
-        if (!members) {
-            return;
-        }
-        for (let member of members) {
-            if (!hasModifier(member, ModifierFlags.Static)) {
-                continue;
-            }
-            if (member.kind == SyntaxKind.PropertyDeclaration) {
-                let property = <PropertyDeclaration>member;
-                visitExpression(property.initializer);
+            if (heritage && heritage.types) {
+                heritage.types.forEach(superClass => {
+                    checkDependencyAtLocation(superClass.expression);
+                });
             }
         }
-    }
-
-    function visitClassDecorators(node: ClassDeclaration): void {
         if (node.decorators) {
             visitDecorators(node.decorators);
         }
-        let members = node.members;
-        if (!members) {
-            return;
-        }
-        for (let member of members) {
-            let decorators: NodeArray<Decorator>;
-            let functionLikeMember: FunctionLikeDeclaration;
-            if (member.kind === SyntaxKind.GetAccessor || member.kind === SyntaxKind.SetAccessor) {
-                const accessors = getAllAccessorDeclarations(node.members, <AccessorDeclaration>member);
-                if (member !== accessors.firstAccessor) {
-                    continue;
-                }
-                decorators = accessors.firstAccessor.decorators;
-                if (!decorators && accessors.secondAccessor) {
-                    decorators = accessors.secondAccessor.decorators;
-                }
-                functionLikeMember = accessors.setAccessor;
-            }
-            else {
-                decorators = member.decorators;
-                if (member.kind === SyntaxKind.MethodDeclaration) {
-                    functionLikeMember = <MethodDeclaration>member;
-                }
-            }
-            if (decorators) {
-                visitDecorators(decorators);
-            }
+        if (node.members) {
+            for (const member of node.members) {
+                visitDecorators(member.decorators);
 
-            if (functionLikeMember) {
-                for (const parameter of functionLikeMember.parameters) {
-                    if (parameter.decorators) {
-                        visitDecorators(parameter.decorators);
-                    }
+                switch (member.kind) {
+                    case ts.SyntaxKind.PropertyDeclaration:
+                        if (hasModifier(member, ModifierFlags.Static)) {
+                            visitExpression((<ts.PropertyDeclaration>member).initializer);
+                        }
+                        break;
+                    case ts.SyntaxKind.SetAccessor:
+                    case ts.SyntaxKind.MethodDeclaration:
+                        (<ts.MethodDeclaration>member).parameters.forEach(parameter => {
+                            visitDecorators(parameter.decorators);
+                        });
+                        break;
                 }
             }
         }
@@ -349,6 +305,10 @@ namespace ts {
                     visitExpression(span.expression);
                 });
                 break;
+            case ts.SyntaxKind.TaggedTemplateExpression:
+                visitExpression((<TaggedTemplateExpression>expression).tag);
+                visitExpression((<TaggedTemplateExpression>expression).template);
+                break;
             case SyntaxKind.ParenthesizedExpression:
                 let parenthesized = <ParenthesizedExpression>expression;
                 visitExpression(parenthesized.expression);
@@ -360,27 +320,46 @@ namespace ts {
             case SyntaxKind.PrefixUnaryExpression:
                 visitExpression((<PrefixUnaryExpression>expression).operand);
                 break;
+            case ts.SyntaxKind.ConditionalExpression: {
+                visitExpression((<ts.ConditionalExpression>expression).condition);
+                visitExpression((<ts.ConditionalExpression>expression).whenTrue);
+                visitExpression((<ts.ConditionalExpression>expression).whenFalse);
+                break;
+            }
             case SyntaxKind.DeleteExpression:
                 visitExpression((<DeleteExpression>expression).expression);
                 break;
-
+            case ts.SyntaxKind.SpreadElement:
+                visitExpression((<SpreadElement>expression).expression);
+                break;
+            case ts.SyntaxKind.VoidExpression:
+                visitExpression((<VoidExpression>expression).expression);
+                break;
+            case ts.SyntaxKind.YieldExpression:
+                visitExpression((<YieldExpression>expression).expression);
+                break;
+            case ts.SyntaxKind.AwaitExpression:
+                visitExpression((<AwaitExpression>expression).expression);
+                break;
+            case ts.SyntaxKind.TypeOfExpression:
+                visitExpression((<TypeOfExpression>expression).expression);
+                break;
+            case ts.SyntaxKind.NonNullExpression:
+                visitExpression((<NonNullExpression>expression).expression);
+                break;
+            case ts.SyntaxKind.TypeAssertionExpression:
+                visitExpression((<TypeAssertion>expression).expression);
+                break;
+            case ts.SyntaxKind.ClassExpression: {
+                visitClassLike(<ts.ClassExpression>expression);
+                break;
+            }
         }
 
-        // TaggedTemplateExpression
-        // TypeAssertionExpression
         // FunctionExpression
         // ArrowFunction
-        // TypeOfExpression
-        // VoidExpression
-        // AwaitExpression
-        // ConditionalExpression
-        // YieldExpression
-        // SpreadElementExpression
-        // ClassExpression
         // OmittedExpression
-        // ExpressionWithTypeArguments
         // AsExpression
-        // NonNullExpression
     }
 
     function visitBinaryExpression(binary: BinaryExpression): void {
