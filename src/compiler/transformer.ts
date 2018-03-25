@@ -1,6 +1,7 @@
 /// <reference path="visitor.ts" />
 /// <reference path="transformers/utilities.ts" />
 /// <reference path="transformers/ts.ts" />
+/// <reference path="transformers/tsPlus.ts" />
 /// <reference path="transformers/jsx.ts" />
 /// <reference path="transformers/esnext.ts" />
 /// <reference path="transformers/es2017.ts" />
@@ -45,6 +46,10 @@ namespace ts {
         const transformers: TransformerFactory<SourceFile>[] = [];
 
         addRange(transformers, customTransformers && customTransformers.before);
+        
+        if(compilerOptions.defines || compilerOptions.emitReflection){
+            transformers.push(transformTypeScriptPlus);
+        }
 
         transformers.push(transformTypeScript);
 

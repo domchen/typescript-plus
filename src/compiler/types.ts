@@ -820,6 +820,10 @@ namespace ts {
         exclamationToken?: ExclamationToken;  // Optional definite assignment assertion
         type?: TypeNode;                      // Optional type annotation
         initializer?: Expression;             // Optional initializer
+        /* @internal */
+        callerList?: string[];
+        /* @internal */
+        delayInitializerList?: Expression[];        
     }
 
     export interface VariableDeclarationList extends Node {
@@ -996,6 +1000,7 @@ namespace ts {
         kind: SyntaxKind.MethodDeclaration;
         name: PropertyName;
         body?: FunctionBody;
+        isJumpTarget?: boolean;
     }
 
     export interface ConstructorDeclaration extends FunctionLikeDeclarationBase, ClassElement, JSDocContainer {
@@ -1861,6 +1866,7 @@ namespace ts {
         kind: SyntaxKind.Block;
         statements: NodeArray<Statement>;
         /*@internal*/ multiLine?: boolean;
+        /*@internal*/ visitedBySorting?: boolean;
     }
 
     export interface VariableStatement extends Statement, JSDocContainer {
@@ -2007,6 +2013,7 @@ namespace ts {
         typeParameters?: NodeArray<TypeParameterDeclaration>;
         heritageClauses?: NodeArray<HeritageClause>;
         members: NodeArray<ClassElement>;
+        typeNames?: string[];
     }
 
     export interface ClassDeclaration extends ClassLikeDeclarationBase, DeclarationStatement {
@@ -4694,7 +4701,9 @@ namespace ts {
 
         /* @internal */
         isSourceFileFromExternalLibrary(file: SourceFile): boolean;
-
+        /* @internal */
+        getTypeChecker(): TypeChecker;
+        
         getCommonSourceDirectory(): string;
         getCanonicalFileName(fileName: string): string;
         getNewLine(): string;
