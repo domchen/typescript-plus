@@ -192,7 +192,7 @@ interface I2 {
 //// [declFileMethods_0.js]
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var c1 = (function () {
+var c1 = /** @class */ (function () {
     function c1() {
     }
     /** This comment should appear for foo*/
@@ -200,8 +200,8 @@ var c1 = (function () {
     };
     /** This is comment for function signature*/
     c1.prototype.fooWithParameters = function (/** this is comment about a*/ a, 
-        /** this is comment for b*/
-        b) {
+    /** this is comment for b*/
+    b) {
         var d = a;
     };
     c1.prototype.fooWithRestParameters = function (a) {
@@ -219,8 +219,8 @@ var c1 = (function () {
     };
     /** This is comment for function signature*/
     c1.prototype.privateFooWithParameters = function (/** this is comment about a*/ a, 
-        /** this is comment for b*/
-        b) {
+    /** this is comment for b*/
+    b) {
         var d = a;
     };
     c1.prototype.privateFooWithRestParameters = function (a) {
@@ -238,8 +238,8 @@ var c1 = (function () {
     };
     /** This is comment for function signature*/
     c1.staticFooWithParameters = function (/** this is comment about a*/ a, 
-        /** this is comment for b*/
-        b) {
+    /** this is comment for b*/
+    b) {
         var d = a;
     };
     c1.staticFooWithRestParameters = function (a) {
@@ -257,8 +257,8 @@ var c1 = (function () {
     };
     /** This is comment for function signature*/
     c1.privateStaticFooWithParameters = function (/** this is comment about a*/ a, 
-        /** this is comment for b*/
-        b) {
+    /** this is comment for b*/
+    b) {
         var d = a;
     };
     c1.privateStaticFooWithRestParameters = function (a) {
@@ -275,7 +275,7 @@ var c1 = (function () {
 }());
 exports.c1 = c1;
 //// [declFileMethods_1.js]
-var c2 = (function () {
+var c2 = /** @class */ (function () {
     function c2() {
     }
     /** This comment should appear for foo*/
@@ -283,8 +283,8 @@ var c2 = (function () {
     };
     /** This is comment for function signature*/
     c2.prototype.fooWithParameters = function (/** this is comment about a*/ a, 
-        /** this is comment for b*/
-        b) {
+    /** this is comment for b*/
+    b) {
         var d = a;
     };
     c2.prototype.fooWithRestParameters = function (a) {
@@ -302,8 +302,8 @@ var c2 = (function () {
     };
     /** This is comment for function signature*/
     c2.prototype.privateFooWithParameters = function (/** this is comment about a*/ a, 
-        /** this is comment for b*/
-        b) {
+    /** this is comment for b*/
+    b) {
         var d = a;
     };
     c2.prototype.privateFooWithRestParameters = function (a) {
@@ -321,8 +321,8 @@ var c2 = (function () {
     };
     /** This is comment for function signature*/
     c2.staticFooWithParameters = function (/** this is comment about a*/ a, 
-        /** this is comment for b*/
-        b) {
+    /** this is comment for b*/
+    b) {
         var d = a;
     };
     c2.staticFooWithRestParameters = function (a) {
@@ -340,8 +340,8 @@ var c2 = (function () {
     };
     /** This is comment for function signature*/
     c2.privateStaticFooWithParameters = function (/** this is comment about a*/ a, 
-        /** this is comment for b*/
-        b) {
+    /** this is comment for b*/
+    b) {
         var d = a;
     };
     c2.privateStaticFooWithRestParameters = function (a) {

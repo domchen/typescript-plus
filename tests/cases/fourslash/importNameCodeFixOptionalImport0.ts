@@ -8,13 +8,13 @@
 //// export function foo() {};
 
 // @Filename: a/foo.ts
-//// export { foo } from "./foo/bar"; 
+//// export { foo } from "./foo/bar";
 
 verify.importFixAtPosition([
 `import * as ns from "./foo";
-import { foo } from "./foo";
-foo();`,
+ns.foo();`,
 
 `import * as ns from "./foo";
-ns.foo();`,
+import { foo } from "./foo";
+foo();`,
 ]);

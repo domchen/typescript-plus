@@ -1,12 +1,6 @@
 /* @internal */
 namespace ts {
     export interface Refactor {
-        /** An unique code associated with each refactor */
-        name: string;
-
-        /** Description of the refactor to display in the UI of the editor */
-        description: string;
-
         /** Compute the associated code actions */
         getEditsForAction(context: RefactorContext, actionName: string): RefactorEditInfo | undefined;
 
@@ -14,13 +8,11 @@ namespace ts {
         getAvailableActions(context: RefactorContext): ApplicableRefactorInfo[] | undefined;
     }
 
-    export interface RefactorContext {
+    export interface RefactorContext extends textChanges.TextChangesContext {
         file: SourceFile;
         startPosition: number;
         endPosition?: number;
         program: Program;
-        newLineCharacter: string;
-        rulesProvider?: formatting.RulesProvider;
         cancellationToken?: CancellationToken;
     }
 
@@ -29,31 +21,23 @@ namespace ts {
         // e.g.  nonSuggestableRefactors[refactorCode] -> the refactor you want
         const refactors: Map<Refactor> = createMap<Refactor>();
 
-        export function registerRefactor(refactor: Refactor) {
-            refactors.set(refactor.name, refactor);
+        /** @param name An unique code associated with each refactor. Does not have to be human-readable. */
+        export function registerRefactor(name: string, refactor: Refactor) {
+            refactors.set(name, refactor);
         }
 
-        export function getApplicableRefactors(context: RefactorContext): ApplicableRefactorInfo[] | undefined {
-            let results: ApplicableRefactorInfo[];
-            const refactorList: Refactor[] = [];
-            refactors.forEach(refactor => {
-                refactorList.push(refactor);
-            });
-            for (const refactor of refactorList) {
-                if (context.cancellationToken && context.cancellationToken.isCancellationRequested()) {
-                    return results;
-                }
-                const infos = refactor.getAvailableActions(context);
-                if (infos && infos.length) {
-                    (results || (results = [])).push(...infos);
-                }
-            }
-            return results;
+        export function getApplicableRefactors(context: RefactorContext): ApplicableRefactorInfo[] {
+            return arrayFrom(flatMapIterator(refactors.values(), refactor =>
+                context.cancellationToken && context.cancellationToken.isCancellationRequested() ? undefined : refactor.getAvailableActions(context)));
         }
 
         export function getEditsForRefactor(context: RefactorContext, refactorName: string, actionName: string): RefactorEditInfo | undefined {
             const refactor = refactors.get(refactorName);
             return refactor && refactor.getEditsForAction(context, actionName);
         }
+    }
+
+    export function getRefactorContextLength(context: RefactorContext): number {
+        return context.endPosition === undefined ? 0 : context.endPosition - context.startPosition;
     }
 }

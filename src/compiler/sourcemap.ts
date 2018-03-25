@@ -51,7 +51,7 @@ namespace ts {
          * @param tokenStartPos The start pos of the token.
          * @param emitCallback The callback used to emit the token.
          */
-        emitTokenWithSourceMap(node: Node, token: SyntaxKind, tokenStartPos: number, emitCallback: (token: SyntaxKind, tokenStartPos: number) => number): number;
+        emitTokenWithSourceMap(node: Node, token: SyntaxKind, writer: (s: string) => void, tokenStartPos: number, emitCallback: (token: SyntaxKind, writer: (s: string) => void, tokenStartPos: number) => number): number;
 
         /**
          * Gets the text for the source map.
@@ -145,7 +145,7 @@ namespace ts {
 
             // Initialize source map data
             sourceMapData = {
-                sourceMapFilePath: sourceMapFilePath,
+                sourceMapFilePath,
                 jsSourceMappingURL: !compilerOptions.inlineSourceMap ? getBaseFileName(normalizeSlashes(sourceMapFilePath)) : undefined,
                 sourceMapFile: getBaseFileName(normalizeSlashes(filePath)),
                 sourceMapSourceRoot: compilerOptions.sourceRoot || "",
@@ -292,8 +292,8 @@ namespace ts {
 
                 // New span
                 lastRecordedSourceMapSpan = {
-                    emittedLine: emittedLine,
-                    emittedColumn: emittedColumn,
+                    emittedLine,
+                    emittedColumn,
                     sourceLine: sourceLinePos.line,
                     sourceColumn: sourceLinePos.character,
                     sourceIndex: sourceMapSourceIndex
@@ -372,9 +372,9 @@ namespace ts {
          * @param tokenStartPos The start pos of the token.
          * @param emitCallback The callback used to emit the token.
          */
-        function emitTokenWithSourceMap(node: Node, token: SyntaxKind, tokenPos: number, emitCallback: (token: SyntaxKind, tokenStartPos: number) => number) {
+        function emitTokenWithSourceMap(node: Node, token: SyntaxKind, writer: (s: string) => void, tokenPos: number, emitCallback: (token: SyntaxKind, writer: (s: string) => void, tokenStartPos: number) => number) {
             if (disabled) {
-                return emitCallback(token, tokenPos);
+                return emitCallback(token, writer, tokenPos);
             }
 
             const emitNode = node && node.emitNode;
@@ -386,7 +386,7 @@ namespace ts {
                 emitPos(tokenPos);
             }
 
-            tokenPos = emitCallback(token, tokenPos);
+            tokenPos = emitCallback(token, writer, tokenPos);
 
             if (range) tokenPos = range.end;
             if ((emitFlags & EmitFlags.NoTokenTrailingSourceMaps) === 0 && tokenPos >= 0) {
@@ -420,7 +420,7 @@ namespace ts {
                 host.getCanonicalFileName,
                 /*isAbsolutePathAnUrl*/ true);
 
-            sourceMapSourceIndex = indexOf(sourceMapData.sourceMapSources, source);
+            sourceMapSourceIndex = sourceMapData.sourceMapSources.indexOf(source);
             if (sourceMapSourceIndex === -1) {
                 sourceMapSourceIndex = sourceMapData.sourceMapSources.length;
                 sourceMapData.sourceMapSources.push(source);

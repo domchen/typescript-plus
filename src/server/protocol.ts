@@ -2,110 +2,118 @@
  * Declaration module describing the TypeScript Server protocol
  */
 namespace ts.server.protocol {
+    // NOTE: If updating this, be sure to also update `allCommandNames` in `harness/unittests/session.ts`.
+    export const enum CommandTypes {
+        Brace = "brace",
+        /* @internal */
+        BraceFull = "brace-full",
+        BraceCompletion = "braceCompletion",
+        GetSpanOfEnclosingComment = "getSpanOfEnclosingComment",
+        Change = "change",
+        Close = "close",
+        Completions = "completions",
+        /* @internal */
+        CompletionsFull = "completions-full",
+        CompletionDetails = "completionEntryDetails",
+        /* @internal */
+        CompletionDetailsFull = "completionEntryDetails-full",
+        CompileOnSaveAffectedFileList = "compileOnSaveAffectedFileList",
+        CompileOnSaveEmitFile = "compileOnSaveEmitFile",
+        Configure = "configure",
+        Definition = "definition",
+        /* @internal */
+        DefinitionFull = "definition-full",
+        DefinitionAndBoundSpan = "definitionAndBoundSpan",
+        /* @internal */
+        DefinitionAndBoundSpanFull = "definitionAndBoundSpan-full",
+        Implementation = "implementation",
+        /* @internal */
+        ImplementationFull = "implementation-full",
+        Exit = "exit",
+        Format = "format",
+        Formatonkey = "formatonkey",
+        /* @internal */
+        FormatFull = "format-full",
+        /* @internal */
+        FormatonkeyFull = "formatonkey-full",
+        /* @internal */
+        FormatRangeFull = "formatRange-full",
+        Geterr = "geterr",
+        GeterrForProject = "geterrForProject",
+        SemanticDiagnosticsSync = "semanticDiagnosticsSync",
+        SyntacticDiagnosticsSync = "syntacticDiagnosticsSync",
+        NavBar = "navbar",
+        /* @internal */
+        NavBarFull = "navbar-full",
+        Navto = "navto",
+        /* @internal */
+        NavtoFull = "navto-full",
+        NavTree = "navtree",
+        NavTreeFull = "navtree-full",
+        Occurrences = "occurrences",
+        DocumentHighlights = "documentHighlights",
+        /* @internal */
+        DocumentHighlightsFull = "documentHighlights-full",
+        Open = "open",
+        Quickinfo = "quickinfo",
+        /* @internal */
+        QuickinfoFull = "quickinfo-full",
+        References = "references",
+        /* @internal */
+        ReferencesFull = "references-full",
+        Reload = "reload",
+        Rename = "rename",
+        /* @internal */
+        RenameInfoFull = "rename-full",
+        /* @internal */
+        RenameLocationsFull = "renameLocations-full",
+        Saveto = "saveto",
+        SignatureHelp = "signatureHelp",
+        /* @internal */
+        SignatureHelpFull = "signatureHelp-full",
+        Status = "status",
+        TypeDefinition = "typeDefinition",
+        ProjectInfo = "projectInfo",
+        ReloadProjects = "reloadProjects",
+        Unknown = "unknown",
+        OpenExternalProject = "openExternalProject",
+        OpenExternalProjects = "openExternalProjects",
+        CloseExternalProject = "closeExternalProject",
+        /* @internal */
+        SynchronizeProjectList = "synchronizeProjectList",
+        /* @internal */
+        ApplyChangedToOpenFiles = "applyChangedToOpenFiles",
+        /* @internal */
+        EncodedSemanticClassificationsFull = "encodedSemanticClassifications-full",
+        /* @internal */
+        Cleanup = "cleanup",
+        /* @internal */
+        OutliningSpans = "outliningSpans",
+        TodoComments = "todoComments",
+        Indentation = "indentation",
+        DocCommentTemplate = "docCommentTemplate",
+        /* @internal */
+        CompilerOptionsDiagnosticsFull = "compilerOptionsDiagnostics-full",
+        /* @internal */
+        NameOrDottedNameSpan = "nameOrDottedNameSpan",
+        /* @internal */
+        BreakpointStatement = "breakpointStatement",
+        CompilerOptionsForInferredProjects = "compilerOptionsForInferredProjects",
+        GetCodeFixes = "getCodeFixes",
+        /* @internal */
+        GetCodeFixesFull = "getCodeFixes-full",
+        GetCombinedCodeFix = "getCombinedCodeFix",
+        /* @internal */
+        GetCombinedCodeFixFull = "getCombinedCodeFix-full",
+        ApplyCodeActionCommand = "applyCodeActionCommand",
+        GetSupportedCodeFixes = "getSupportedCodeFixes",
 
-    export namespace CommandTypes {
-        export type Brace = "brace";
+        GetApplicableRefactors = "getApplicableRefactors",
+        GetEditsForRefactor = "getEditsForRefactor",
         /* @internal */
-        export type BraceFull = "brace-full";
-        export type BraceCompletion = "braceCompletion";
-        export type Change = "change";
-        export type Close = "close";
-        export type Completions = "completions";
-        /* @internal */
-        export type CompletionsFull = "completions-full";
-        export type CompletionDetails = "completionEntryDetails";
-        export type CompileOnSaveAffectedFileList = "compileOnSaveAffectedFileList";
-        export type CompileOnSaveEmitFile = "compileOnSaveEmitFile";
-        export type Configure = "configure";
-        export type Definition = "definition";
-        /* @internal */
-        export type DefinitionFull = "definition-full";
-        export type Implementation = "implementation";
-        /* @internal */
-        export type ImplementationFull = "implementation-full";
-        export type Exit = "exit";
-        export type Format = "format";
-        export type Formatonkey = "formatonkey";
-        /* @internal */
-        export type FormatFull = "format-full";
-        /* @internal */
-        export type FormatonkeyFull = "formatonkey-full";
-        /* @internal */
-        export type FormatRangeFull = "formatRange-full";
-        export type Geterr = "geterr";
-        export type GeterrForProject = "geterrForProject";
-        export type SemanticDiagnosticsSync = "semanticDiagnosticsSync";
-        export type SyntacticDiagnosticsSync = "syntacticDiagnosticsSync";
-        export type NavBar = "navbar";
-        /* @internal */
-        export type NavBarFull = "navbar-full";
-        export type Navto = "navto";
-        /* @internal */
-        export type NavtoFull = "navto-full";
-        export type NavTree = "navtree";
-        export type NavTreeFull = "navtree-full";
-        export type Occurrences = "occurrences";
-        export type DocumentHighlights = "documentHighlights";
-        /* @internal */
-        export type DocumentHighlightsFull = "documentHighlights-full";
-        export type Open = "open";
-        export type Quickinfo = "quickinfo";
-        /* @internal */
-        export type QuickinfoFull = "quickinfo-full";
-        export type References = "references";
-        /* @internal */
-        export type ReferencesFull = "references-full";
-        export type Reload = "reload";
-        export type Rename = "rename";
-        /* @internal */
-        export type RenameInfoFull = "rename-full";
-        /* @internal */
-        export type RenameLocationsFull = "renameLocations-full";
-        export type Saveto = "saveto";
-        export type SignatureHelp = "signatureHelp";
-        /* @internal */
-        export type SignatureHelpFull = "signatureHelp-full";
-        export type TypeDefinition = "typeDefinition";
-        export type ProjectInfo = "projectInfo";
-        export type ReloadProjects = "reloadProjects";
-        export type Unknown = "unknown";
-        export type OpenExternalProject = "openExternalProject";
-        export type OpenExternalProjects = "openExternalProjects";
-        export type CloseExternalProject = "closeExternalProject";
-        /* @internal */
-        export type SynchronizeProjectList = "synchronizeProjectList";
-        /* @internal */
-        export type ApplyChangedToOpenFiles = "applyChangedToOpenFiles";
-        /* @internal */
-        export type EncodedSemanticClassificationsFull = "encodedSemanticClassifications-full";
-        /* @internal */
-        export type Cleanup = "cleanup";
-        /* @internal */
-        export type OutliningSpans = "outliningSpans";
-        export type TodoComments = "todoComments";
-        export type Indentation = "indentation";
-        export type DocCommentTemplate = "docCommentTemplate";
-        /* @internal */
-        export type CompilerOptionsDiagnosticsFull = "compilerOptionsDiagnostics-full";
-        /* @internal */
-        export type NameOrDottedNameSpan = "nameOrDottedNameSpan";
-        /* @internal */
-        export type BreakpointStatement = "breakpointStatement";
-        export type CompilerOptionsForInferredProjects = "compilerOptionsForInferredProjects";
-        export type GetCodeFixes = "getCodeFixes";
-        /* @internal */
-        export type GetCodeFixesFull = "getCodeFixes-full";
-        export type GetSupportedCodeFixes = "getSupportedCodeFixes";
+        GetEditsForRefactorFull = "getEditsForRefactor-full",
 
         // NOTE: If updating this, be sure to also update `allCommandNames` in `harness/unittests/session.ts`.
-        export type GetApplicableRefactors = "getApplicableRefactors";
-        export type GetRefactorCodeActions = "getRefactorCodeActions";
-        /* @internal */
-        export type GetRefactorCodeActionsFull = "getRefactorCodeActions-full";
-
-        export type GetEditsForRefactor = "getEditsForRefactor";
-        /* @internal */
-        export type GetEditsForRefactorFull = "getEditsForRefactor-full";
     }
 
     /**
@@ -127,6 +135,8 @@ namespace ts.server.protocol {
      * Client-initiated request message
      */
     export interface Request extends Message {
+        type: "request";
+
         /**
          * The command to execute
          */
@@ -149,6 +159,8 @@ namespace ts.server.protocol {
      * Server-initiated event message
      */
     export interface Event extends Message {
+        type: "event";
+
         /**
          * Name of event
          */
@@ -164,6 +176,8 @@ namespace ts.server.protocol {
      * Response by server to client request message.
      */
     export interface Response extends Message {
+        type: "response";
+
         /**
          * Sequence number of the request message.
          */
@@ -180,7 +194,8 @@ namespace ts.server.protocol {
         command: string;
 
         /**
-         * Contains error message if success === false.
+         * If success === false, this should always be provided.
+         * Otherwise, may (or may not) contain a success message.
          */
         message?: string;
 
@@ -203,6 +218,24 @@ namespace ts.server.protocol {
         * Optional name of project that contains file
         */
         projectFileName?: string;
+    }
+
+    export interface StatusRequest extends Request {
+        command: CommandTypes.Status;
+    }
+
+    export interface StatusResponseBody {
+        /**
+         * The TypeScript version (`ts.version`).
+         */
+        version: string;
+    }
+
+    /**
+     * Response to StatusRequest
+     */
+    export interface StatusResponse extends Response {
+        body: StatusResponseBody;
     }
 
     /**
@@ -242,6 +275,21 @@ namespace ts.server.protocol {
      */
     export interface TodoCommentsResponse extends Response {
         body?: TodoComment[];
+    }
+
+    /**
+     * A request to determine if the caret is inside a comment.
+     */
+    export interface SpanOfEnclosingCommentRequest extends FileLocationRequest {
+        command: CommandTypes.GetSpanOfEnclosingComment;
+        arguments: SpanOfEnclosingCommentRequestArgs;
+    }
+
+    export interface SpanOfEnclosingCommentRequestArgs extends FileLocationRequestArgs {
+        /**
+         * Requires that the enclosing span be a multi-line comment, or else the request returns undefined.
+         */
+        onlyMultiLine: boolean;
     }
 
     /**
@@ -453,7 +501,7 @@ namespace ts.server.protocol {
      * Represents a single refactoring action - for example, the "Extract Method..." refactor might
      * offer several actions, each corresponding to a surround class or closure to extract into.
      */
-    export type RefactorActionInfo = {
+    export interface RefactorActionInfo {
         /**
          * The programmatic name of the refactoring action
          */
@@ -465,7 +513,7 @@ namespace ts.server.protocol {
          * so this description should make sense by itself if the parent is inlineable=true
          */
         description: string;
-    };
+    }
 
     export interface GetEditsForRefactorRequest extends Request {
         command: CommandTypes.GetEditsForRefactor;
@@ -488,7 +536,7 @@ namespace ts.server.protocol {
         body?: RefactorEditInfo;
     }
 
-    export type RefactorEditInfo = {
+    export interface RefactorEditInfo {
         edits: FileCodeEdits[];
 
         /**
@@ -497,7 +545,7 @@ namespace ts.server.protocol {
          */
         renameLocation?: Location;
         renameFilename?: string;
-    };
+    }
 
     /**
      * Request for the available codefixes at a specific position.
@@ -506,6 +554,23 @@ namespace ts.server.protocol {
         command: CommandTypes.GetCodeFixes;
         arguments: CodeFixRequestArgs;
     }
+
+    export interface GetCombinedCodeFixRequest extends Request {
+        command: CommandTypes.GetCombinedCodeFix;
+        arguments: GetCombinedCodeFixRequestArgs;
+    }
+
+    export interface GetCombinedCodeFixResponse extends Response {
+        body: CombinedCodeActions;
+    }
+
+    export interface ApplyCodeActionCommandRequest extends Request {
+        command: CommandTypes.ApplyCodeActionCommand;
+        arguments: ApplyCodeActionCommandRequestArgs;
+    }
+
+    // All we need is the `success` and `message` fields of Response.
+    export interface ApplyCodeActionCommandResponse extends Response {}
 
     export interface FileRangeRequestArgs extends FileRequestArgs {
         /**
@@ -548,7 +613,22 @@ namespace ts.server.protocol {
         /**
          * Errorcodes we want to get the fixes for.
          */
-        errorCodes?: number[];
+        errorCodes?: ReadonlyArray<number>;
+    }
+
+    export interface GetCombinedCodeFixRequestArgs {
+        scope: GetCombinedCodeFixScope;
+        fixId: {};
+    }
+
+    export interface GetCombinedCodeFixScope {
+        type: "file";
+        args: FileRequestArgs;
+    }
+
+    export interface ApplyCodeActionCommandRequestArgs {
+        /** May also be an array of commands. */
+        command: {};
     }
 
     /**
@@ -643,7 +723,7 @@ namespace ts.server.protocol {
     }
 
     /**
-     * Location in source code expressed as (one-based) line and character offset.
+     * Location in source code expressed as (one-based) line and (one-based) column offset.
      */
     export interface Location {
         line: number;
@@ -675,11 +755,20 @@ namespace ts.server.protocol {
         file: string;
     }
 
+    export interface DefinitionInfoAndBoundSpan {
+        definitions: ReadonlyArray<FileSpan>;
+        textSpan: TextSpan;
+    }
+
     /**
      * Definition response message.  Gives text range for definition.
      */
     export interface DefinitionResponse extends Response {
         body?: FileSpan[];
+    }
+
+    export interface DefinitionInfoAndBoundSpanReponse extends Response {
+        body?: DefinitionInfoAndBoundSpan;
     }
 
     /**
@@ -751,10 +840,9 @@ namespace ts.server.protocol {
 
     /**
      * Span augmented with extra information that denotes the kind of the highlighting to be used for span.
-     * Kind is taken from HighlightSpanKind type.
      */
     export interface HighlightSpan extends TextSpan {
-        kind: string;
+        kind: HighlightSpanKind;
     }
 
     /**
@@ -891,7 +979,7 @@ namespace ts.server.protocol {
         /**
          * The items's kind (such as 'className' or 'parameterName' or plain 'text').
          */
-        kind: string;
+        kind: ScriptElementKind;
 
         /**
          * Optional modifiers for the kind (such as 'public').
@@ -918,7 +1006,7 @@ namespace ts.server.protocol {
         /**
          * An array of span groups (one per file) that refer to the item to be renamed.
          */
-        locs: SpanGroup[];
+        locs: ReadonlyArray<SpanGroup>;
     }
 
     /**
@@ -1308,6 +1396,13 @@ namespace ts.server.protocol {
          * Compiler options to be used with inferred projects.
          */
         options: ExternalProjectCompilerOptions;
+
+        /**
+         * Specifies the project root path used to scope compiler options.
+         * It is an error to provide this property if the server has not been started with
+         * `useInferredProjectPerProjectRoot` enabled.
+         */
+        projectRootPath?: string;
     }
 
     /**
@@ -1405,7 +1500,7 @@ namespace ts.server.protocol {
         /**
          * The symbol's kind (such as 'className' or 'parameterName' or plain 'text').
          */
-        kind: string;
+        kind: ScriptElementKind;
 
         /**
          * Optional modifiers for the kind (such as 'public').
@@ -1514,7 +1609,7 @@ namespace ts.server.protocol {
 
     export interface CodeFixResponse extends Response {
         /** The code actions that are available */
-        body?: CodeAction[];
+        body?: CodeFixAction[];
     }
 
     export interface CodeAction {
@@ -1522,6 +1617,21 @@ namespace ts.server.protocol {
         description: string;
         /** Text changes to apply to each file as part of the code action */
         changes: FileCodeEdits[];
+        /** A command is an opaque object that should be passed to `ApplyCodeActionCommandRequestArgs` without modification.  */
+        commands?: {}[];
+    }
+
+    export interface CombinedCodeActions {
+        changes: ReadonlyArray<FileCodeEdits>;
+        commands?: ReadonlyArray<{}>;
+    }
+
+    export interface CodeFixAction extends CodeAction {
+        /**
+         * If present, one may call 'getCombinedCodeFix' with this fixId.
+         * This may be omitted to indicate that the code fix can't be applied in a group.
+         */
+        fixId?: {};
     }
 
     /**
@@ -1564,6 +1674,16 @@ namespace ts.server.protocol {
          * Optional prefix to apply to possible completions.
          */
         prefix?: string;
+        /**
+         * If enabled, TypeScript will search through all external modules' exports and add them to the completions list.
+         * This affects lone identifier completions but not completions on the right hand side of `obj.`.
+         */
+        includeExternalModuleExports: boolean;
+        /**
+         * If enabled, the completion list will include completions with invalid identifier names.
+         * For those entries, The `insertText` and `replacementSpan` properties will be set to change from `.x` property access to `["x"]`.
+         */
+        includeInsertTextCompletions: boolean;
     }
 
     /**
@@ -1584,7 +1704,12 @@ namespace ts.server.protocol {
         /**
          * Names of one or more entries for which to obtain details.
          */
-        entryNames: string[];
+        entryNames: (string | CompletionEntryIdentifier)[];
+    }
+
+    export interface CompletionEntryIdentifier {
+        name: string;
+        source: string;
     }
 
     /**
@@ -1624,7 +1749,7 @@ namespace ts.server.protocol {
         /**
          * The symbol's kind (such as 'className' or 'parameterName').
          */
-        kind: string;
+        kind: ScriptElementKind;
         /**
          * Optional modifiers for the kind (such as 'public').
          */
@@ -1635,10 +1760,32 @@ namespace ts.server.protocol {
          */
         sortText: string;
         /**
-         * An optional span that indicates the text to be replaced by this completion item. If present,
-         * this span should be used instead of the default one.
+         * Text to insert instead of `name`.
+         * This is used to support bracketed completions; If `name` might be "a-b" but `insertText` would be `["a-b"]`,
+         * coupled with `replacementSpan` to replace a dotted access with a bracket access.
+         */
+        insertText?: string;
+        /**
+         * An optional span that indicates the text to be replaced by this completion item.
+         * If present, this span should be used instead of the default one.
+         * It will be set if the required span differs from the one generated by the default replacement behavior.
          */
         replacementSpan?: TextSpan;
+        /**
+         * Indicates whether commiting this completion entry will require additional code actions to be
+         * made to avoid errors. The CompletionEntryDetails will have these actions.
+         */
+        hasAction?: true;
+        /**
+         * Identifier (not necessarily human-readable) identifying where this completion came from.
+         */
+        source?: string;
+        /**
+         * If true, this completion should be highlighted as recommended. There will only be one of these.
+         * This will be set when we know the user should write an expression with a certain type and that type is an enum or constructable class.
+         * Then either that enum/class or a namespace containing it will be the recommended symbol.
+         */
+        isRecommended?: true;
     }
 
     /**
@@ -1652,7 +1799,7 @@ namespace ts.server.protocol {
         /**
          * The symbol's kind (such as 'className' or 'parameterName').
          */
-        kind: string;
+        kind: ScriptElementKind;
         /**
          * Optional modifiers for the kind (such as 'public').
          */
@@ -1671,6 +1818,16 @@ namespace ts.server.protocol {
          * JSDoc tags for the symbol.
          */
         tags: JSDocTagInfo[];
+
+        /**
+         * The associated code actions for this entry
+         */
+        codeActions?: CodeAction[];
+
+        /**
+         * Human-readable description of the `source` from the CompletionEntry.
+         */
+        source?: SymbolDisplayPart[];
     }
 
     export interface CompletionsResponse extends Response {
@@ -1947,6 +2104,13 @@ namespace ts.server.protocol {
         source?: string;
     }
 
+    export interface DiagnosticWithFileName extends Diagnostic {
+        /**
+         * Name of the file the diagnostic is in
+         */
+        fileName: string;
+    }
+
     export interface DiagnosticEventBody {
         /**
          * The file for which diagnostic information is reported.
@@ -1981,7 +2145,7 @@ namespace ts.server.protocol {
         /**
          * An arry of diagnostic information items for the found config file.
          */
-        diagnostics: Diagnostic[];
+        diagnostics: DiagnosticWithFileName[];
     }
 
     /**
@@ -2012,6 +2176,19 @@ namespace ts.server.protocol {
          * and false otherwise.
          */
         languageServiceEnabled: boolean;
+    }
+
+    export type ProjectsUpdatedInBackgroundEventName = "projectsUpdatedInBackground";
+    export interface ProjectsUpdatedInBackgroundEvent extends Event {
+        event: ProjectsUpdatedInBackgroundEventName;
+        body: ProjectsUpdatedInBackgroundEventBody;
+    }
+
+    export interface ProjectsUpdatedInBackgroundEventBody {
+        /**
+         * Current set of open files
+         */
+        openFiles: string[];
     }
 
     /**
@@ -2111,7 +2288,7 @@ namespace ts.server.protocol {
         /**
          * The symbol's kind (such as 'className' or 'parameterName').
          */
-        kind: string;
+        kind: ScriptElementKind;
 
         /**
          * exact, substring, or prefix.
@@ -2152,7 +2329,7 @@ namespace ts.server.protocol {
         /**
          * Kind of symbol's container symbol (if any).
          */
-        containerKind?: string;
+        containerKind?: ScriptElementKind;
     }
 
     /**
@@ -2225,7 +2402,7 @@ namespace ts.server.protocol {
         /**
          * The symbol's kind (such as 'className' or 'parameterName').
          */
-        kind: string;
+        kind: ScriptElementKind;
 
         /**
          * Optional modifiers for the kind (such as 'public').
@@ -2251,7 +2428,7 @@ namespace ts.server.protocol {
     /** protocol.NavigationTree is identical to ts.NavigationTree, except using protocol.TextSpan instead of ts.TextSpan */
     export interface NavigationTree {
         text: string;
-        kind: string;
+        kind: ScriptElementKind;
         kindModifiers: string;
         spans: TextSpan[];
         childItems?: NavigationTree[];
@@ -2345,13 +2522,11 @@ namespace ts.server.protocol {
         body?: NavigationTree;
     }
 
-    export namespace IndentStyle {
-        export type None = "None";
-        export type Block = "Block";
-        export type Smart = "Smart";
+    export const enum IndentStyle {
+        None = "None",
+        Block = "Block",
+        Smart = "Smart",
     }
-
-    export type IndentStyle = IndentStyle.None | IndentStyle.Block | IndentStyle.Smart;
 
     export interface EditorSettings {
         baseIndentSize?: number;
@@ -2378,6 +2553,7 @@ namespace ts.server.protocol {
         insertSpaceBeforeFunctionParenthesis?: boolean;
         placeOpenBraceOnNewLineForFunctions?: boolean;
         placeOpenBraceOnNewLineForControlBlocks?: boolean;
+        insertSpaceBeforeTypeAnnotation?: boolean;
     }
 
     export interface CompilerOptions {
@@ -2428,6 +2604,7 @@ namespace ts.server.protocol {
         paths?: MapLike<string[]>;
         plugins?: PluginImport[];
         preserveConstEnums?: boolean;
+        preserveSymlinks?: boolean;
         project?: string;
         reactNamespace?: string;
         removeComments?: boolean;
@@ -2449,47 +2626,41 @@ namespace ts.server.protocol {
         [option: string]: CompilerOptionsValue | undefined;
     }
 
-    export namespace JsxEmit {
-        export type None = "None";
-        export type Preserve = "Preserve";
-        export type ReactNative = "ReactNative";
-        export type React = "React";
+    export const enum JsxEmit {
+        None = "None",
+        Preserve = "Preserve",
+        ReactNative = "ReactNative",
+        React = "React",
     }
 
-    export type JsxEmit = JsxEmit.None | JsxEmit.Preserve | JsxEmit.React | JsxEmit.ReactNative;
-
-    export namespace ModuleKind {
-        export type None = "None";
-        export type CommonJS = "CommonJS";
-        export type AMD = "AMD";
-        export type UMD = "UMD";
-        export type System = "System";
-        export type ES6 = "ES6";
-        export type ES2015 = "ES2015";
+    export const enum ModuleKind {
+        None = "None",
+        CommonJS = "CommonJS",
+        AMD = "AMD",
+        UMD = "UMD",
+        System = "System",
+        ES6 = "ES6",
+        ES2015 = "ES2015",
+        ESNext = "ESNext"
     }
 
-    export type ModuleKind = ModuleKind.None | ModuleKind.CommonJS | ModuleKind.AMD | ModuleKind.UMD | ModuleKind.System | ModuleKind.ES6 | ModuleKind.ES2015;
-
-    export namespace ModuleResolutionKind {
-        export type Classic = "Classic";
-        export type Node = "Node";
+    export const enum ModuleResolutionKind {
+        Classic = "Classic",
+        Node = "Node",
     }
 
-    export type ModuleResolutionKind = ModuleResolutionKind.Classic | ModuleResolutionKind.Node;
-
-    export namespace NewLineKind {
-        export type Crlf = "Crlf";
-        export type Lf = "Lf";
+    export const enum NewLineKind {
+        Crlf = "Crlf",
+        Lf = "Lf",
     }
 
-    export type NewLineKind = NewLineKind.Crlf | NewLineKind.Lf;
-
-    export namespace ScriptTarget {
-        export type ES3 = "ES3";
-        export type ES5 = "ES5";
-        export type ES6 = "ES6";
-        export type ES2015 = "ES2015";
+    export const enum ScriptTarget {
+        ES3 = "ES3",
+        ES5 = "ES5",
+        ES6 = "ES6",
+        ES2015 = "ES2015",
+        ES2016 = "ES2016",
+        ES2017 = "ES2017",
+        ESNext = "ESNext"
     }
-
-    export type ScriptTarget = ScriptTarget.ES3 | ScriptTarget.ES5 | ScriptTarget.ES6 | ScriptTarget.ES2015;
 }

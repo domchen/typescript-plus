@@ -1,16 +1,28 @@
 /// <reference path='fourslash.ts' />
 
-//// abstract class A {
+////abstract class A {
 ////    abstract f(a: number, b: string): boolean;
 ////    abstract f(a: number, b: string): this;
 ////    abstract f(a: string, b: number): Function;
 ////    abstract f(a: string): Function;
 ////    abstract foo(): number;
-//// }
+////}
 ////
-//// class C extends A {[| |]}
+////class C extends A {}
 
-verify.rangeAfterCodeFix(`
+verify.codeFix({
+    description: "Implement inherited abstract class",
+    // TODO: GH#18795
+    newFileContent:
+`abstract class A {
+    abstract f(a: number, b: string): boolean;
+    abstract f(a: number, b: string): this;
+    abstract f(a: string, b: number): Function;
+    abstract f(a: string): Function;
+    abstract foo(): number;
+}
+
+class C extends A {
     f(a: number, b: string): boolean;
     f(a: number, b: string): this;
     f(a: string, b: number): Function;
@@ -21,4 +33,5 @@ verify.rangeAfterCodeFix(`
     foo(): number {
         throw new Error("Method not implemented.");
     }
-`);
+}`
+});

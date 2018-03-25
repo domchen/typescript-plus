@@ -10,11 +10,33 @@
 ////     }
 //// }
 
-verify.getAndApplyCodeFix(/*errorCode*/undefined, 0);
-verify.getAndApplyCodeFix(/*errorCode*/undefined, 0);
-verify.getAndApplyCodeFix(/*errorCode*/undefined, 0);
+verify.codeFix({
+    description: "Declare method 'foo1'",
+    index: 0,
+    newRangeContent: `
+    foo1(arg0: any, arg1: any, arg2: any): any {
+        throw new Error("Method not implemented.");
+    }
+    `,
+});
 
-verify.rangeIs(`
+verify.codeFix({
+    description: "Declare method 'foo2'",
+    index: 0,
+    newRangeContent: `
+    foo2<T, U, V, W, X, Y, Z>(): any {
+        throw new Error("Method not implemented.");
+    }
+    foo1(arg0: any, arg1: any, arg2: any): any {
+        throw new Error("Method not implemented.");
+    }
+    `
+});
+
+verify.codeFix({
+    description: "Declare method 'foo3'",
+    index: 0,
+    newRangeContent:`
     foo3<T0, T1, T2, T3, T4, T5, T6, T7>(): any {
         throw new Error("Method not implemented.");
     }
@@ -24,4 +46,5 @@ verify.rangeIs(`
     foo1(arg0: any, arg1: any, arg2: any): any {
         throw new Error("Method not implemented.");
     }
-`);
+    `
+});

@@ -1,14 +1,18 @@
 /// <reference path='fourslash.ts' />
 
-////[|class C {
+////class C {
 ////    method() {
 ////        this.foo = 10;
 ////    }
-////}|]
+////}
 
-verify.rangeAfterCodeFix(`class C {
-    [x:string]: number;
+verify.codeFix({
+    description: "Add index signature for property 'foo'",
+    index: 1,
+    newFileContent: `class C {
+    [x: string]: number;
     method() {
         this.foo = 10;
     }
-}`, /*includeWhiteSpace*/false, /*errorCode*/ undefined, /*index*/ 1);
+}`
+});

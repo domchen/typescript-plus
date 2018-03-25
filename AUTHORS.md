@@ -3,9 +3,13 @@ TypeScript is authored by:
 * Abubaker Bashir
 * Adam Freidin
 * Adi Dahiya
+* Adrian Leonhard 
 * Ahmad Farid
 * Akshar Patel
+* Alan Agius 
+* Alex Chugaev 
 * Alex Eagle
+* Alex Khomchenko 
 * Alexander Kuvaev
 * Alexander Rusakov 
 * Ali Sabzevari
@@ -25,6 +29,8 @@ TypeScript is authored by:
 * Anton Khlynovskiy 
 * Anton Tolmachev
 * Anubha Mathur 
+* Armando Aguirre 
+* Arnaud Tournier 
 * Arnav Singh
 * Arthur Ozga
 * Asad Saeeduddin
@@ -33,6 +39,7 @@ TypeScript is authored by:
 * Ben Duffield
 * Ben Mosher 
 * Benjamin Bock 
+* Benjamin Lichtman 
 * Benny Neugebauer 
 * Bill Ticehurst
 * Blaine Bublitz 
@@ -42,6 +49,7 @@ TypeScript is authored by:
 * Brett Mayen
 * Bryan Forbes
 * Caitlin Potter
+* Cameron Taggart 
 * @cedvdb
 * Charles Pierce 
 * Charly POLY 
@@ -51,6 +59,7 @@ TypeScript is authored by:
 * Colby Russell
 * Colin Snover
 * Cotton Hou 
+* csigs 
 * Cyrus Najmabadi
 * Dafrok Zhang
 * Dahan Gong
@@ -80,12 +89,15 @@ TypeScript is authored by:
 * Erik McClenney 
 * Ethan Resnick 
 * Ethan Rubio
+* Eugene Timokhov 
 * Evan Martin
 * Evan Sebastian
 * Eyas Sharaiha
 * Fabian Cook 
 * @falsandtru
+* Filipe Silva 
 * @flowmemo
+* Francois Wouts 
 * Frank Wallis
 * Franklin Tse
 * František Žiacik
@@ -100,18 +112,23 @@ TypeScript is authored by:
 * Halasi Tamás 
 * Harald Niesche
 * Hendrik Liebau 
+* Henry Mercer 
 * Herrington Darkholme
 * Homa Wong 
 * Iain Monro
+* @IdeaHunter
 * Igor Novozhilov
 * Ika 
 * Ingvar Stepanyan
 * Isiah Meadows
+* Ivan Enderlin 
 * Ivo Gabe de Wolff
 * Iwata Hidetaka 
+* Jakub Korzeniowski
 * Jakub Młokosiewicz 
 * James Henry 
 * James Whitney
+* Jan Melcher 
 * Jason Freeman
 * Jason Jarrett 
 * Jason Killian
@@ -120,7 +137,9 @@ TypeScript is authored by:
 * Jed Mao
 * Jeffrey Morlan
 * Jesse Schalken
+* Jing Ma 
 * Jiri Tobisek
+* Joe Calzaretta 
 * Joe Chung 
 * Joel Day 
 * Joey Wilson
@@ -149,26 +168,35 @@ TypeScript is authored by:
 * Kevin Lang 
 * Kitson Kelly 
 * Klaus Meinhardt 
+* Kris Zyp 
 * Kyle Kelley
 * Kārlis Gaņģis
 * Lorant Pinter
 * Lucien Greathouse
 * Lukas Elmer 
 * Magnus Hiie 
+* Magnus Kulke 
 * Manish Giri
 * Marin Marinov
 * Marius Schulz 
+* Martin Hiller 
 * Martin Vseticka
 * Masahiro Wakame
+* Matt 
 * Matt Bierner 
 * Matt McCutchen
+* Matt Mitchell 
 * Mattias Buelens
 * Mattias Buelens 
 * Max Deepfield
+* Maxwell Paul Brickner 
+* @meyer
 * Micah Zoltu
+* @micbou
 * Michael 
 * Michael Bromley
 * Mike Busyrev 
+* Mike Morearty 
 * Mine Starks 
 * Mohamed Hegazy
 * Mohsen Azimi 
@@ -177,6 +205,7 @@ TypeScript is authored by:
 * Nathan Shively-Sanders
 * Nathan Yee
 * Nicolas Henry
+* @nieltg
 * Nima Zahedi
 * Noah Chen 
 * Noel Varanda 
@@ -184,7 +213,9 @@ TypeScript is authored by:
 * Oleg Mihailik
 * Oleksandr Chekhovskyi
 * Omer Sheikh 
+* Orta Therox
 * Oskar Segersva¨rd
+* Oussama Ben Brahim 
 * Patrick Zhong
 * Paul Jolly
 * Paul van Brenk
@@ -196,11 +227,13 @@ TypeScript is authored by:
 * Piero Cangianiello
 * @piloopin
 * Prayag Verma
+* Priyantha Lankapura 
 * @progre
 * Punya Biswal
 * Rado Kirov
 * Raj Dosanjh
 * Reiner Dolp 
+* Remo H. Jansen 
 * Richard Karmazín 
 * Richard Knoll
 * Richard Sentino
@@ -213,8 +246,10 @@ TypeScript is authored by:
 * Ryohei Ikegami
 * Sam El-Husseini 
 * Sarangan Rajamanickam
+* Sean Barag 
 * Sergey Rubanov
 * Sergey Shandar 
+* Sharon Rolel 
 * Sheetal Nandi
 * Shengping Zhong
 * Shyyko Serhiy
@@ -223,14 +258,18 @@ TypeScript is authored by:
 * Solal Pirelli
 * Soo Jae Hwang 
 * Stan Thomas
+* Stanislav Iliev 
 * Stanislav Sysoev
+* Stas Vilchik 
 * Steve Lucco
 * Sudheesh Singanamalla 
 * Sébastien Arod
 * @T18970237136
 * @t_
+* Taras Mankovski 
 * Tarik Ozket
 * Tetsuharu Ohzeki
+* Thomas den Hollander 
 * Thomas Loubiou
 * Tien Hoanhtien
 * Tim Lancina 
@@ -243,16 +282,22 @@ TypeScript is authored by:
 * Torben Fitschen 
 * @TravCav
 * TruongSinh Tran-Nguyen
+* Tycho Grouwstra 
 * Vadi Taslim 
+* Vakhurin Sergey 
 * Vidar Tonaas Fauske
 * Viktor Zozulyak
 * Vilic Vane
 * Vladimir Kurchatkin 
 * Vladimir Matveev
+* Wenlu Wang 
 * Wesley Wigham
 * William Orr 
+* Wilson Hobbs 
 * York Yao
 * @yortus
 * Yuichi Nukiyama
+* Yuval Greenfield 
+* Zeeshan Ahmed 
 * Zev Spitz
 * Zhengbo Li
