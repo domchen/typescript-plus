@@ -653,6 +653,7 @@ declare namespace ts {
         kind: SyntaxKind.MethodDeclaration;
         name: PropertyName;
         body?: FunctionBody;
+        isJumpTarget?: boolean;
     }
     interface ConstructorDeclaration extends FunctionLikeDeclarationBase, ClassElement, JSDocContainer {
         kind: SyntaxKind.Constructor;
@@ -1249,6 +1250,7 @@ declare namespace ts {
         typeParameters?: NodeArray<TypeParameterDeclaration>;
         heritageClauses?: NodeArray<HeritageClause>;
         members: NodeArray<ClassElement>;
+        typeNames?: string[];
     }
     interface ClassDeclaration extends ClassLikeDeclarationBase, DeclarationStatement {
         kind: SyntaxKind.ClassDeclaration;
@@ -2329,6 +2331,11 @@ declare namespace ts {
         /** Paths used to compute primary types search locations */
         typeRoots?: string[];
         esModuleInterop?: boolean;
+        accessorOptimization?: boolean;
+        defines?: MapLike<any>;
+        emitReflection?: boolean;
+        noEmitJs?: boolean;
+        reorderFiles?: boolean;
         [option: string]: CompilerOptionsValue | JsonSourceFile | undefined;
     }
     interface TypeAcquisition {
@@ -2813,6 +2820,9 @@ declare namespace ts {
     const versionMajorMinor = "2.7";
     /** The version of the TypeScript compiler release */
     const version: string;
+}
+declare namespace ts {
+    const version_plus = "2.7.2";
 }
 declare namespace ts {
     function isExternalModuleNameRelative(moduleName: string): boolean;
