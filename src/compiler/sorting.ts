@@ -54,8 +54,8 @@ namespace ts {
     }
 
     export function reorderSourceFiles(program: Program): SortingResult {
-        sourceFiles = program.getSourceFiles();
-        rootFileNames = program.getRootFileNames();
+        sourceFiles = <any>program.getSourceFiles();
+        rootFileNames = <any>program.getRootFileNames();
         checker = program.getTypeChecker();
         buildDependencyMap();
         let result = sortOnDependency();
@@ -113,7 +113,11 @@ namespace ts {
                 visitExpression(expression.expression);
                 break;
             case SyntaxKind.ClassDeclaration:
-                visitClassLike(<ClassDeclaration>statement);
+                checkInheriting(<ClassDeclaration>statement);
+                visitStaticMember(<ClassDeclaration>statement);
+                if (statement.transformFlags & TransformFlags.ContainsDecorators) {
+                    visitClassDecorators(<ClassDeclaration>statement);
+                }
                 break;
             case SyntaxKind.VariableStatement:
                 visitVariableList((<VariableStatement>statement).declarationList);
@@ -196,11 +200,6 @@ namespace ts {
                     visitBlock(tryStatement.catchClause.block);
                 }
                 break;
-            case ts.SyntaxKind.EnumDeclaration:
-                (<EnumDeclaration>statement).members.forEach(element => {
-                    visitExpression(element.initializer);
-                })
-                break;
         }
     }
 
@@ -232,37 +231,82 @@ namespace ts {
         addDependency(getSourceFileOfNode(node).fileName, sourceFile.fileName);
     }
 
-    function visitClassLike(node: ClassLikeDeclaration) {
-        if (node.heritageClauses) {
-            let heritage = node.heritageClauses.filter(clause => {
-                return clause.token == ts.SyntaxKind.ExtendsKeyword;
-            })[0];
-
-            if (heritage && heritage.types) {
-                heritage.types.forEach(superClass => {
-                    checkDependencyAtLocation(superClass.expression);
-                });
+    function checkInheriting(node: ClassDeclaration): void {
+        if (!node.heritageClauses) {
+            return;
+        }
+        let heritageClause: HeritageClause = null;
+        for (const clause of node.heritageClauses) {
+            if (clause.token === SyntaxKind.ExtendsKeyword) {
+                heritageClause = clause;
+                break;
             }
         }
+        if (!heritageClause) {
+            return;
+        }
+        let superClasses = heritageClause.types;
+        if (!superClasses) {
+            return;
+        }
+        superClasses.forEach(superClass => {
+            checkDependencyAtLocation(superClass.expression);
+        });
+    }
+
+    function visitStaticMember(node: ClassDeclaration): void {
+        let members = node.members;
+        if (!members) {
+            return;
+        }
+        for (let member of members) {
+            if (!hasModifier(member, ModifierFlags.Static)) {
+                continue;
+            }
+            if (member.kind == SyntaxKind.PropertyDeclaration) {
+                let property = <PropertyDeclaration>member;
+                visitExpression(property.initializer);
+            }
+        }
+    }
+
+    function visitClassDecorators(node: ClassDeclaration): void {
         if (node.decorators) {
             visitDecorators(node.decorators);
         }
-        if (node.members) {
-            for (const member of node.members) {
-                visitDecorators(member.decorators);
+        let members = node.members;
+        if (!members) {
+            return;
+        }
+        for (let member of members) {
+            let decorators: NodeArray<Decorator>;
+            let functionLikeMember: FunctionLikeDeclaration;
+            if (member.kind === SyntaxKind.GetAccessor || member.kind === SyntaxKind.SetAccessor) {
+                const accessors = getAllAccessorDeclarations(node.members, <AccessorDeclaration>member);
+                if (member !== accessors.firstAccessor) {
+                    continue;
+                }
+                decorators = accessors.firstAccessor.decorators;
+                if (!decorators && accessors.secondAccessor) {
+                    decorators = accessors.secondAccessor.decorators;
+                }
+                functionLikeMember = accessors.setAccessor;
+            }
+            else {
+                decorators = member.decorators;
+                if (member.kind === SyntaxKind.MethodDeclaration) {
+                    functionLikeMember = <MethodDeclaration>member;
+                }
+            }
+            if (decorators) {
+                visitDecorators(decorators);
+            }
 
-                switch (member.kind) {
-                    case ts.SyntaxKind.PropertyDeclaration:
-                        if (hasModifier(member, ModifierFlags.Static)) {
-                            visitExpression((<ts.PropertyDeclaration>member).initializer);
-                        }
-                        break;
-                    case ts.SyntaxKind.SetAccessor:
-                    case ts.SyntaxKind.MethodDeclaration:
-                        (<ts.MethodDeclaration>member).parameters.forEach(parameter => {
-                            visitDecorators(parameter.decorators);
-                        });
-                        break;
+            if (functionLikeMember) {
+                for (const parameter of functionLikeMember.parameters) {
+                    if (parameter.decorators) {
+                        visitDecorators(parameter.decorators);
+                    }
                 }
             }
         }
@@ -288,12 +332,9 @@ namespace ts {
                 break;
             case SyntaxKind.PropertyAccessExpression:
                 checkDependencyAtLocation(expression);
-                visitExpression((<PropertyAccessExpression>expression).expression);
                 break;
             case SyntaxKind.ElementAccessExpression:
-                let elementAccess = <ElementAccessExpression>expression;
-                visitExpression(elementAccess.expression);
-                visitExpression(elementAccess.argumentExpression);
+                visitExpression((<PropertyAccessExpression>expression).expression);
                 break;
             case SyntaxKind.ObjectLiteralExpression:
                 visitObjectLiteralExpression(<ObjectLiteralExpression>expression);
@@ -308,10 +349,6 @@ namespace ts {
                     visitExpression(span.expression);
                 });
                 break;
-            case ts.SyntaxKind.TaggedTemplateExpression:
-                visitExpression((<TaggedTemplateExpression>expression).tag);
-                visitExpression((<TaggedTemplateExpression>expression).template);
-                break;
             case SyntaxKind.ParenthesizedExpression:
                 let parenthesized = <ParenthesizedExpression>expression;
                 visitExpression(parenthesized.expression);
@@ -323,16 +360,20 @@ namespace ts {
             case SyntaxKind.PrefixUnaryExpression:
                 visitExpression((<PrefixUnaryExpression>expression).operand);
                 break;
-            case ts.SyntaxKind.ConditionalExpression: {
+            case SyntaxKind.DeleteExpression:
+                visitExpression((<DeleteExpression>expression).expression);
+                break;
+            case ts.SyntaxKind.TaggedTemplateExpression:
+                visitExpression((<TaggedTemplateExpression>expression).tag);
+                visitExpression((<TaggedTemplateExpression>expression).template);
+                break;
+            case ts.SyntaxKind.ConditionalExpression: 
                 visitExpression((<ts.ConditionalExpression>expression).condition);
                 visitExpression((<ts.ConditionalExpression>expression).whenTrue);
                 visitExpression((<ts.ConditionalExpression>expression).whenFalse);
                 break;
-            }
-            case SyntaxKind.DeleteExpression:
-                visitExpression((<DeleteExpression>expression).expression);
-                break;
-            case ts.SyntaxKind.SpreadElement:
+            
+                case ts.SyntaxKind.SpreadElement:
                 visitExpression((<SpreadElement>expression).expression);
                 break;
             case ts.SyntaxKind.VoidExpression:
@@ -353,15 +394,13 @@ namespace ts {
             case ts.SyntaxKind.TypeAssertionExpression:
                 visitExpression((<TypeAssertion>expression).expression);
                 break;
-            case ts.SyntaxKind.ClassExpression: {
-                visitClassLike(<ts.ClassExpression>expression);
-                break;
-            }
         }
 
         // FunctionExpression
         // ArrowFunction
+        // ClassExpression
         // OmittedExpression
+        // ExpressionWithTypeArguments
         // AsExpression
     }
 
@@ -506,37 +545,6 @@ namespace ts {
                     break;
             }
         }
-    }
-
-    function checkReferenceOfCallExpression(reference: Node): void {
-        let symbol = checker.getSymbolAtLocation(reference);
-        if (!symbol || !symbol.declarations) {
-            return;
-        }
-        let fileName = getSourceFileOfNode(reference).fileName;
-        for (let declaration of symbol.declarations) {
-            let sourceFile = getSourceFileOfNode(declaration);
-            if (!sourceFile) {
-                continue;
-            }
-            addDependency(fileName, sourceFile.fileName);
-            switch (declaration.kind) {
-                case SyntaxKind.FunctionDeclaration:
-                case SyntaxKind.MethodDeclaration:
-                    visitBlock((<FunctionDeclaration>declaration).body);
-                    break;
-                case SyntaxKind.ClassDeclaration:
-                    checkClassInstantiation(<ClassDeclaration>declaration);
-                    break;
-                case SyntaxKind.ImportEqualsDeclaration:
-                    checkReferenceOfCallExpression((<ImportEqualsDeclaration>declaration).moduleReference);
-                    break;
-                case SyntaxKind.VariableDeclaration:
-
-                    break;
-            }
-        }
-
     }
 
     function checkClassInstantiation(node: ClassDeclaration): void {

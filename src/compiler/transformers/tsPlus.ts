@@ -82,7 +82,7 @@ namespace ts {
             return node
         }
 
-        function updateModuleBlock(node: ModuleBlock, statements: Statement[]) {
+        function updateModuleBlock(node: ModuleBlock, statements: NodeArray<Statement>) {
             if (node.statements !== statements) {
                 let updated = getMutableClone(node);
                 updated.statements = createNodeArray(statements);
@@ -124,7 +124,7 @@ namespace ts {
         }
 
         function getImplementedInterfaces(node: Node, result: any) {
-            let superInterfaces: any[] = null;
+            let superInterfaces: NodeArray<any> = null;
             if (node.kind === SyntaxKind.ClassDeclaration) {
                 superInterfaces = getClassImplementsHeritageClauseElements(<ClassLikeDeclaration>node);
             }
@@ -187,7 +187,8 @@ namespace ts {
         }
 
         function isDefinedConstant(node: Identifier): boolean {
-            if (compilerDefines[node.text] === undefined) {
+            let nodeText = ts.getTextOfIdentifierOrLiteral(node);
+            if (compilerDefines[nodeText] === undefined) {
                 return false;
             }
             if (!node.parent) {
@@ -226,7 +227,8 @@ namespace ts {
         function onSubstituteNode(hint: EmitHint, node: Node) {
             node = previousOnSubstituteNode(hint, node);
             if (isIdentifier(node) && isDefinedConstant(node)) {
-                return createIdentifier(compilerDefines[node.text]);
+                let nodeText = ts.getTextOfIdentifierOrLiteral(node);
+                return createIdentifier(compilerDefines[nodeText]);
             }
             return node;
         }
