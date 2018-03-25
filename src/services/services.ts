@@ -1402,7 +1402,11 @@ namespace ts {
         function getSyntacticDiagnostics(fileName: string): Diagnostic[] {
             synchronizeHostData();
 
-            return program.getSyntacticDiagnostics(getValidSourceFile(fileName), cancellationToken).slice();
+            let targetSourceFile: SourceFile;
+            if (fileName) {
+                targetSourceFile = getValidSourceFile(fileName);
+            }
+            return program.getSyntacticDiagnostics(targetSourceFile, cancellationToken).slice();
         }
 
         /**
@@ -1412,7 +1416,10 @@ namespace ts {
         function getSemanticDiagnostics(fileName: string): Diagnostic[] {
             synchronizeHostData();
 
-            const targetSourceFile = getValidSourceFile(fileName);
+            let targetSourceFile: SourceFile;
+            if (fileName) {
+                targetSourceFile = getValidSourceFile(fileName);
+            }
 
             // Only perform the action per file regardless of '-out' flag as LanguageServiceHost is expected to call this function per file.
             // Therefore only get diagnostics for given file.
@@ -1652,7 +1659,11 @@ namespace ts {
         function getEmitOutput(fileName: string, emitOnlyDtsFiles?: boolean) {
             synchronizeHostData();
 
-            const sourceFile = getValidSourceFile(fileName);
+            let sourceFile: SourceFile;
+            if (fileName) {
+                sourceFile = getValidSourceFile(fileName);
+            }
+
             const customTransformers = host.getCustomTransformers && host.getCustomTransformers();
             return getFileEmitOutput(program, sourceFile, emitOnlyDtsFiles, cancellationToken, customTransformers);
         }
