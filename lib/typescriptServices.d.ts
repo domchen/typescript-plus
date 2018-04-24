@@ -2822,7 +2822,7 @@ declare namespace ts {
     const version: string;
 }
 declare namespace ts {
-    const version_plus = "2.7.2";
+    const version_plus = "2.7.3";
 }
 declare namespace ts {
     function isExternalModuleNameRelative(moduleName: string): boolean;
