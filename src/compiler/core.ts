@@ -10,7 +10,7 @@ namespace ts {
 }
 
 namespace ts {
-    export const version_plus = "2.7.3";
+    export const version_plus = "2.7.4";
 }
 
 namespace ts {
