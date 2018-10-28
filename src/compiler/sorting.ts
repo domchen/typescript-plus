@@ -701,7 +701,7 @@ namespace ts {
                 return references;
             }
             let result = updatePathWeight(parentPath, weight + 1, references.concat(parentPath));
-            if (result) {
+            if (result.length > 0) {
                 return result;
             }
         }
