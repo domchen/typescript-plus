@@ -37,7 +37,7 @@ namespace ts {
             context.enableSubstitution(SyntaxKind.Identifier);
         }
 
-        return transformSourceFile;
+        return chainBundle(transformSourceFile);
 
         function transformSourceFile(node: SourceFile) {
             if (!compilerOptions.emitReflection) {
