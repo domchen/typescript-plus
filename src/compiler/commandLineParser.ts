@@ -1134,7 +1134,8 @@ namespace ts {
 
     /* @internal */
     export function printVersion() {
-        sys.write(getDiagnosticText(Diagnostics.Version_0, version) + sys.newLine);
+        sys.write("Version : " + ts.version_plus + sys.newLine);
+        sys.write("typescript-version : " + ts.version + sys.newLine);
     }
 
     /* @internal */
