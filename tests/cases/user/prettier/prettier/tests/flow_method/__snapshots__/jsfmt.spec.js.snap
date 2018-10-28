@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`comment.js 1`] = `
+type Foo = {
+  method(
+    arg: number, // I belong with baz
+    qux: string
+  ) : void
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+type Foo = {
+  method(
+    arg: number, // I belong with baz
+    qux: string
+  ): void
+};
+
+`;
+
+exports[`method.js 1`] = `
+type T = { method: () => void };
+type T = { method(): void };
+declare class X { method(): void }
+declare function f(): void;
+var f: () => void;
+
+declare class X {
+  static deserialize(): mixed,
+  static deserialize: () => mixed,
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+type T = { method: () => void };
+type T = { method(): void };
+declare class X { method(): void }
+declare function f(): void;
+var f: () => void;
+
+declare class X {
+  static deserialize(): mixed;
+  static deserialize: () => mixed;
+}
+
+`;

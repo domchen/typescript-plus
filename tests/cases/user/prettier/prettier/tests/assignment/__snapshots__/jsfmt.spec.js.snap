@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`binaryish.js 1`] = `
+const computedDescriptionLines = (showConfirm &&
+  descriptionLinesConfirming) ||
+  (focused && !loading && descriptionLinesFocused) ||
+  descriptionLines;
+
+computedDescriptionLines = (focused &&
+  !loading &&
+  descriptionLinesFocused) ||
+  descriptionLines;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const computedDescriptionLines =
+  (showConfirm && descriptionLinesConfirming) ||
+  (focused && !loading && descriptionLinesFocused) ||
+  descriptionLines;
+
+computedDescriptionLines =
+  (focused && !loading && descriptionLinesFocused) || descriptionLines;
+
+`;
+
+exports[`sequence.js 1`] = `
+for ((i = 0), (len = arr.length); i < len; i++) {
+  console.log(arr[i])
+}
+
+for (i = 0, len = arr.length; i < len; i++) {
+  console.log(arr[i])
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for (i = 0, len = arr.length; i < len; i++) {
+  console.log(arr[i]);
+}
+
+for (i = 0, len = arr.length; i < len; i++) {
+  console.log(arr[i]);
+}
+
+`;

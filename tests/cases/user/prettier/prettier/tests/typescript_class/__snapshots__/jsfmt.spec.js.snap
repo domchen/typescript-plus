@@ -1,0 +1,173 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`constructor.ts 1`] = `
+class foo {
+  constructor(static a: number) {}
+}
+
+class foo {
+  constructor(export a: number) {}
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class foo {
+  constructor(static a: number) {}
+}
+
+class foo {
+  constructor(export a: number) {}
+}
+
+`;
+
+exports[`dunder.ts 1`] = `
+// eslint/typescript-eslint-parser#296
+class F<__T> {}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// eslint/typescript-eslint-parser#296
+class F<__T> {}
+
+`;
+
+exports[`extends_implements.ts 1`] = `
+class Class extends AbstractClass implements Interface1, Interface2, Interface3, Interface4 {}
+
+class ExtendsAbstractClassAndImplementsInterfaces extends AbstractClass
+  implements Interface1, Interface2, Interface3, Interface4 {}
+
+class ExtendsAbstractClassAndImplementsInterfaces
+  extends AAAAAAAAAAAAAAbstractClass
+  implements Interface1, Interface2, Interface3, Interface4 {}
+
+class ExtendsAbstractClassAndImplementsInterfaces
+  extends AAAAAAAAAAAAAAbstractClass
+  implements
+    Interface1,
+    Interface2,
+    Interface3,
+    Interface4,
+    Interface5,
+    Interface6,
+    Interface7,
+    Interface8 {}
+
+class ExtendsAbstractClassAndImplementsInterfaces
+  extends AAAAAAAAAAAAAAbstractClass<Type1, Type2, Type3, Type4, Type5, Type6, Type7> {} 
+
+class ExtendsAbstractClassAndImplementsInterfaces
+  extends AAAAAAAAAAAAAAbstractClass<Type1, Type2, Type3, Type4, Type5, Type6, Type7>
+  implements
+    Interface1,
+    Interface2,
+    Interface3,
+    Interface4,
+    Interface5,
+    Interface6,
+    Interface7,
+    Interface8 {}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class Class extends AbstractClass
+  implements Interface1, Interface2, Interface3, Interface4 {}
+
+class ExtendsAbstractClassAndImplementsInterfaces extends AbstractClass
+  implements Interface1, Interface2, Interface3, Interface4 {}
+
+class ExtendsAbstractClassAndImplementsInterfaces
+  extends AAAAAAAAAAAAAAbstractClass
+  implements Interface1, Interface2, Interface3, Interface4 {}
+
+class ExtendsAbstractClassAndImplementsInterfaces
+  extends AAAAAAAAAAAAAAbstractClass
+  implements
+    Interface1,
+    Interface2,
+    Interface3,
+    Interface4,
+    Interface5,
+    Interface6,
+    Interface7,
+    Interface8 {}
+
+class ExtendsAbstractClassAndImplementsInterfaces extends AAAAAAAAAAAAAAbstractClass<
+  Type1,
+  Type2,
+  Type3,
+  Type4,
+  Type5,
+  Type6,
+  Type7
+> {}
+
+class ExtendsAbstractClassAndImplementsInterfaces
+  extends AAAAAAAAAAAAAAbstractClass<
+    Type1,
+    Type2,
+    Type3,
+    Type4,
+    Type5,
+    Type6,
+    Type7
+  >
+  implements
+    Interface1,
+    Interface2,
+    Interface3,
+    Interface4,
+    Interface5,
+    Interface6,
+    Interface7,
+    Interface8 {}
+
+`;
+
+exports[`generics.ts 1`] = `
+class<T> implements Map<T> {}
+
+interface AudioBufferList {
+	mBuffers: interop.Reference<any /*AudioBuffer*/>;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class<T> implements Map<T> {}
+
+interface AudioBufferList {
+  mBuffers: interop.Reference<any /*AudioBuffer*/>;
+}
+
+`;
+
+exports[`methods.ts 1`] = `
+class X {
+    optionalMethod?() {}
+}
+
+interface Iterable<T> {
+  export [Symbol.iterator](): Iterator<T>;
+}
+
+export class Check {
+  private static property = 'test';
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class X {
+  optionalMethod?() {}
+}
+
+interface Iterable<T> {
+  export [Symbol.iterator](): Iterator<T>;
+}
+
+export class Check {
+  private static property = "test";
+}
+
+`;
+
+exports[`optional.ts 1`] = `
+class X {
+  private foo? = undefined;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class X {
+  private foo? = undefined;
+}
+
+`;

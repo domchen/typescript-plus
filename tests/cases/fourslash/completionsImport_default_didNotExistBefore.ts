@@ -1,6 +1,6 @@
 /// <reference path="fourslash.ts" />
 
-// @noLib: true
+// @module: esnext
 
 // @Filename: /a.ts
 ////export default function foo() {}
@@ -17,7 +17,7 @@ verify.completionListContains({ name: "foo", source: "/a" }, "function foo(): vo
 verify.applyCodeActionFromCompletion("", {
     name: "foo",
     source: "/a",
-    description: `Import 'foo' from module "./a"`,
+    description: `Import default 'foo' from module "./a"`,
     newFileContent: `import foo from "./a";
 
 f;`,

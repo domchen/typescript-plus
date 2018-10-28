@@ -1,12 +1,14 @@
+/// <reference path="fourslash.ts"/>
+
 // @esModuleInterop: true
 
 // @Filename: /abc.d.ts
 ////declare module "a" {
-////    export const [|x|]: number;
+////    export const [|{| "isWriteAccess": true, "isDefinition": true |}x|]: number;
 ////}
 
 // @Filename: /b.ts
-////import * as a from "a";
+////import a from "a";
 ////a.[|x|];
 
-verify.rangesReferenceEachOther();
+verify.singleReferenceGroup("const x: number");

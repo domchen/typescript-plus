@@ -68,19 +68,36 @@ function f10(shape: Shape) {
     setProperty(shape, cond ? "name" : "size", 10);  // Error
 }
 
-function f20<T, U>(k1: keyof (T | U), k2: keyof (T & U), o1: T | U, o2: T & U) {
-    o1[k1];
-    o1[k2];   // Error
-    o2[k1];
-    o2[k2];
-    o1 = o2;
-    o2 = o1;  // Error
-    k1 = k2;  // Error
+function f20<T, U>(x: T | U, y: T & U, k1: keyof (T | U), k2: keyof T & keyof U, k3: keyof (T & U), k4: keyof T | keyof U) {
+    x[k1];
+    x[k2];
+    x[k3];  // Error
+    x[k4];  // Error
+
+    y[k1];
+    y[k2];
+    y[k3];
+    y[k4];
+
+    k1 = k2;
+    k1 = k3;  // Error
+    k1 = k4;  // Error
+
     k2 = k1;
+    k2 = k3;  // Error
+    k2 = k4;  // Error
+
+    k3 = k1;
+    k3 = k2;
+    k3 = k4;
+
+    k4 = k1;
+    k4 = k2;
+    k4 = k3;
 }
 
 // Repro from #17166
-function f3<T, K extends keyof T, U extends T, J extends K>(
+function f3<T, K extends Extract<keyof T, string>, U extends T, J extends K>(
     t: T, k: K, tk: T[K], u: U, j: J, uk: U[K], tj: T[J], uj: U[J]): void {
     for (let key in t) {
         key = k // ok, K ==> keyof T
@@ -99,6 +116,12 @@ function f3<T, K extends keyof T, U extends T, J extends K>(
 
     tk = uj;
     uj = tk; // error
+}
+
+// The constraint of 'keyof T' is 'keyof T'
+function f4<T extends { [K in keyof T]: string }>(k: keyof T) {
+    k = 42; // error
+    k = "hello"; // error
 }
 
 
@@ -122,15 +145,27 @@ function f10(shape) {
     setProperty(shape, "size", 10); // Error
     setProperty(shape, cond ? "name" : "size", 10); // Error
 }
-function f20(k1, k2, o1, o2) {
-    o1[k1];
-    o1[k2]; // Error
-    o2[k1];
-    o2[k2];
-    o1 = o2;
-    o2 = o1; // Error
-    k1 = k2; // Error
+function f20(x, y, k1, k2, k3, k4) {
+    x[k1];
+    x[k2];
+    x[k3]; // Error
+    x[k4]; // Error
+    y[k1];
+    y[k2];
+    y[k3];
+    y[k4];
+    k1 = k2;
+    k1 = k3; // Error
+    k1 = k4; // Error
     k2 = k1;
+    k2 = k3; // Error
+    k2 = k4; // Error
+    k3 = k1;
+    k3 = k2;
+    k3 = k4;
+    k4 = k1;
+    k4 = k2;
+    k4 = k3;
 }
 // Repro from #17166
 function f3(t, k, tk, u, j, uk, tj, uj) {
@@ -148,4 +183,9 @@ function f3(t, k, tk, u, j, uk, tj, uj) {
     tj = tk; // error
     tk = uj;
     uj = tk; // error
+}
+// The constraint of 'keyof T' is 'keyof T'
+function f4(k) {
+    k = 42; // error
+    k = "hello"; // error
 }

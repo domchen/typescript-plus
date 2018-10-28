@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`checks stdin with --debug-check (write) 1`] = `Array []`;
+
+exports[`doesn't crash when --debug-check is passed (write) 1`] = `Array []`;
+
+exports[`show diff for 2+ error files with --debug-check (stderr) 1`] = `
+"[error] a.debug-check: prettier(input) !== prettier(prettier(input))
+[error] Index: 
+[error] ===================================================================
+[error] --- 	
+[error] +++ 	
+[error] @@ -1,2 +1,4 @@
+[error]  hello
+[error]  hello
+[error] +hello
+[error] +hello
+[error] 
+[error] b.debug-check: prettier(input) !== prettier(prettier(input))
+[error] Index: 
+[error] ===================================================================
+[error] --- 	
+[error] +++ 	
+[error] @@ -1,2 +1,4 @@
+[error]  world
+[error]  world
+[error] +world
+[error] +world
+[error] 
+"
+`;
+
+exports[`show diff for 2+ error files with --debug-check (stdout) 1`] = `
+"
+
+"
+`;
+
+exports[`show diff for 2+ error files with --debug-check (write) 1`] = `Array []`;

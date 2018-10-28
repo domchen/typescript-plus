@@ -1,6 +1,3 @@
-/// <reference path="core.ts"/>
-/// <reference path="diagnosticInformationMap.generated.ts"/>
-
 namespace ts {
     export type ErrorCallback = (message: DiagnosticMessage, length: number) => void;
 
@@ -33,18 +30,20 @@ namespace ts {
         reScanTemplateToken(): SyntaxKind;
         scanJsxIdentifier(): SyntaxKind;
         scanJsxAttributeValue(): SyntaxKind;
-        reScanJsxToken(): SyntaxKind;
-        scanJsxToken(): SyntaxKind;
+        reScanJsxToken(): JsxTokenSyntaxKind;
+        scanJsxToken(): JsxTokenSyntaxKind;
         scanJSDocToken(): JsDocSyntaxKind;
         scan(): SyntaxKind;
         getText(): string;
         // Sets the text for the scanner to scan.  An optional subrange starting point and length
         // can be provided to have the scanner only scan a portion of the text.
-        setText(text: string, start?: number, length?: number): void;
-        setOnError(onError: ErrorCallback): void;
+        setText(text: string | undefined, start?: number, length?: number): void;
+        setOnError(onError: ErrorCallback | undefined): void;
         setScriptTarget(scriptTarget: ScriptTarget): void;
         setLanguageVariant(variant: LanguageVariant): void;
         setTextPos(textPos: number): void;
+        /* @internal */
+        setInJSDocType(inType: boolean): void;
         // Invokes the provided callback then unconditionally restores the scanner to the state it
         // was in immediately prior to invoking the callback.  The result of invoking the callback
         // is returned from this function.
@@ -92,6 +91,7 @@ namespace ts {
         "implements": SyntaxKind.ImplementsKeyword,
         "import": SyntaxKind.ImportKeyword,
         "in": SyntaxKind.InKeyword,
+        "infer": SyntaxKind.InferKeyword,
         "instanceof": SyntaxKind.InstanceOfKeyword,
         "interface": SyntaxKind.InterfaceKeyword,
         "is": SyntaxKind.IsKeyword,
@@ -126,6 +126,7 @@ namespace ts {
         "typeof": SyntaxKind.TypeOfKeyword,
         "undefined": SyntaxKind.UndefinedKeyword,
         "unique": SyntaxKind.UniqueKeyword,
+        "unknown": SyntaxKind.UnknownKeyword,
         "var": SyntaxKind.VarKeyword,
         "void": SyntaxKind.VoidKeyword,
         "while": SyntaxKind.WhileKeyword,
@@ -268,14 +269,14 @@ namespace ts {
         return false;
     }
 
-    /* @internal */ export function isUnicodeIdentifierStart(code: number, languageVersion: ScriptTarget) {
-        return languageVersion >= ScriptTarget.ES5 ?
+    /* @internal */ export function isUnicodeIdentifierStart(code: number, languageVersion: ScriptTarget | undefined) {
+        return languageVersion! >= ScriptTarget.ES5 ?
             lookupInUnicodeMap(code, unicodeES5IdentifierStart) :
             lookupInUnicodeMap(code, unicodeES3IdentifierStart);
     }
 
-    function isUnicodeIdentifierPart(code: number, languageVersion: ScriptTarget) {
-        return languageVersion >= ScriptTarget.ES5 ?
+    function isUnicodeIdentifierPart(code: number, languageVersion: ScriptTarget | undefined) {
+        return languageVersion! >= ScriptTarget.ES5 ?
             lookupInUnicodeMap(code, unicodeES5IdentifierPart) :
             lookupInUnicodeMap(code, unicodeES3IdentifierPart);
     }
@@ -329,13 +330,16 @@ namespace ts {
         return result;
     }
 
-    export function getPositionOfLineAndCharacter(sourceFile: SourceFile, line: number, character: number): number {
+    export function getPositionOfLineAndCharacter(sourceFile: SourceFileLike, line: number, character: number): number {
         return computePositionOfLineAndCharacter(getLineStarts(sourceFile), line, character, sourceFile.text);
     }
 
     /* @internal */
     export function computePositionOfLineAndCharacter(lineStarts: ReadonlyArray<number>, line: number, character: number, debugText?: string): number {
-        Debug.assert(line >= 0 && line < lineStarts.length);
+        if (line < 0 || line >= lineStarts.length) {
+            Debug.fail(`Bad line number. Line: ${line}, lineStarts.length: ${lineStarts.length} , line map is correct? ${debugText !== undefined ? arraysEqual(lineStarts, computeLineStarts(debugText)) : "unknown"}`);
+        }
+
         const res = lineStarts[line] + character;
         if (line < lineStarts.length - 1) {
             Debug.assert(res < lineStarts[line + 1]);
@@ -600,7 +604,7 @@ namespace ts {
     }
 
     function scanShebangTrivia(text: string, pos: number) {
-        const shebang = shebangTriviaRegex.exec(text)[0];
+        const shebang = shebangTriviaRegex.exec(text)![0];
         pos = pos + shebang.length;
         return pos;
     }
@@ -625,11 +629,11 @@ namespace ts {
      * @returns If "reduce" is true, the accumulated value. If "reduce" is false, the first truthy
      *      return value of the callback.
      */
-    function iterateCommentRanges<T, U>(reduce: boolean, text: string, pos: number, trailing: boolean, cb: (pos: number, end: number, kind: CommentKind, hasTrailingNewLine: boolean, state: T, memo: U) => U, state: T, initial?: U): U {
-        let pendingPos: number;
-        let pendingEnd: number;
-        let pendingKind: CommentKind;
-        let pendingHasTrailingNewLine: boolean;
+    function iterateCommentRanges<T, U>(reduce: boolean, text: string, pos: number, trailing: boolean, cb: (pos: number, end: number, kind: CommentKind, hasTrailingNewLine: boolean, state: T, memo: U | undefined) => U, state: T, initial?: U): U | undefined {
+        let pendingPos!: number;
+        let pendingEnd!: number;
+        let pendingKind!: CommentKind;
+        let pendingHasTrailingNewLine!: boolean;
         let hasPendingCommentRange = false;
         let collecting = trailing || pos === 0;
         let accumulator = initial;
@@ -692,8 +696,6 @@ namespace ts {
                                     // If we are not reducing and we have a truthy result, return it.
                                     return accumulator;
                                 }
-
-                                hasPendingCommentRange = false;
                             }
 
                             pendingPos = startPos;
@@ -770,20 +772,20 @@ namespace ts {
         }
     }
 
-    export function isIdentifierStart(ch: number, languageVersion: ScriptTarget): boolean {
+    export function isIdentifierStart(ch: number, languageVersion: ScriptTarget | undefined): boolean {
         return ch >= CharacterCodes.A && ch <= CharacterCodes.Z || ch >= CharacterCodes.a && ch <= CharacterCodes.z ||
             ch === CharacterCodes.$ || ch === CharacterCodes._ ||
             ch > CharacterCodes.maxAsciiCharacter && isUnicodeIdentifierStart(ch, languageVersion);
     }
 
-    export function isIdentifierPart(ch: number, languageVersion: ScriptTarget): boolean {
+    export function isIdentifierPart(ch: number, languageVersion: ScriptTarget | undefined): boolean {
         return ch >= CharacterCodes.A && ch <= CharacterCodes.Z || ch >= CharacterCodes.a && ch <= CharacterCodes.z ||
             ch >= CharacterCodes._0 && ch <= CharacterCodes._9 || ch === CharacterCodes.$ || ch === CharacterCodes._ ||
             ch > CharacterCodes.maxAsciiCharacter && isUnicodeIdentifierPart(ch, languageVersion);
     }
 
     /* @internal */
-    export function isIdentifierText(name: string, languageVersion: ScriptTarget): boolean {
+    export function isIdentifierText(name: string, languageVersion: ScriptTarget | undefined): boolean {
         if (!isIdentifierStart(name.charCodeAt(0), languageVersion)) {
             return false;
         }
@@ -801,12 +803,15 @@ namespace ts {
     export function createScanner(languageVersion: ScriptTarget,
                                   skipTrivia: boolean,
                                   languageVariant = LanguageVariant.Standard,
-                                  text?: string,
+                                  textInitial?: string,
                                   onError?: ErrorCallback,
                                   start?: number,
                                   length?: number): Scanner {
+        let text = textInitial!;
+
         // Current position (end position of text of current token)
         let pos: number;
+
 
         // end of text
         let end: number;
@@ -818,8 +823,10 @@ namespace ts {
         let tokenPos: number;
 
         let token: SyntaxKind;
-        let tokenValue: string;
+        let tokenValue!: string;
         let tokenFlags: TokenFlags;
+
+        let inJSDocType = 0;
 
         setText(text, start, length);
 
@@ -851,6 +858,7 @@ namespace ts {
             setLanguageVariant,
             setOnError,
             setTextPos,
+            setInJSDocType,
             tryScan,
             lookAhead,
             scanRange,
@@ -908,8 +916,8 @@ namespace ts {
         function scanNumber(): string {
             const start = pos;
             const mainFragment = scanNumberFragment();
-            let decimalFragment: string;
-            let scientificFragment: string;
+            let decimalFragment: string | undefined;
+            let scientificFragment: string | undefined;
             if (text.charCodeAt(pos) === CharacterCodes.dot) {
                 pos++;
                 decimalFragment = scanNumberFragment();
@@ -1286,7 +1294,7 @@ namespace ts {
             if (len >= 2 && len <= 11) {
                 const ch = tokenValue.charCodeAt(0);
                 if (ch >= CharacterCodes.a && ch <= CharacterCodes.z) {
-                    token = textToToken.get(tokenValue);
+                    token = textToToken.get(tokenValue)!;
                     if (token !== undefined) {
                         return token;
                     }
@@ -1306,7 +1314,7 @@ namespace ts {
             let isPreviousTokenSeparator = false;
             while (true) {
                 const ch = text.charCodeAt(pos);
-                // Numeric seperators are allowed anywhere within a numeric literal, except not at the beginning, or following another separator
+                // Numeric separators are allowed anywhere within a numeric literal, except not at the beginning, or following another separator
                 if (ch === CharacterCodes._) {
                     tokenFlags |= TokenFlags.ContainsSeparator;
                     if (separatorAllowed) {
@@ -1347,6 +1355,7 @@ namespace ts {
         function scan(): SyntaxKind {
             startPos = pos;
             tokenFlags = 0;
+            let asteriskSeen = false;
             while (true) {
                 tokenPos = pos;
                 if (pos >= end) {
@@ -1387,6 +1396,24 @@ namespace ts {
                     case CharacterCodes.verticalTab:
                     case CharacterCodes.formFeed:
                     case CharacterCodes.space:
+                    case CharacterCodes.nonBreakingSpace:
+                    case CharacterCodes.ogham:
+                    case CharacterCodes.enQuad:
+                    case CharacterCodes.emQuad:
+                    case CharacterCodes.enSpace:
+                    case CharacterCodes.emSpace:
+                    case CharacterCodes.threePerEmSpace:
+                    case CharacterCodes.fourPerEmSpace:
+                    case CharacterCodes.sixPerEmSpace:
+                    case CharacterCodes.figureSpace:
+                    case CharacterCodes.punctuationSpace:
+                    case CharacterCodes.thinSpace:
+                    case CharacterCodes.hairSpace:
+                    case CharacterCodes.zeroWidthSpace:
+                    case CharacterCodes.narrowNoBreakSpace:
+                    case CharacterCodes.mathematicalSpace:
+                    case CharacterCodes.ideographicSpace:
+                    case CharacterCodes.byteOrderMark:
                         if (skipTrivia) {
                             pos++;
                             continue;
@@ -1444,6 +1471,11 @@ namespace ts {
                             return pos += 2, token = SyntaxKind.AsteriskAsteriskToken;
                         }
                         pos++;
+                        if (inJSDocType && !asteriskSeen && (tokenFlags & TokenFlags.PrecedingLineBreak)) {
+                            // decoration at the start of a JSDoc comment line
+                            asteriskSeen = true;
+                            continue;
+                        }
                         return token = SyntaxKind.AsteriskToken;
                     case CharacterCodes.plus:
                         if (text.charCodeAt(pos + 1) === CharacterCodes.plus) {
@@ -1832,12 +1864,12 @@ namespace ts {
             return token = scanTemplateAndSetTokenValue();
         }
 
-        function reScanJsxToken(): SyntaxKind {
+        function reScanJsxToken(): JsxTokenSyntaxKind {
             pos = tokenPos = startPos;
             return token = scanJsxToken();
         }
 
-        function scanJsxToken(): SyntaxKind {
+        function scanJsxToken(): JsxTokenSyntaxKind {
             startPos = tokenPos = pos;
 
             if (pos >= end) {
@@ -1929,12 +1961,11 @@ namespace ts {
         }
 
         function scanJSDocToken(): JsDocSyntaxKind {
+            startPos = tokenPos = pos;
+            tokenFlags = 0;
             if (pos >= end) {
                 return token = SyntaxKind.EndOfFileToken;
             }
-
-            startPos = pos;
-            tokenPos = pos;
 
             const ch = text.charCodeAt(pos);
             pos++;
@@ -1951,6 +1982,7 @@ namespace ts {
                     return token = SyntaxKind.AtToken;
                 case CharacterCodes.lineFeed:
                 case CharacterCodes.carriageReturn:
+                    tokenFlags |= TokenFlags.PrecedingLineBreak;
                     return token = SyntaxKind.NewLineTrivia;
                 case CharacterCodes.asterisk:
                     return token = SyntaxKind.AsteriskToken;
@@ -1970,6 +2002,13 @@ namespace ts {
                     return token = SyntaxKind.CommaToken;
                 case CharacterCodes.dot:
                     return token = SyntaxKind.DotToken;
+                case CharacterCodes.backtick:
+                    while (pos < end && text.charCodeAt(pos) !== CharacterCodes.backtick) {
+                        pos++;
+                    }
+                    tokenValue = text.substring(tokenPos + 1, pos);
+                    pos++;
+                    return token = SyntaxKind.NoSubstitutionTemplateLiteral;
             }
 
             if (isIdentifierStart(ch, ScriptTarget.Latest)) {
@@ -2041,13 +2080,13 @@ namespace ts {
             return text;
         }
 
-        function setText(newText: string, start: number, length: number) {
+        function setText(newText: string | undefined, start: number | undefined, length: number | undefined) {
             text = newText || "";
-            end = length === undefined ? text.length : start + length;
+            end = length === undefined ? text.length : start! + length;
             setTextPos(start || 0);
         }
 
-        function setOnError(errorCallback: ErrorCallback) {
+        function setOnError(errorCallback: ErrorCallback | undefined) {
             onError = errorCallback;
         }
 
@@ -2065,8 +2104,12 @@ namespace ts {
             startPos = textPos;
             tokenPos = textPos;
             token = SyntaxKind.Unknown;
-            tokenValue = undefined;
+            tokenValue = undefined!;
             tokenFlags = 0;
+        }
+
+        function setInJSDocType(inType: boolean) {
+            inJSDocType += inType ? 1 : -1;
         }
     }
 }
