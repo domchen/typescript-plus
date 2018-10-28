@@ -31,6 +31,7 @@ namespace ts {
     let rootFileNames: string[];
     let dependencyMap: Map<string[]>;
     let pathWeightMap: Map<number>;
+    let visitedBlocks: Block[];
 
     interface Map<T> {
         [index: string]: T;
@@ -57,12 +58,14 @@ namespace ts {
         sourceFiles = <any>program.getSourceFiles();
         rootFileNames = <any>program.getRootFileNames();
         checker = program.getTypeChecker();
+        visitedBlocks = [];
         buildDependencyMap();
         let result = sortOnDependency();
         sourceFiles = null;
         rootFileNames = null;
         checker = null;
         dependencyMap = null;
+        visitedBlocks = null;
         return result;
     }
 
@@ -314,7 +317,7 @@ namespace ts {
 
     function visitDecorators(decorators: NodeArray<Decorator>): void {
         for (let decorator of decorators) {
-            visitExpression(decorator.expression);
+            visitCallExpression(decorator.expression);
         }
     }
 
@@ -325,7 +328,8 @@ namespace ts {
         switch (expression.kind) {
             case SyntaxKind.NewExpression:
             case SyntaxKind.CallExpression:
-                visitCallExpression(<CallExpression>expression);
+                visitCallArguments(<CallExpression>expression);
+                visitCallExpression((<CallExpression>expression).expression);
                 break;
             case SyntaxKind.Identifier:
                 checkDependencyAtLocation(expression);
@@ -367,13 +371,13 @@ namespace ts {
                 visitExpression((<TaggedTemplateExpression>expression).tag);
                 visitExpression((<TaggedTemplateExpression>expression).template);
                 break;
-            case ts.SyntaxKind.ConditionalExpression: 
+            case ts.SyntaxKind.ConditionalExpression:
                 visitExpression((<ts.ConditionalExpression>expression).condition);
                 visitExpression((<ts.ConditionalExpression>expression).whenTrue);
                 visitExpression((<ts.ConditionalExpression>expression).whenFalse);
                 break;
-            
-                case ts.SyntaxKind.SpreadElement:
+
+            case ts.SyntaxKind.SpreadElement:
                 visitExpression((<SpreadElement>expression).expression);
                 break;
             case ts.SyntaxKind.VoidExpression:
@@ -452,14 +456,16 @@ namespace ts {
         });
     }
 
-    function visitCallExpression(callExpression: CallExpression): void {
+    function visitCallArguments(callExpression: CallExpression): void {
         if (callExpression.arguments) {
             callExpression.arguments.forEach(argument => {
                 visitExpression(argument);
             });
         }
+    }
 
-        let expression = escapeParenthesized(callExpression.expression);
+    function visitCallExpression(expression: Expression): void {
+        expression = escapeParenthesized(expression);
         visitExpression(expression);
         switch (expression.kind) {
             case SyntaxKind.FunctionExpression:
@@ -468,11 +474,60 @@ namespace ts {
                 break;
             case SyntaxKind.PropertyAccessExpression:
             case SyntaxKind.Identifier:
-                let callerFileName = getSourceFileOfNode(callExpression).fileName;
+                let callerFileName = getSourceFileOfNode(expression).fileName;
                 checkCallTarget(callerFileName, expression);
+                break;
+            case SyntaxKind.CallExpression:
+                visitReturnedFunction((<CallExpression>expression).expression);
+                break;
+        }
+    }
+
+    function visitReturnedFunction(expression: Expression): Expression[] {
+        expression = escapeParenthesized(expression);
+        let returnExpressions: Expression[] = [];
+        if (expression.kind === SyntaxKind.CallExpression) {
+            let expressions = visitReturnedFunction((<CallExpression>expression).expression);
+            for (let returnExpression of expressions) {
+                let returns = visitReturnedFunction(returnExpression);
+                returnExpressions = returnExpressions.concat(returns);
+            }
+            return returnExpressions;
+        }
+
+        let functionBlocks: Block[] = [];
+        switch (expression.kind) {
+            case SyntaxKind.FunctionExpression:
+                functionBlocks.push((<FunctionExpression>expression).body);
+                break;
+            case SyntaxKind.PropertyAccessExpression:
+            case SyntaxKind.Identifier:
+                let callerFileName = getSourceFileOfNode(expression).fileName;
+                let declarations: Declaration[] = [];
+                getForwardDeclarations(expression, declarations, callerFileName);
+                for (let declaration of declarations) {
+                    let sourceFile = getSourceFileOfNode(declaration);
+                    if (!sourceFile || sourceFile.isDeclarationFile) {
+                        continue;
+                    }
+                    if (declaration.kind === SyntaxKind.FunctionDeclaration ||
+                        declaration.kind === SyntaxKind.MethodDeclaration) {
+                        functionBlocks.push((<FunctionDeclaration>declaration).body);
+                    }
+                }
                 break;
         }
 
+        for (let block of functionBlocks) {
+            for (let statement of block.statements) {
+                if (statement.kind === SyntaxKind.ReturnStatement) {
+                    let returnExpression = (<ReturnStatement>statement).expression;
+                    returnExpressions.push(returnExpression);
+                    visitCallExpression(returnExpression);
+                }
+            }
+        }
+        return returnExpressions;
     }
 
     function escapeParenthesized(expression: Expression): Expression {
@@ -488,7 +543,7 @@ namespace ts {
         for (let declaration of declarations) {
             let sourceFile = getSourceFileOfNode(declaration);
             if (!sourceFile || sourceFile.isDeclarationFile) {
-                return;
+                continue;
             }
             addDependency(callerFileName, sourceFile.fileName);
             if (declaration.kind === SyntaxKind.FunctionDeclaration ||
@@ -568,13 +623,14 @@ namespace ts {
     }
 
     function visitBlock(block: Block): void {
-        if (!block || block.visitedBySorting) {
+        if (!block || visitedBlocks.indexOf(block) != -1) {
             return;
         }
-        block.visitedBySorting = true;
+        visitedBlocks.push(block);
         for (let statement of block.statements) {
             visitStatement(statement);
         }
+        visitedBlocks.pop();
     }
 
     function visitVariableList(variables: VariableDeclarationList) {

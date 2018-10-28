@@ -1866,7 +1866,6 @@ namespace ts {
         kind: SyntaxKind.Block;
         statements: NodeArray<Statement>;
         /*@internal*/ multiLine?: boolean;
-        /*@internal*/ visitedBySorting?: boolean;
     }
 
     export interface VariableStatement extends Statement, JSDocContainer {
