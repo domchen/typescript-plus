@@ -1274,6 +1274,7 @@ namespace ts {
                 getSourceFile: program.getSourceFile,
                 getSourceFileByPath: program.getSourceFileByPath,
                 getSourceFiles: program.getSourceFiles,
+                getTypeChecker: program.getTypeChecker,
                 getLibFileFromReference: program.getLibFileFromReference,
                 isSourceFileFromExternalLibrary,
                 writeFile: writeFileCallback || (

@@ -1371,7 +1371,7 @@ namespace ts {
             if (fileName) {
                 targetSourceFile = getValidSourceFile(fileName);
             }
-            return program.getSyntacticDiagnostics(targetSourceFile, cancellationToken).slice();
+            return program.getSyntacticDiagnostics(targetSourceFile!, cancellationToken).slice();
         }
 
         /**
@@ -1389,13 +1389,13 @@ namespace ts {
             // Only perform the action per file regardless of '-out' flag as LanguageServiceHost is expected to call this function per file.
             // Therefore only get diagnostics for given file.
 
-            const semanticDiagnostics = program.getSemanticDiagnostics(targetSourceFile, cancellationToken);
+            const semanticDiagnostics = program.getSemanticDiagnostics(targetSourceFile!, cancellationToken);
             if (!getEmitDeclarations(program.getCompilerOptions())) {
                 return semanticDiagnostics.slice();
             }
 
             // If '-d' is enabled, check for emitter error. One example of emitter error is export class implements non-export interface
-            const declarationDiagnostics = program.getDeclarationDiagnostics(targetSourceFile, cancellationToken);
+            const declarationDiagnostics = program.getDeclarationDiagnostics(targetSourceFile!, cancellationToken);
             return [...semanticDiagnostics, ...declarationDiagnostics];
         }
 
@@ -1595,7 +1595,7 @@ namespace ts {
             }
 
             const customTransformers = host.getCustomTransformers && host.getCustomTransformers();
-            return getFileEmitOutput(program, sourceFile, emitOnlyDtsFiles, cancellationToken, customTransformers);
+            return getFileEmitOutput(program, sourceFile!, emitOnlyDtsFiles, cancellationToken, customTransformers);
         }
 
         // Signature help

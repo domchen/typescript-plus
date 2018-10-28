@@ -42,6 +42,8 @@
         "transformers/declarations/diagnostics.ts",
         "transformers/declarations.ts",
         "transformer.ts",
+        "transformers/tsPlus.ts",
+        "sorting.ts",
         "sourcemap.ts",
         "comments.ts",
         "emitter.ts",
