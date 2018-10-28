@@ -4444,6 +4444,13 @@ namespace ts {
         /*@internal*/ watch?: boolean;
         esModuleInterop?: boolean;
 
+        /* extra options */
+        accessorOptimization?: boolean;
+        defines?: MapLike<any>;
+        emitReflection?: boolean;
+        noEmitJs?: boolean;
+        reorderFiles?: boolean;
+                
         [option: string]: CompilerOptionsValue | TsConfigSourceFile | undefined;
     }
 
