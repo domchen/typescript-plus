@@ -17,7 +17,7 @@ declare namespace ts {
     const versionMajorMinor = "3.1";
     /** The version of the TypeScript compiler release */
     const version: string;
-    const version_plus = "3.1.3";
+    const version_plus = "3.1.4";
 }
 declare namespace ts {
     /**

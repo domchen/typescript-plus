@@ -32,6 +32,7 @@ namespace ts {
     let dependencyMap: any;
     let pathWeightMap: any;
     let visitedBlocks: Block[];
+    let calledMethods: MethodDeclaration[] = [];
 
     interface Map<T> {
         [index: string]: T;
@@ -546,9 +547,11 @@ namespace ts {
                 continue;
             }
             addDependency(callerFileName, sourceFile.fileName);
-            if (declaration.kind === SyntaxKind.FunctionDeclaration ||
-                declaration.kind === SyntaxKind.MethodDeclaration) {
+            if (declaration.kind === SyntaxKind.FunctionDeclaration) {
                 visitBlock((<FunctionDeclaration>declaration).body);
+            } else if (declaration.kind === SyntaxKind.MethodDeclaration) {
+                visitBlock((<MethodDeclaration>declaration).body);
+                calledMethods.push(<MethodDeclaration>declaration);
             }
             else if (declaration.kind === SyntaxKind.ClassDeclaration) {
                 checkClassInstantiation(<ClassDeclaration>declaration);
@@ -602,14 +605,33 @@ namespace ts {
         }
     }
 
-    function checkClassInstantiation(node: ClassDeclaration): void {
+    function checkClassInstantiation(node: ClassDeclaration): string[] {
+        let superMethodNames: string[] = [];
+        let superClass = getClassExtendsHeritageElement(node);
+        if (superClass) {
+            let type = checker!.getTypeAtLocation(superClass);
+            if (type && type.symbol) {
+                let declaration = <ClassDeclaration>ts.getDeclarationOfKind(type.symbol, SyntaxKind.ClassDeclaration);
+                if (declaration) {
+                    superMethodNames = checkClassInstantiation(declaration);
+                }
+            }
+        }
+
         let members = node.members;
         if (!members) {
-            return;
+            return [];
         }
+        let index = calledMethods.length;
         for (let member of members) {
             if (hasModifier(member, ModifierFlags.Static)) {
                 continue;
+            }
+            if (member.kind === SyntaxKind.MethodDeclaration) { // called by super class.
+                let methodName = ts.unescapeLeadingUnderscores(ts.getTextOfPropertyName(member.name!));
+                if (superMethodNames.indexOf(methodName) != -1) {
+                    visitBlock((<MethodDeclaration>member).body);
+                }
             }
             if (member.kind === SyntaxKind.PropertyDeclaration) {
                 let property = <PropertyDeclaration>member;
@@ -620,6 +642,20 @@ namespace ts {
                 visitBlock(constructor.body);
             }
         }
+        let methodNames: string[] = [];
+        for (let i = index; i < calledMethods.length; i++) {
+            let method = calledMethods[i];
+            for (let memeber of members) {
+                if (memeber === method) {
+                    let methodName = ts.unescapeLeadingUnderscores(ts.getTextOfPropertyName(method.name));
+                    methodNames.push(methodName);
+                }
+            }
+        }
+        if (index == 0) {
+            calledMethods.length = 0;
+        }
+        return methodNames;
     }
 
     function visitBlock(block?: Block): void {
