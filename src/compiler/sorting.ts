@@ -606,14 +606,14 @@ namespace ts {
     }
 
     function checkClassInstantiation(node: ClassDeclaration): string[] {
-        let superMethodNames: string[] = [];
+        let methodNames: string[] = [];
         let superClass = getClassExtendsHeritageElement(node);
         if (superClass) {
             let type = checker!.getTypeAtLocation(superClass);
             if (type && type.symbol) {
                 let declaration = <ClassDeclaration>ts.getDeclarationOfKind(type.symbol, SyntaxKind.ClassDeclaration);
                 if (declaration) {
-                    superMethodNames = checkClassInstantiation(declaration);
+                    methodNames = checkClassInstantiation(declaration);
                 }
             }
         }
@@ -629,7 +629,7 @@ namespace ts {
             }
             if (member.kind === SyntaxKind.MethodDeclaration) { // called by super class.
                 let methodName = ts.unescapeLeadingUnderscores(ts.getTextOfPropertyName(member.name!));
-                if (superMethodNames.indexOf(methodName) != -1) {
+                if (methodNames.indexOf(methodName) != -1) {
                     visitBlock((<MethodDeclaration>member).body);
                 }
             }
@@ -642,7 +642,7 @@ namespace ts {
                 visitBlock(constructor.body);
             }
         }
-        let methodNames: string[] = [];
+        
         for (let i = index; i < calledMethods.length; i++) {
             let method = calledMethods[i];
             for (let memeber of members) {

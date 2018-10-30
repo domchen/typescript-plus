@@ -4,7 +4,7 @@ namespace ts {
     export const versionMajorMinor = "3.1";
     /** The version of the TypeScript compiler release */
     export const version = `${versionMajorMinor}.3`;
-    export const version_plus = "3.1.4";
+    export const version_plus = "3.1.5";
 }
 
 namespace ts {
