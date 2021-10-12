@@ -1367,11 +1367,7 @@ namespace ts {
         function getSyntacticDiagnostics(fileName: string): DiagnosticWithLocation[] {
             synchronizeHostData();
 
-            let targetSourceFile: SourceFile;
-            if (fileName) {
-                targetSourceFile = getValidSourceFile(fileName);
-            }
-            return program.getSyntacticDiagnostics(targetSourceFile!, cancellationToken).slice();
+            return program.getSyntacticDiagnostics(getValidSourceFile(fileName), cancellationToken).slice();
         }
 
         /**
@@ -1381,21 +1377,18 @@ namespace ts {
         function getSemanticDiagnostics(fileName: string): Diagnostic[] {
             synchronizeHostData();
 
-            let targetSourceFile: SourceFile;
-            if (fileName) {
-                targetSourceFile = getValidSourceFile(fileName);
-            }
+            const targetSourceFile = getValidSourceFile(fileName);
 
             // Only perform the action per file regardless of '-out' flag as LanguageServiceHost is expected to call this function per file.
             // Therefore only get diagnostics for given file.
 
-            const semanticDiagnostics = program.getSemanticDiagnostics(targetSourceFile!, cancellationToken);
+            const semanticDiagnostics = program.getSemanticDiagnostics(targetSourceFile, cancellationToken);
             if (!getEmitDeclarations(program.getCompilerOptions())) {
                 return semanticDiagnostics.slice();
             }
 
             // If '-d' is enabled, check for emitter error. One example of emitter error is export class implements non-export interface
-            const declarationDiagnostics = program.getDeclarationDiagnostics(targetSourceFile!, cancellationToken);
+            const declarationDiagnostics = program.getDeclarationDiagnostics(targetSourceFile, cancellationToken);
             return [...semanticDiagnostics, ...declarationDiagnostics];
         }
 
@@ -1589,13 +1582,9 @@ namespace ts {
         function getEmitOutput(fileName: string, emitOnlyDtsFiles = false) {
             synchronizeHostData();
 
-            let sourceFile: SourceFile;
-            if (fileName) {
-                sourceFile = getValidSourceFile(fileName);
-            }
-
+            const sourceFile = getValidSourceFile(fileName);
             const customTransformers = host.getCustomTransformers && host.getCustomTransformers();
-            return getFileEmitOutput(program, sourceFile!, emitOnlyDtsFiles, cancellationToken, customTransformers);
+            return getFileEmitOutput(program, sourceFile, emitOnlyDtsFiles, cancellationToken, customTransformers);
         }
 
         // Signature help
