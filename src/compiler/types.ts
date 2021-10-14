@@ -24,7 +24,84 @@ namespace ts {
         | SyntaxKind.DotToken
         | SyntaxKind.Identifier
         | SyntaxKind.NoSubstitutionTemplateLiteral
-        | SyntaxKind.Unknown;
+        | SyntaxKind.Unknown
+        | KeywordSyntaxKind;
+
+    export type KeywordSyntaxKind =
+        | SyntaxKind.AbstractKeyword
+        | SyntaxKind.AnyKeyword
+        | SyntaxKind.AsKeyword
+        | SyntaxKind.BooleanKeyword
+        | SyntaxKind.BreakKeyword
+        | SyntaxKind.CaseKeyword
+        | SyntaxKind.CatchKeyword
+        | SyntaxKind.ClassKeyword
+        | SyntaxKind.ContinueKeyword
+        | SyntaxKind.ConstKeyword
+        | SyntaxKind.ConstructorKeyword
+        | SyntaxKind.DebuggerKeyword
+        | SyntaxKind.DeclareKeyword
+        | SyntaxKind.DefaultKeyword
+        | SyntaxKind.DeleteKeyword
+        | SyntaxKind.DoKeyword
+        | SyntaxKind.ElseKeyword
+        | SyntaxKind.EnumKeyword
+        | SyntaxKind.ExportKeyword
+        | SyntaxKind.ExtendsKeyword
+        | SyntaxKind.FalseKeyword
+        | SyntaxKind.FinallyKeyword
+        | SyntaxKind.ForKeyword
+        | SyntaxKind.FromKeyword
+        | SyntaxKind.FunctionKeyword
+        | SyntaxKind.GetKeyword
+        | SyntaxKind.IfKeyword
+        | SyntaxKind.ImplementsKeyword
+        | SyntaxKind.ImportKeyword
+        | SyntaxKind.InKeyword
+        | SyntaxKind.InferKeyword
+        | SyntaxKind.InstanceOfKeyword
+        | SyntaxKind.InterfaceKeyword
+        | SyntaxKind.IsKeyword
+        | SyntaxKind.KeyOfKeyword
+        | SyntaxKind.LetKeyword
+        | SyntaxKind.ModuleKeyword
+        | SyntaxKind.NamespaceKeyword
+        | SyntaxKind.NeverKeyword
+        | SyntaxKind.NewKeyword
+        | SyntaxKind.NullKeyword
+        | SyntaxKind.NumberKeyword
+        | SyntaxKind.ObjectKeyword
+        | SyntaxKind.PackageKeyword
+        | SyntaxKind.PrivateKeyword
+        | SyntaxKind.ProtectedKeyword
+        | SyntaxKind.PublicKeyword
+        | SyntaxKind.ReadonlyKeyword
+        | SyntaxKind.RequireKeyword
+        | SyntaxKind.GlobalKeyword
+        | SyntaxKind.ReturnKeyword
+        | SyntaxKind.SetKeyword
+        | SyntaxKind.StaticKeyword
+        | SyntaxKind.StringKeyword
+        | SyntaxKind.SuperKeyword
+        | SyntaxKind.SwitchKeyword
+        | SyntaxKind.SymbolKeyword
+        | SyntaxKind.ThisKeyword
+        | SyntaxKind.ThrowKeyword
+        | SyntaxKind.TrueKeyword
+        | SyntaxKind.TryKeyword
+        | SyntaxKind.TypeKeyword
+        | SyntaxKind.TypeOfKeyword
+        | SyntaxKind.UndefinedKeyword
+        | SyntaxKind.UniqueKeyword
+        | SyntaxKind.UnknownKeyword
+        | SyntaxKind.VarKeyword
+        | SyntaxKind.VoidKeyword
+        | SyntaxKind.WhileKeyword
+        | SyntaxKind.WithKeyword
+        | SyntaxKind.YieldKeyword
+        | SyntaxKind.AsyncKeyword
+        | SyntaxKind.AwaitKeyword
+        | SyntaxKind.OfKeyword;
 
     export type JsxTokenSyntaxKind =
         | SyntaxKind.LessThanSlashToken
@@ -809,10 +886,6 @@ namespace ts {
         exclamationToken?: ExclamationToken;  // Optional definite assignment assertion
         type?: TypeNode;                      // Optional type annotation
         initializer?: Expression;             // Optional initializer
-        /* @internal */
-        callerList?: string[];
-        /* @internal */
-        delayInitializerList?: Expression[];        
     }
 
     export interface VariableDeclarationList extends Node {
@@ -988,7 +1061,6 @@ namespace ts {
         parent: ClassLikeDeclaration | ObjectLiteralExpression;
         name: PropertyName;
         body?: FunctionBody;
-        isJumpTarget?: boolean;
     }
 
     export interface ConstructorDeclaration extends FunctionLikeDeclarationBase, ClassElement, JSDocContainer {
@@ -2057,7 +2129,6 @@ namespace ts {
         typeParameters?: NodeArray<TypeParameterDeclaration>;
         heritageClauses?: NodeArray<HeritageClause>;
         members: NodeArray<ClassElement>;
-        typeNames?: string[];
     }
 
     export interface ClassDeclaration extends ClassLikeDeclarationBase, DeclarationStatement {
@@ -4450,13 +4521,6 @@ namespace ts {
         /*@internal*/ watch?: boolean;
         esModuleInterop?: boolean;
 
-        /* extra options */
-        accessorOptimization?: boolean;
-        defines?: MapLike<any>;
-        emitReflection?: boolean;
-        noEmitJs?: boolean;
-        reorderFiles?: boolean;
-                
         [option: string]: CompilerOptionsValue | TsConfigSourceFile | undefined;
     }
 
@@ -5111,8 +5175,6 @@ namespace ts {
 
         /* @internal */
         isSourceFileFromExternalLibrary(file: SourceFile): boolean;
-        /* @internal */
-        getTypeChecker(): TypeChecker;
         getLibFileFromReference(ref: FileReference): SourceFile | undefined;
 
         getCommonSourceDirectory(): string;

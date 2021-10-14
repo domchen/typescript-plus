@@ -32,10 +32,6 @@ namespace ts {
 
         addRange(transformers, customTransformers && customTransformers.before);
 
-        if(compilerOptions.defines || compilerOptions.emitReflection){
-            transformers.push(transformTypeScriptPlus);
-        }
-
         transformers.push(transformTypeScript);
 
         if (jsx === JsxEmit.React) {

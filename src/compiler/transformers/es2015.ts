@@ -56,9 +56,9 @@ namespace ts {
     }
 
     const enum Jump {
-        Break = 1 << 1,
-        Continue = 1 << 2,
-        Return = 1 << 3
+        Break       = 1 << 1,
+        Continue    = 1 << 2,
+        Return      = 1 << 3
     }
 
     interface ConvertedLoopState {
@@ -267,7 +267,6 @@ namespace ts {
 
         const compilerOptions = context.getCompilerOptions();
         const resolver = context.getEmitResolver();
-        const typeChecker = context.getEmitHost().getTypeChecker();
         const previousOnSubstituteNode = context.onSubstituteNode;
         const previousOnEmitNode = context.onEmitNode;
         context.onEmitNode = onEmitNode;
@@ -1040,11 +1039,11 @@ namespace ts {
          * @returns The new statement offset into the `statements` array.
          */
         function declareOrCaptureOrReturnThisForConstructorIfNeeded(
-            statements: Statement[],
-            ctor: ConstructorDeclaration | undefined,
-            isDerivedClass: boolean,
-            hasSynthesizedSuper: boolean,
-            statementOffset: number) {
+                    statements: Statement[],
+                    ctor: ConstructorDeclaration | undefined,
+                    isDerivedClass: boolean,
+                    hasSynthesizedSuper: boolean,
+                    statementOffset: number) {
             // If this isn't a derived class, just capture 'this' for arrow functions if necessary.
             if (!isDerivedClass) {
                 if (ctor) {
@@ -1546,13 +1545,7 @@ namespace ts {
                         break;
 
                     case SyntaxKind.MethodDeclaration:
-                        const method = <MethodDeclaration>member;
-                        if (method.isJumpTarget || (method.original && (<MethodDeclaration>method.original).isJumpTarget)) {
-                            transformJumpTarget(statements, getClassMemberPrefix(node, member), <MethodDeclaration>member);
-                        }
-                        else {
-                            statements.push(transformClassMethodDeclarationToStatement(getClassMemberPrefix(node, member), <MethodDeclaration>member, node));
-                        }
+                        statements.push(transformClassMethodDeclarationToStatement(getClassMemberPrefix(node, member), <MethodDeclaration>member, node));
                         break;
 
                     case SyntaxKind.GetAccessor:
@@ -1573,44 +1566,6 @@ namespace ts {
                         break;
                 }
             }
-        }
-
-        function transformJumpTarget(statements: Statement[], receiver: LeftHandSideExpression, member: MethodDeclaration): void {
-            const memberName = createMemberAccessForPropertyName(receiver, visitNode(member.name, visitor, isPropertyName), /*location*/ member.name);
-            statements.push(createStatement(
-                createAssignment(memberName, <Identifier>member.name),
-            ));
-
-            const sourceMapRange = getSourceMapRange(member);
-            const memberFunction = transformMethodToFunctionDeclaration(member, /*location*/ member, /*name*/ <Identifier>member.name);
-            setEmitFlags(memberFunction, EmitFlags.NoComments);
-            setSourceMapRange(memberFunction, sourceMapRange);
-            statements.push(memberFunction);
-        }
-
-        function transformMethodToFunctionDeclaration(node: FunctionLikeDeclaration, location: TextRange, name: Identifier): FunctionDeclaration {
-            const savedConvertedLoopState = convertedLoopState;
-            convertedLoopState = undefined;
-            const ancestorFacts = enterSubtree(HierarchyFacts.FunctionExcludes, HierarchyFacts.FunctionIncludes);
-            const parameters = visitParameterList(node.parameters, visitor, context);
-            const body = transformFunctionBody(node);
-            exitSubtree(ancestorFacts, HierarchyFacts.PropagateNewTargetMask, HierarchyFacts.None);
-            convertedLoopState = savedConvertedLoopState;
-            return setOriginalNode(
-                setTextRange(
-                    createFunctionDeclaration(
-                        /*decorators*/ undefined,
-                        /*modifiers*/ undefined,
-                        node.asteriskToken,
-                        name,
-                        /*typeParameters*/ undefined,
-                        parameters,
-                        /*type*/ undefined,
-                        body),
-                    location
-                ),
-                /*original*/ node
-            );
         }
 
         /**
@@ -1693,15 +1648,19 @@ namespace ts {
 
             const properties: ObjectLiteralElementLike[] = [];
             if (getAccessor) {
-                const getterExpression = createAccessorExpression(getAccessor, firstAccessor, receiver, container);
-                const getter = createPropertyAssignment("get", getterExpression);
+                const getterFunction = transformFunctionLikeToExpression(getAccessor, /*location*/ undefined, /*name*/ undefined, container);
+                setSourceMapRange(getterFunction, getSourceMapRange(getAccessor));
+                setEmitFlags(getterFunction, EmitFlags.NoLeadingComments);
+                const getter = createPropertyAssignment("get", getterFunction);
                 setCommentRange(getter, getCommentRange(getAccessor));
                 properties.push(getter);
             }
 
             if (setAccessor) {
-                const setterExpression = createAccessorExpression(setAccessor, firstAccessor, receiver, container);
-                const setter = createPropertyAssignment("set", setterExpression);
+                const setterFunction = transformFunctionLikeToExpression(setAccessor, /*location*/ undefined, /*name*/ undefined, container);
+                setSourceMapRange(setterFunction, getSourceMapRange(setAccessor));
+                setEmitFlags(setterFunction, EmitFlags.NoLeadingComments);
+                const setter = createPropertyAssignment("set", setterFunction);
                 setCommentRange(setter, getCommentRange(setAccessor));
                 properties.push(setter);
             }
@@ -1727,79 +1686,6 @@ namespace ts {
             exitSubtree(ancestorFacts, HierarchyFacts.PropagateNewTargetMask, hierarchyFacts & HierarchyFacts.PropagateNewTargetMask ? HierarchyFacts.NewTarget : HierarchyFacts.None);
             return call;
         }
-
-        /**
- * If the accessor method contains only one call to another method, use that method to define the accessor directly.
- */
-        function createAccessorExpression(accessor: AccessorDeclaration, firstAccessor: AccessorDeclaration, receiver: LeftHandSideExpression, container: Node): Expression {
-            let expression: Expression;
-            let method = compilerOptions.accessorOptimization ? getJumpTargetOfAccessor(accessor) : null;
-            if (method) {
-                const methodName = <Identifier>getMutableClone(method.name);
-                setEmitFlags(methodName, EmitFlags.NoComments | EmitFlags.NoTrailingSourceMap);
-                setSourceMapRange(methodName, method.name);
-                if (firstAccessor.pos > method.pos) { // the target method has been already emitted.
-                    const target = getMutableClone(receiver);
-                    setEmitFlags(target, EmitFlags.NoComments | EmitFlags.NoTrailingSourceMap);
-                    setSourceMapRange(target, firstAccessor.name);
-                    expression = createPropertyAccess(target, methodName);
-                }
-                else {
-                    expression = methodName;
-                    method.isJumpTarget = true;
-                }
-            }
-            else {
-                expression = transformFunctionLikeToExpression(accessor, /*location*/ undefined, /*name*/ undefined, container);
-            }
-            setSourceMapRange(expression, getSourceMapRange(accessor));
-            setEmitFlags(expression, EmitFlags.NoLeadingComments);
-            return expression;
-        }
-
-        function getJumpTargetOfAccessor(accessor: AccessorDeclaration): MethodDeclaration | undefined {
-            if (accessor.body!.statements.length != 1) {
-                return undefined;
-            }
-            let statement = accessor.body!.statements[0];
-            if (statement.kind !== SyntaxKind.ExpressionStatement &&
-                statement.kind !== SyntaxKind.ReturnStatement) {
-                return undefined;
-            }
-            let expression = (<ReturnStatement>statement).expression;
-            if (expression!.kind !== SyntaxKind.CallExpression) {
-                return undefined;
-            }
-            let callExpression = <CallExpression>expression;
-            if (accessor.kind === SyntaxKind.SetAccessor) {
-                if (callExpression.arguments.length != 1) {
-                    return undefined;
-                }
-                let argument = callExpression.arguments[0];
-                if (argument.kind !== SyntaxKind.Identifier) {
-                    return undefined;
-                }
-            }
-            else {
-                if (callExpression.arguments.length != 0) {
-                    return undefined;
-                }
-            }
-
-            if (callExpression.expression.kind !== SyntaxKind.PropertyAccessExpression) {
-                return undefined;
-            }
-            let propertyExpression = <PropertyAccessExpression>callExpression.expression;
-            if (propertyExpression.expression.kind !== SyntaxKind.ThisKeyword) {
-                return undefined;
-            }
-            let symbol = typeChecker.getSymbolAtLocation(propertyExpression.name);
-            if (!symbol) {
-                return undefined;
-            }
-            return <MethodDeclaration>getDeclarationOfKind(symbol, SyntaxKind.MethodDeclaration);
-        }
-
 
         /**
          * Visits an ArrowFunction and transforms it into a FunctionExpression.
@@ -3925,8 +3811,8 @@ namespace ts {
         function visitSuperKeyword(isExpressionOfCall: boolean): LeftHandSideExpression {
             return hierarchyFacts & HierarchyFacts.NonStaticClassElement
                 && !isExpressionOfCall
-                ? createPropertyAccess(createFileLevelUniqueName("_super"), "prototype")
-                : createFileLevelUniqueName("_super");
+                    ? createPropertyAccess(createFileLevelUniqueName("_super"), "prototype")
+                    : createFileLevelUniqueName("_super");
         }
 
         function visitMetaProperty(node: MetaProperty) {

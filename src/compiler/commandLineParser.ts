@@ -782,32 +782,7 @@ namespace ts {
                 type: "object"
             },
             description: Diagnostics.List_of_language_service_plugins
-        },
-        // extra options
-        {
-            name: "accessorOptimization",
-            type: "boolean"
-        },
-        {
-            // this option can only be specified in tsconfig.json
-            // use type = object to copy the value as-is
-            name: "defines",
-            type: "object",
-            isTSConfigOnly: true
-        },
-        {
-            name: "emitReflection",
-            type: "boolean"
-        },
-        {
-            name: "noEmitJs",
-            type: "boolean"
-        },
-        {
-            name: "reorderFiles",
-            type: "boolean"
         }
-        
     ];
 
     /* @internal */
@@ -1030,7 +1005,7 @@ namespace ts {
                                     i++;
                                     break;
                                 case "list":
-                                    const result = parseListTypeOption(<CommandLineOptionOfListType>opt, args[i], errors);
+                                    const result = parseListTypeOption(<CommandLineOptionOfListType>opt, args[i], errors); // tslint:disable-line no-unnecessary-type-assertion
                                     options[opt.name] = result || [];
                                     if (result) {
                                         i++;
@@ -1159,8 +1134,7 @@ namespace ts {
 
     /* @internal */
     export function printVersion() {
-        sys.write("Version : " + ts.version_plus + sys.newLine);
-        sys.write("typescript-version : " + ts.version + sys.newLine);
+        sys.write(getDiagnosticText(Diagnostics.Version_0, version) + sys.newLine);
     }
 
     /* @internal */
@@ -1680,7 +1654,7 @@ namespace ts {
                 return undefined;
             }
             else if (optionDefinition.type === "list") {
-                return getCustomTypeMapOfCommandLineOption((<CommandLineOptionOfListType>optionDefinition).element);
+                return getCustomTypeMapOfCommandLineOption((<CommandLineOptionOfListType>optionDefinition).element); // tslint:disable-line no-unnecessary-type-assertion
             }
             else {
                 return (<CommandLineOptionOfCustomType>optionDefinition).type;
@@ -1744,7 +1718,7 @@ namespace ts {
                 case "object":
                     return {};
                 default:
-                    return (option as CommandLineOptionOfCustomType).type.keys().next().value;
+                    return (option as CommandLineOptionOfCustomType).type.keys().next().value; // tslint:disable-line no-unnecessary-type-assertion
             }
         }
 
@@ -2331,7 +2305,7 @@ namespace ts {
     function normalizeOptionValue(option: CommandLineOption, basePath: string, value: any): CompilerOptionsValue {
         if (isNullOrUndefined(value)) return undefined;
         if (option.type === "list") {
-            const listOption = <CommandLineOptionOfListType>option;
+            const listOption = <CommandLineOptionOfListType>option; // tslint:disable-line no-unnecessary-type-assertion
             if (listOption.element.isFilePath || !isString(listOption.element.type)) {
                 return <CompilerOptionsValue>filter(map(value, v => normalizeOptionValue(listOption.element, basePath, v)), v => !!v);
             }
@@ -2716,7 +2690,7 @@ namespace ts {
             case "boolean":
                 return typeof value === "boolean" ? value : "";
             case "list":
-                const elementType = (option as CommandLineOptionOfListType).element;
+                const elementType = (option as CommandLineOptionOfListType).element; // tslint:disable-line no-unnecessary-type-assertion
                 return isArray(value) ? value.map(v => getOptionValueWithEmptyStrings(v, elementType)) : "";
             default:
                 return forEachEntry(option.type, (optionEnumValue, optionStringValue) => {

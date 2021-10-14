@@ -1,271 +1,99 @@
-[![npm version](https://badge.fury.io/js/typescript-plus.svg)](https://www.npmjs.com/package/typescript-plus)
+[![Build Status](https://travis-ci.org/Microsoft/TypeScript.svg?branch=master)](https://travis-ci.org/Microsoft/TypeScript)
+[![VSTS Build Status](https://typescript.visualstudio.com/_apis/public/build/definitions/cf7ac146-d525-443c-b23c-0d58337efebc/4/badge)](https://typescript.visualstudio.com/TypeScript/_build/latest?definitionId=4&view=logs) 
+[![npm version](https://badge.fury.io/js/typescript.svg)](https://www.npmjs.com/package/typescript)
+[![Downloads](https://img.shields.io/npm/dm/typescript.svg)](https://www.npmjs.com/package/typescript)
 
-[中文版](http://www.idom.me/articles/849.html)
+# TypeScript
 
-# typescript-plus
+[![Join the chat at https://gitter.im/Microsoft/TypeScript](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Microsoft/TypeScript?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-
-
-TypeScript is a language for application-scale JavaScript, For more information, please visit : [TypeScript](https://github.com/Microsoft/TypeScript).
-
-The typescript-plus compiler provides extra features to the original typescript compiler, such as accessors optimization, class reflection, conditional compilation and the most useful one: automatically reordering the source files by analyzing their dependencies in code. This compiler is integrated into the [Egret Engine](https://github.com/egret-labs/egret-core) and has been heavily used by it.
-
-This project will try to stay up to date with the new release of the original TypeScript project.
-
-Current TypeScript Version: 3.1.3
-
+[TypeScript](https://www.typescriptlang.org/) is a language for application-scale JavaScript. TypeScript adds optional types to JavaScript that support tools for large-scale JavaScript applications for any browser, for any host, on any OS. TypeScript compiles to readable, standards-based JavaScript. Try it out at the [playground](https://www.typescriptlang.org/play/), and stay up to date via [our blog](https://blogs.msdn.microsoft.com/typescript) and [Twitter account](https://twitter.com/typescriptlang).
 
 ## Installing
 
-First, make sure you have installed the latest version of [node.js](http://nodejs.org/)
-(You may need to restart your computer after this step).
+For the latest stable version:
 
-For use as a command line app:
-
-```
-npm install -g typescript-plus
+```bash
+npm install -g typescript
 ```
 
-For programmatic use:
+For our nightly builds:
+
+```bash
+npm install -g typescript@next
+```
+
+## Contribute
+
+There are many ways to [contribute](https://github.com/Microsoft/TypeScript/blob/master/CONTRIBUTING.md) to TypeScript.
+* [Submit bugs](https://github.com/Microsoft/TypeScript/issues) and help us verify fixes as they are checked in.
+* Review the [source code changes](https://github.com/Microsoft/TypeScript/pulls).
+* Engage with other TypeScript users and developers on [StackOverflow](https://stackoverflow.com/questions/tagged/typescript). 
+* Join the [#typescript](https://twitter.com/#!/search/realtime/%23typescript) discussion on Twitter.
+* [Contribute bug fixes](https://github.com/Microsoft/TypeScript/blob/master/CONTRIBUTING.md).
+* Read the language specification ([docx](https://github.com/Microsoft/TypeScript/blob/master/doc/TypeScript%20Language%20Specification.docx?raw=true),
+ [pdf](https://github.com/Microsoft/TypeScript/blob/master/doc/TypeScript%20Language%20Specification.pdf?raw=true), [md](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md)).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see 
+the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) 
+with any additional questions or comments.
+
+## Documentation
+
+*  [Quick tutorial](https://www.typescriptlang.org/docs/tutorial.html)
+*  [Programming handbook](https://www.typescriptlang.org/docs/handbook/basic-types.html)
+*  [Language specification](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md)
+*  [Homepage](https://www.typescriptlang.org/)
+
+## Building
+
+In order to build the TypeScript compiler, ensure that you have [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/) installed.
+
+Clone a copy of the repo:
+
+```bash
+git clone https://github.com/Microsoft/TypeScript.git
+```
+
+Change to the TypeScript directory:
+
+```bash
+cd TypeScript
+```
+
+Install Jake tools and dev dependencies:
+
+```bash
+npm install -g jake
+npm install
+```
+
+Use one of the following to build and test:
 
 ```
-npm install typescript-plus
+jake local            # Build the compiler into built/local 
+jake clean            # Delete the built compiler 
+jake LKG              # Replace the last known good with the built one.
+                      # Bootstrapping step to be executed when the built compiler reaches a stable state.
+jake tests            # Build the test infrastructure using the built compiler. 
+jake runtests         # Run tests using the built compiler and test infrastructure. 
+                      # You can override the host or specify a test for this command. 
+                      # Use host=<hostName> or tests=<testPath>. 
+jake runtests-browser # Runs the tests using the built run.js file. Syntax is jake runtests. Optional
+                        parameters 'host=', 'tests=[regex], reporter=[list|spec|json|<more>]'.
+jake baseline-accept  # This replaces the baseline test results with the results obtained from jake runtests.
+jake lint             # Runs tslint on the TypeScript source.
+jake help             # List the above commands. 
 ```
+
 
 ## Usage
 
-```
-tsc-plus [input files] [options]
-```
-
-To learn how to use the original typescript compiler, please visit the following links:
-
-*  [Quick tutorial](http://www.typescriptlang.org/Tutorial)
-*  [Programming handbook](http://www.typescriptlang.org/Handbook)
-*  [Language specification](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md)
-*  [Homepage](http://www.typescriptlang.org/)
-
-## Extra Options
-
-| Option               | Type    | Default| Description                                        |
-|:-------------------- |:-------:|:------:| :------------------------------------------------- |
-| accessorOptimization | boolean | false  | If an accessor contains only one call to another method, use that method to define the accessor directly.|
-| emitReflection       | boolean | false  | Emit the reflection data of the class.                 |
-| reorderFiles         | boolean | false  | Automatically reordering the source files by dependencies.|
-| defines              | Object  |        | Replace the global variables with the constants defined in the "defines" object. |
-
-
-
-Example tsconfig.json file:
-
-```
-{
-    "compilerOptions": {
-        "module": "commonjs",
-        "noImplicitAny": true,
-        "removeComments": true,
-        "preserveConstEnums": true,
-        "sourceMap": true,
-        "accessorOptimization": true,
-        "emitReflection": true,
-        "reorderFiles": true
-        "defines": {
-            "DEBUG": false,
-            "RELEASE": true
-        }
-
-    },  
-    "files": [
-        "core.ts",
-        "sys.ts"
-    ]  
-}
-
+```bash
+node built/local/tsc.js hello.ts
 ```
 
-## Accessor Optimization
 
-Pass `--accessorOptimization` to the command-line tool or add `"accessorOptimization": true` to the `compilerOptions` in tsconfig.json file to enable this feature.
+## Roadmap
 
-As we know, we can't override the get / set accessors of super class in TypeScript. To solve the problem, we usually forward the call to the set accessor to another method:
-
-TypeScript:
-
-```
-class Student {
-
-    public _name:string;
-
-    protected setName(value:string):void {
-        this._name = value;
-    }
-
-    public get name():string {
-        return this._name;
-    }
-
-    public set name(value:string) {
-        this.setName(value);
-    }
-}
-```
-It does solve the problem, but also brings a performance issue, that two functions have to be called each time we call a set accessor. With the `--accessorOptimization` switch on, if the accessor contains only one call to another method, the compiler uses that method to define accessor directly.
-
-Javascript:
-
-```
-var Student = (function () {
-    function Student() {
-    }
-    Student.prototype.setName = function (value) {
-        this._name = value;
-    };
-    Object.defineProperty(Student.prototype, "name", {
-        get: function () {
-            return this._name;
-        },
-        set: Student.prototype.setName,
-        enumerable: true,
-        configurable: true
-    });
-    return Student;
-}());
-```
-
-If you define the `setName()` method after the set accessor, the final result looks like this:
-
-```
-var Student = (function () {
-    function Student() {
-    }
-    Object.defineProperty(Student.prototype, "name", {
-        get: function () {
-            return this._name;
-        },
-        set: setName,
-        enumerable: true,
-        configurable: true
-    });
-    Student.prototype.setName = setName;
-    function setName(value) {
-        this._name = value;
-    };
-    return Student;
-}());
-```
-Either way, it works.
-
-## Class Reflection
-
-Pass `--emitReflection` to the command-line tool or add `"emitReflection": true` to the `compilerOptions` in tsconfig.json file to enable this feature.
-
-TypeScript:
-
-```
-namespace ts {
-    export interface IPerson {
-        name:string;
-    }
-    
-    export class Student implements IPerson {
-        public name:string = "";
-    }
-}
-```
-JavaScript:
-
-```
-var ts;
-(function (ts) {
-    var Student = (function () {
-        function Student() {
-            this.name = "";
-        }
-        return Student;
-    }());
-    ts.Student = Student;
-    __reflect(Student.prototype, "ts.Student", ["ts.IPerson"]);
-})(ts || (ts = {}));
-
-```
-The `__reflect` helper function is just like the `__extends` function, it is emitted only once in one file.
-
-Then you can use the helper funtions in [reflection.ts](tools/reflection.ts) to get the qualified class name of an instance:
-
-```
-let student = new ts.Student();
-ts.getQualifiedClassName(student);  // "ts.Student"
-```
-or do some type checking:
-
-```
-ts.is(student, "ts.Student"); // true
-ts.is(student, "ts.IPersion"); // true
-```
-
-## SourceFiles Reordering
-
-Pass `--reorderFiles` to the command-line tool or add `"reorderFiles": true` to the `compilerOptions` in tsconfig.json file to enable this feature.
-
-Normally when you pass the `--outFile` option, the compiler will concatenate and emit output to a single file. But the order of concatenation is determined by the list of files passed to the compiler on the command line (or in the tsconfig.json file) along with triple-slash references and imports. That forces you to sort the input files in the correct order manually. It is ok with only a few source files, but it becomes a disaster when you have countless source files.
-
-With the `reorderFiles` switch on, the compiler will automatically reorder the source files by analyzing their dependencies in code. Then you can get the correct concatenation order in the generated file without doing any extra effort. I have tested this feature in many real-world projects, it works very well. If it does not work in your project, please feel free to open an issue and send me the test case.
-
-## Conditional Compilation
-
-The `defines` option is only allowed in tsconfig.json, and not through command-line switches.
-
-You can use the `defines` option to declare global variables that the compiler will assume to be constants (unless defined in scope). Then all the defined global variables will be replaced with the corresponding constants. For example:
-
-tsconfig.json:
-
-```
-{
-    "compilerOptions": {
-        "defines": {
-            "DEBUG": false,
-            "LANGUAGE": "en_US"
-        }
-    }
-}
-
-```
-TypeScript:
-
-```
-declare var DEBUG:boolean;
-declare var LANGUAGE:string;
-
-if (DEBUG) {
-    console.log("DEBUG is true");
-}
-
-console.log("The language is : " + LANGUAGE);
-
-function someFunction():void {
-    let DEBUG = true;
-    if (DEBUG) {
-        console.log("DEBUG is true");
-    }
-}
-
-```
-JavaScript:
-
-```
-if (false) {
-    console.log("DEBUG is true");
-}
-
-console.log("The language is : " + "en_US");
-
-function someFunction() {
-    var DEBUG = true;
-    if (DEBUG) {
-        console.log("DEBUG is true");
-    }
-}
-```
-As you can see, the second `if(DEBUG)` in `someFunction` is not replaced because it is defined in scope.
-
-Note that the compiler does not drop the unreachable code because it is can be easily done by other tools like [UglifyJS](http://lisperator.net/uglifyjs/) or [Google Closure Compiler](https://developers.google.com/closure/compiler/).
+For details on our planned features and future direction please refer to our [roadmap](https://github.com/Microsoft/TypeScript/wiki/Roadmap).
